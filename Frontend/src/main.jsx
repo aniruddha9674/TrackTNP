@@ -1,10 +1,16 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+import React from "react";
+import { createRoot } from "react-dom/client"; // Correct import
+import { BrowserRouter } from "react-router-dom";
+import App from "./App";
+import "./index.css";
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
+import { initializeTheme } from "./Utils/Hooks/theme";
+initializeTheme();
+
+// Create the root element using 'createRoot' from 'react-dom/client'
+const root = createRoot(document.getElementById("root")); // Creating the root
+root.render(
+  <BrowserRouter>
     <App />
-  </StrictMode>,
-)
+  </BrowserRouter>
+);
