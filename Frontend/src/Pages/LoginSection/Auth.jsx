@@ -20,6 +20,7 @@ export default function AuthApp() {
   const [theme, setTheme] = useState("light");
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [role, setRole] = useState("student");
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") || "light";
@@ -52,7 +53,11 @@ export default function AuthApp() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(`${currentPage === "signin" ? "Sign In" : "Sign Up"} successful!`);
+    alert(
+      `${
+        currentPage === "signin" ? "Sign In" : "Sign Up"
+      } as ${role} successful!`
+    );
   };
 
   const renderSignInForm = () => (
@@ -133,6 +138,32 @@ export default function AuthApp() {
                 </span>
               </div>
             </div>
+            <div className="flex items-center w-full mb-6 bg-[var(--surface)] rounded-lg p-2">
+              <button
+                type="button"
+                onClick={() => setRole("student")}
+                className={`flex-1 py-2 rounded-lg transition text-sm ${
+                  role === "student"
+                    ? "bg-[var(--brand)] text-white"
+                    : "text-[var(--text-primary)]"
+                }`}
+              >
+                Student
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRole("admin")}
+                className={`flex-1 py-2 rounded-lg transition text-sm ${
+                  role === "admin"
+                    ? "bg-[var(--brand)] text-white"
+                    : "text-[var(--text-primary)]"
+                }`}
+              >
+                Admin
+              </button>
+            </div>
+
             <form onSubmit={handleSubmit}>
               <div className="space-y-6">
                 <div>

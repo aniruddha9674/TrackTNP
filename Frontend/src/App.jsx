@@ -1,27 +1,23 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { ThemeProvider } from "./Utils/ui/context/DashboardThemeContext";
 
 {
   /*import MainPage from "./Pages/MainPage/main";*/
 }
 import AuthApp from "./Pages/LoginSection/Auth";
 
-{
-  /*
-  import StudentDash from "./Pages/StudentDash/AppLayout";
-  
-  import StudentDash from "./Pages/StudentDash/StudentDash";
-import CertificationManager from "./components/StudentDashboard/Certification";
+import StudentDash from "./Pages/StudentDash/AppLayout";
+import StudentOverview from "./components/StudentDashboard/overview";
 import CompanyRegistrationfrom from "./components/StudentDashboard/Company";
+import OfferLetters from "./components/StudentDashboard/OfferLetter";
+import CertificationManager from "./components/StudentDashboard/Certification";
 import PlacementFeedbackSystem from "./components/StudentDashboard/Feedback";
 import InternshipManagerfrom from "./components/StudentDashboard/Internship";
-import OfferLetters from "./components/StudentDashboard/OfferLetter";
-import Overview from "./components/StudentDashboard/overview";
-import Profile from "./components/StudentDashboard/FirstTimeLogin";
+import Profile from "./components/StudentDashboard/Profile";
 import ProjectManager from "./components/StudentDashboard/Project";
-import AuthApp from "./Pages/LoginSection/Auth";*/
-}
+import StudentCalendar from "./components/StudentDashboard/Calender";
 
 function App() {
   useEffect(() => {
@@ -34,24 +30,30 @@ function App() {
     }
   }, []);
   return (
-    <Routes>
-      <Route path="/" element={<AuthApp />} />
-      <Route path="/login" element={<AuthApp />} />
+    <ThemeProvider>
+      <Routes>
+        <Route path="/" element={<AuthApp />} />
+        <Route path="/login" element={<AuthApp />} />
 
-      {/*
-       <Route path="/studentdashboard" element={<StudentDash />} />
-      
-      Student Dashboard 
-      <Route path="" element={<Overview />} />
-      <Route path="/company" element={<CompanyRegistrationfrom />} />
-      <Route path="/calender" element={< />} /> 
-      <Route path="/offerletter" element={<OfferLetters />} />
-      <Route path="/internship" element={<InternshipManagerfrom />} />
-      <Route path="/certification" element={<CertificationManager />} />
-      <Route path="/project" element={<ProjectManager />} />
-      <Route path="/feedback" element={<PlacementFeedbackSystem />} />
-      <Route path="/profile" element={<Profile />} />*/}
-    </Routes>
+        <Route path="/studentdashboard" element={<StudentDash />}>
+          <Route path="" element={<StudentOverview />} />
+          <Route
+            path="companyregistration"
+            element={<CompanyRegistrationfrom />}
+          />
+          <Route path="offerletter" element={<OfferLetters />} />
+          <Route path="internshipdetails" element={<InternshipManagerfrom />} />
+          <Route
+            path="certificationdetails"
+            element={<CertificationManager />}
+          />
+          <Route path="feedback" element={<PlacementFeedbackSystem />} />
+          <Route path="projectdetails" element={<ProjectManager />} />
+          <Route path="profilesettings" element={<Profile />} />
+          <Route path="calender" element={<StudentCalendar />} />
+        </Route>
+      </Routes>
+    </ThemeProvider>
   );
 }
 

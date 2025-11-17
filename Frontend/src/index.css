@@ -30,3 +30,20 @@
     color: var(--text-primary);
   }
 }
+
+:root {
+  --font-sans: "Urbanist", sans-serif;
+  --letter-spacing-tight: -0.01em;
+  --letter-spacing-normal: 0;
+}
+body {
+  font-feature-settings: "liga", "kern";
+  letter-spacing: var(--letter-spacing-normal);
+}
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: var(--letter-spacing-tight);
+  font-weight: 600;
+}

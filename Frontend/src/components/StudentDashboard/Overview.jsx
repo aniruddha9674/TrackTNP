@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   FileText,
   Award,
@@ -12,6 +12,8 @@ import {
   Users,
   Building2,
   Sparkles,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 // Add Urbanist font
@@ -24,7 +26,68 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// Color themes
+const lightTheme = {
+  background: "#ffffff",
+  textPrimary: "#101828",
+  textSecondary: "#667085",
+  surface: "#F2F4F7",
+  brand: "#465FFF",
+  brandHover: "#3641F5",
+  blueLight: "#0BA5EC",
+  success: "#32D583",
+  error: "#F04438",
+  border: "#E2E8F0",
+};
+
+const darkTheme = {
+  background: "#0C111D",
+  textPrimary: "#F9FAFB",
+  textSecondary: "#98A2B3",
+  surface: "#1D2939",
+  brand: "#7592FF",
+  brandHover: "#465FFF",
+  blueLight: "#36BFFA",
+  success: "#6CE9A6",
+  error: "#F97066",
+  border: "#374151",
+};
+
 const Overview = () => {
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Load theme from localStorage ("dark" / "light")
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme === "dark") {
+      setDarkMode(true);
+      document.documentElement.classList.add("dark");
+    } else if (savedTheme === "light") {
+      setDarkMode(false);
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  // Update Tailwind + save to localStorage when darkMode changes
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => !prev);
+  };
+
+  // theme object
+  const colors = darkMode ? darkTheme : lightTheme;
+
+  // Your existing data arrays remain exactly the same...
   const [offers] = useState([
     {
       id: 1,
@@ -194,48 +257,79 @@ const Overview = () => {
     };
   }, [offers, certifications, projects, internships]);
 
-  const colors = {
-    primary: "#3b82f6",
-    accent: "#8b5cf6",
-    success: "#10b981",
-    warning: "#f59e0b",
-    background: "#f8fafc",
-    card: "#ffffff",
-    foreground: "#0f172a",
-    muted: "#64748b",
-    border: "#e2e8f0",
-  };
-
+  // The rest of your component JSX remains exactly the same...
   return (
-    <div style={{ minHeight: "100vh", background: colors.background }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: colors.background,
+        color: colors.textPrimary,
+        transition: "all 0.3s ease",
+      }}
+    >
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem" }}>
-        {/* Header */}
-        <div style={{ marginBottom: "2.5rem" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              marginBottom: "0.75rem",
-            }}
-          >
-            <Sparkles size={24} color={colors.primary} />
+        {/* Header with Theme Toggle */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "2.5rem",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <h1
               style={{
                 fontSize: "2.25rem",
                 fontWeight: "bold",
-                background: `linear-gradient(to right, ${colors.primary}, ${colors.accent})`,
+                background: `linear-gradient(to right, ${colors.brand}, ${colors.blueLight})`,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
               }}
             >
-              Career Dashboard
+              Overview
             </h1>
           </div>
-          <p style={{ color: colors.muted, fontSize: "1.125rem" }}>
-            Track your professional journey and achievements
-          </p>
+
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleDarkMode}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.5rem 1rem",
+              background: colors.surface,
+              border: `1px solid ${colors.border}`,
+              borderRadius: "0.75rem",
+              color: colors.textPrimary,
+              cursor: "pointer",
+              transition: "all 0.2s",
+              fontSize: "0.875rem",
+              fontWeight: "500",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = colors.brand;
+              e.currentTarget.style.color = "#ffffff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = colors.surface;
+              e.currentTarget.style.color = colors.textPrimary;
+            }}
+          >
+            {darkMode ? (
+              <>
+                <Sun size={16} />
+                Light Mode
+              </>
+            ) : (
+              <>
+                <Moon size={16} />
+                Dark Mode
+              </>
+            )}
+          </button>
         </div>
 
         {/* Stats Grid */}
@@ -255,7 +349,7 @@ const Overview = () => {
               subtitle: `${overallStats.finalOffers} final offer${
                 overallStats.finalOffers !== 1 ? "s" : ""
               }`,
-              color: colors.primary,
+              color: colors.brand,
             },
             {
               icon: Award,
@@ -269,20 +363,20 @@ const Overview = () => {
               label: "Projects",
               value: overallStats.totalProjects,
               subtitle: `${overallStats.uniqueTechs} technologies`,
-              color: colors.accent,
+              color: colors.blueLight,
             },
             {
               icon: Briefcase,
               label: "Internships",
               value: overallStats.totalInternships,
               subtitle: `${overallStats.activeInternships} active`,
-              color: colors.warning,
+              color: colors.error,
             },
           ].map((stat, idx) => (
             <div
               key={idx}
               style={{
-                background: colors.card,
+                background: colors.surface,
                 border: `1px solid ${colors.border}`,
                 borderRadius: "1rem",
                 padding: "1.5rem",
@@ -309,7 +403,7 @@ const Overview = () => {
                   <p
                     style={{
                       fontSize: "0.875rem",
-                      color: colors.muted,
+                      color: colors.textSecondary,
                       marginBottom: "0.25rem",
                       fontWeight: "500",
                     }}
@@ -320,13 +414,18 @@ const Overview = () => {
                     style={{
                       fontSize: "2.5rem",
                       fontWeight: "bold",
-                      color: colors.foreground,
+                      color: colors.textPrimary,
                       marginBottom: "0.25rem",
                     }}
                   >
                     {stat.value}
                   </p>
-                  <p style={{ fontSize: "0.875rem", color: colors.muted }}>
+                  <p
+                    style={{
+                      fontSize: "0.875rem",
+                      color: colors.textSecondary,
+                    }}
+                  >
                     {stat.subtitle}
                   </p>
                 </div>
@@ -362,7 +461,7 @@ const Overview = () => {
             {/* Offers */}
             <div
               style={{
-                background: colors.card,
+                background: colors.surface,
                 border: `1px solid ${colors.border}`,
                 borderRadius: "1rem",
                 padding: "1.5rem",
@@ -377,12 +476,12 @@ const Overview = () => {
                   marginBottom: "1.5rem",
                 }}
               >
-                <Building2 size={20} color={colors.primary} />
+                <Building2 size={20} color={colors.brand} />
                 <h2
                   style={{
                     fontSize: "1.25rem",
                     fontWeight: "600",
-                    color: colors.foreground,
+                    color: colors.textPrimary,
                   }}
                 >
                   Job Offers
@@ -403,19 +502,21 @@ const Overview = () => {
                       alignItems: "center",
                       justifyContent: "space-between",
                       padding: "1.25rem",
-                      background: `${colors.muted}10`,
+                      background: `${colors.textSecondary}10`,
                       borderRadius: "0.75rem",
                       border: `1px solid ${colors.border}`,
                       cursor: "pointer",
                       transition: "all 0.2s",
                     }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.boxShadow =
-                        "0 2px 8px rgba(0,0,0,0.1)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.boxShadow = "none")
-                    }
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.boxShadow =
+                        "0 2px 8px rgba(0,0,0,0.1)";
+                      e.currentTarget.style.background = `${colors.brand}08`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = "none";
+                      e.currentTarget.style.background = `${colors.textSecondary}10`;
+                    }}
                   >
                     <div
                       style={{
@@ -428,27 +529,30 @@ const Overview = () => {
                         style={{
                           height: "3rem",
                           width: "3rem",
-                          background: `${colors.primary}15`,
+                          background: `${colors.brand}15`,
                           borderRadius: "0.75rem",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                         }}
                       >
-                        <Building2 size={24} color={colors.primary} />
+                        <Building2 size={24} color={colors.brand} />
                       </div>
                       <div>
                         <h3
                           style={{
                             fontWeight: "600",
-                            color: colors.foreground,
+                            color: colors.textPrimary,
                             fontSize: "1.125rem",
                           }}
                         >
                           {offer.companyName}
                         </h3>
                         <p
-                          style={{ fontSize: "0.875rem", color: colors.muted }}
+                          style={{
+                            fontSize: "0.875rem",
+                            color: colors.textSecondary,
+                          }}
                         >
                           {offer.companyType}
                         </p>
@@ -458,7 +562,7 @@ const Overview = () => {
                       <p
                         style={{
                           fontWeight: "bold",
-                          color: colors.foreground,
+                          color: colors.textPrimary,
                           fontSize: "1.25rem",
                           marginBottom: "0.25rem",
                         }}
@@ -474,7 +578,7 @@ const Overview = () => {
                           background:
                             offer.status === "final"
                               ? colors.success
-                              : colors.muted,
+                              : colors.textSecondary,
                           color: "white",
                         }}
                       >
@@ -489,7 +593,7 @@ const Overview = () => {
             {/* Summary Stats */}
             <div
               style={{
-                background: `linear-gradient(to bottom right, ${colors.card}, ${colors.primary}08)`,
+                background: colors.surface,
                 border: `1px solid ${colors.border}`,
                 borderRadius: "1rem",
                 padding: "1.5rem",
@@ -504,12 +608,12 @@ const Overview = () => {
                   marginBottom: "1.5rem",
                 }}
               >
-                <BarChart3 size={20} color={colors.primary} />
+                <BarChart3 size={20} color={colors.brand} />
                 <h2
                   style={{
                     fontSize: "1.25rem",
                     fontWeight: "600",
-                    color: colors.foreground,
+                    color: colors.textPrimary,
                   }}
                 >
                   Summary
@@ -553,7 +657,7 @@ const Overview = () => {
                     <span
                       style={{
                         fontSize: "0.875rem",
-                        color: colors.muted,
+                        color: colors.textSecondary,
                         fontWeight: "500",
                       }}
                     >
@@ -569,7 +673,7 @@ const Overview = () => {
                       <span
                         style={{
                           fontWeight: "bold",
-                          color: colors.foreground,
+                          color: colors.textPrimary,
                           fontSize: "1.125rem",
                         }}
                       >
@@ -588,7 +692,7 @@ const Overview = () => {
           {/* Projects */}
           <div
             style={{
-              background: colors.card,
+              background: colors.surface,
               border: `1px solid ${colors.border}`,
               borderRadius: "1rem",
               padding: "1.5rem",
@@ -603,12 +707,12 @@ const Overview = () => {
                 marginBottom: "1.5rem",
               }}
             >
-              <FolderGit2 size={20} color={colors.accent} />
+              <FolderGit2 size={20} color={colors.blueLight} />
               <h2
                 style={{
                   fontSize: "1.25rem",
                   fontWeight: "600",
-                  color: colors.foreground,
+                  color: colors.textPrimary,
                 }}
               >
                 Projects
@@ -622,19 +726,21 @@ const Overview = () => {
                   key={project.id}
                   style={{
                     padding: "1.25rem",
-                    background: `${colors.muted}10`,
+                    background: `${colors.textSecondary}10`,
                     borderRadius: "0.75rem",
                     border: `1px solid ${colors.border}`,
                     cursor: "pointer",
                     transition: "all 0.2s",
                   }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.boxShadow =
-                      "0 2px 8px rgba(0,0,0,0.1)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.boxShadow = "none")
-                  }
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow =
+                      "0 2px 8px rgba(0,0,0,0.1)";
+                    e.currentTarget.style.background = `${colors.blueLight}08`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = "none";
+                    e.currentTarget.style.background = `${colors.textSecondary}10`;
+                  }}
                 >
                   <div
                     style={{
@@ -648,7 +754,7 @@ const Overview = () => {
                       <h3
                         style={{
                           fontWeight: "600",
-                          color: colors.foreground,
+                          color: colors.textPrimary,
                           fontSize: "1.125rem",
                           marginBottom: "0.5rem",
                         }}
@@ -658,7 +764,7 @@ const Overview = () => {
                       <p
                         style={{
                           fontSize: "0.875rem",
-                          color: colors.muted,
+                          color: colors.textSecondary,
                           lineHeight: "1.5",
                         }}
                       >
@@ -674,10 +780,10 @@ const Overview = () => {
                         border: `1px solid ${colors.border}`,
                         borderRadius: "9999px",
                         fontSize: "0.75rem",
-                        color: colors.muted,
+                        color: colors.textSecondary,
                         marginLeft: "0.75rem",
                         flexShrink: 0,
-                        background: colors.card,
+                        background: colors.surface,
                       }}
                     >
                       <Users size={12} />
@@ -692,8 +798,8 @@ const Overview = () => {
                         key={idx}
                         style={{
                           padding: "0.25rem 0.75rem",
-                          background: `${colors.accent}15`,
-                          color: colors.accent,
+                          background: `${colors.blueLight}15`,
+                          color: colors.blueLight,
                           borderRadius: "9999px",
                           fontSize: "0.75rem",
                           fontWeight: "500",
@@ -718,7 +824,7 @@ const Overview = () => {
             {/* Certifications */}
             <div
               style={{
-                background: colors.card,
+                background: colors.surface,
                 border: `1px solid ${colors.border}`,
                 borderRadius: "1rem",
                 padding: "1.5rem",
@@ -738,7 +844,7 @@ const Overview = () => {
                   style={{
                     fontSize: "1.25rem",
                     fontWeight: "600",
-                    color: colors.foreground,
+                    color: colors.textPrimary,
                   }}
                 >
                   Certifications
@@ -756,25 +862,27 @@ const Overview = () => {
                     key={cert.id}
                     style={{
                       padding: "1rem",
-                      background: `${colors.muted}10`,
+                      background: `${colors.textSecondary}10`,
                       borderRadius: "0.5rem",
                       border: `1px solid ${colors.border}`,
                       cursor: "pointer",
                       transition: "all 0.2s",
                     }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.boxShadow =
-                        "0 2px 8px rgba(0,0,0,0.1)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.boxShadow = "none")
-                    }
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.boxShadow =
+                        "0 2px 8px rgba(0,0,0,0.1)";
+                      e.currentTarget.style.background = `${colors.success}08`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = "none";
+                      e.currentTarget.style.background = `${colors.textSecondary}10`;
+                    }}
                   >
                     <h4
                       style={{
                         fontWeight: "600",
                         fontSize: "0.875rem",
-                        color: colors.foreground,
+                        color: colors.textPrimary,
                         marginBottom: "0.5rem",
                       }}
                     >
@@ -788,7 +896,12 @@ const Overview = () => {
                         fontSize: "0.75rem",
                       }}
                     >
-                      <span style={{ color: colors.muted, fontWeight: "500" }}>
+                      <span
+                        style={{
+                          color: colors.textSecondary,
+                          fontWeight: "500",
+                        }}
+                      >
                         {cert.platform}
                       </span>
                       <div
@@ -796,7 +909,7 @@ const Overview = () => {
                           display: "flex",
                           alignItems: "center",
                           gap: "0.25rem",
-                          color: colors.muted,
+                          color: colors.textSecondary,
                         }}
                       >
                         <Clock size={12} />
@@ -811,7 +924,7 @@ const Overview = () => {
             {/* Internships */}
             <div
               style={{
-                background: colors.card,
+                background: colors.surface,
                 border: `1px solid ${colors.border}`,
                 borderRadius: "1rem",
                 padding: "1.5rem",
@@ -826,12 +939,12 @@ const Overview = () => {
                   marginBottom: "1.5rem",
                 }}
               >
-                <Briefcase size={20} color={colors.warning} />
+                <Briefcase size={20} color={colors.error} />
                 <h2
                   style={{
                     fontSize: "1.25rem",
                     fontWeight: "600",
-                    color: colors.foreground,
+                    color: colors.textPrimary,
                   }}
                 >
                   Internships
@@ -855,19 +968,21 @@ const Overview = () => {
                       key={intern.id}
                       style={{
                         padding: "1rem",
-                        background: `${colors.muted}10`,
+                        background: `${colors.textSecondary}10`,
                         borderRadius: "0.5rem",
                         border: `1px solid ${colors.border}`,
                         cursor: "pointer",
                         transition: "all 0.2s",
                       }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.boxShadow =
-                          "0 2px 8px rgba(0,0,0,0.1)")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.boxShadow = "none")
-                      }
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow =
+                          "0 2px 8px rgba(0,0,0,0.1)";
+                        e.currentTarget.style.background = `${colors.error}08`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = "none";
+                        e.currentTarget.style.background = `${colors.textSecondary}10`;
+                      }}
                     >
                       <div
                         style={{
@@ -881,7 +996,7 @@ const Overview = () => {
                           style={{
                             fontWeight: "600",
                             fontSize: "0.875rem",
-                            color: colors.foreground,
+                            color: colors.textPrimary,
                           }}
                         >
                           {intern.companyName}
@@ -907,7 +1022,7 @@ const Overview = () => {
                           alignItems: "center",
                           gap: "0.5rem",
                           fontSize: "0.75rem",
-                          color: colors.muted,
+                          color: colors.textSecondary,
                           marginBottom: "0.5rem",
                         }}
                       >
@@ -928,7 +1043,7 @@ const Overview = () => {
                         style={{
                           fontSize: "0.875rem",
                           fontWeight: "600",
-                          color: colors.foreground,
+                          color: colors.textPrimary,
                         }}
                       >
                         ₹{parseFloat(intern.stipend).toLocaleString()}/month
