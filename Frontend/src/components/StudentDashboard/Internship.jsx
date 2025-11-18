@@ -254,7 +254,7 @@ const InternshipManager = () => {
         }
       `}</style>
 
-      <div className="ax-w-[1400px] mx-auto p-6 space-y-8">
+      <div className="max-w-[1400px] mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
