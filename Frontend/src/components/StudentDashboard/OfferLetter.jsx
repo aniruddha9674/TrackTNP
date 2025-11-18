@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   Plus,
   Eye,
@@ -14,223 +14,15 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
+import { useTheme } from "../../Utils/context/ThemeContext";
 
-// Add Urbanist font and CSS variables
-const style = document.createElement("style");
-style.textContent = `
-  @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap');
-  :root {
-    --color-white: #ffffff;
-    --color-black: #101828;
-    --color-gray-50: #f9fafb;
-    --color-gray-100: #f2f4f7;
-    --color-gray-400: #98a2b3;
-    --color-gray-500: #667085;
-    --color-gray-800: #1d2939;
-    --color-gray-900: #101828;
-    --color-gray-950: #0c111d;
-    --color-brand-400: #7592ff;
-    --color-brand-500: #465fff;
-    --color-brand-600: #1d41f5;
-    --color-blue-light-300: #84caff;
-    --color-blue-light-500: #0ba5ec;
-    --color-success-400: #16c784;
-    --color-success-500: #12b268;
-    --color-error-400: #f97066;
-    --color-error-500: #f04438;
-  }
-  * {
-    font-family: 'Urbanist', sans-serif;
-  }
-`;
-document.head.appendChild(style);
-
-// Custom Button Component
-const Button = ({
-  children,
-  onClick,
-  variant = "default",
-  size = "default",
-  className = "",
-  disabled = false,
-}) => {
-  const baseStyles =
-    "inline-flex items-center justify-center rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2";
-  const variants = {
-    default:
-      "bg-gradient-to-r from-[var(--color-brand-500)] to-[var(--color-brand-600)] text-white hover:from-[var(--color-brand-600)] hover:to-[var(--color-brand-700)] focus:ring-[var(--color-brand-500)] shadow-md hover:shadow-lg",
-    outline:
-      "border border-gray-300 dark:border-gray-700 bg-white dark:bg-[var(--color-gray-950)] text-[var(--color-gray-900)] dark:text-[var(--color-gray-50)] hover:bg-gray-50 dark:hover:bg-gray-800",
-    ghost:
-      "text-[var(--color-gray-900)] dark:text-[var(--color-gray-50)] hover:bg-[var(--color-gray-100)] dark:hover:bg-[var(--color-gray-800)]",
-  };
-  const sizes = {
-    default: "px-5 py-2.5",
-    sm: "px-3 py-1.5 text-sm",
-    icon: "p-2",
-  };
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`${baseStyles} ${variants[variant]} ${
-        sizes[size]
-      } ${className} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-    >
-      {children}
-    </button>
-  );
-};
-
-// Custom Card Components
-const Card = ({ children, className = "" }) => {
-  return (
-    <div
-      className={`rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[var(--color-gray-950)] ${className}`}
-    >
-      {children}
-    </div>
-  );
-};
-
-const CardContent = ({ children, className = "" }) => {
-  return <div className={`p-6 ${className}`}>{children}</div>;
-};
-
-// Custom Badge Component
-const Badge = ({ children, variant = "default", className = "" }) => {
-  const variants = {
-    default:
-      "bg-[var(--color-brand-500)] dark:bg-[var(--color-brand-400)] text-white",
-    secondary:
-      "bg-[var(--color-gray-100)] dark:bg-[var(--color-gray-800)] text-[var(--color-gray-900)] dark:text-[var(--color-gray-50)]",
-    success:
-      "bg-[var(--color-success-500)] dark:bg-[var(--color-success-400)] text-white",
-  };
-  return (
-    <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${variants[variant]} ${className}`}
-    >
-      {children}
-    </span>
-  );
-};
-
-// Custom Select Component
-const Select = ({ value, onValueChange, children }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const selectRef = React.useRef(null);
-
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (selectRef.current && !selectRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  return (
-    <div ref={selectRef} className="relative w-full">
-      {React.Children.map(children, (child) => {
-        if (child.type === SelectTrigger) {
-          return React.cloneElement(child, { isOpen, setIsOpen });
-        }
-        if (child.type === SelectContent) {
-          return isOpen
-            ? React.cloneElement(child, {
-                onValueChange,
-                setIsOpen,
-                value,
-              })
-            : null;
-        }
-        return child;
-      })}
-    </div>
-  );
-};
-
-const SelectTrigger = ({ children, className = "", isOpen, setIsOpen }) => {
-  return (
-    <button
-      type="button"
-      onClick={() => setIsOpen(!isOpen)}
-      className={`w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-[var(--color-gray-950)] border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-500)] focus:border-transparent text-[var(--color-gray-900)] dark:text-[var(--color-gray-50)] transition-all ${className}`}
-    >
-      {children}
-      <ChevronDown
-        className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
-      />
-    </button>
-  );
-};
-
-const SelectValue = ({ placeholder, children }) => {
-  return (
-    <span className="text-left text-[var(--color-gray-900)] dark:text-[var(--color-gray-50)]">
-      {children || placeholder}
-    </span>
-  );
-};
-
-const SelectContent = ({
-  children,
-  className = "",
-  onValueChange,
-  setIsOpen,
-  value,
-}) => {
-  return (
-    <div
-      className={`absolute z-50 w-full mt-2 bg-white dark:bg-[var(--color-gray-800)] border border-gray-300 dark:border-gray-700 rounded-lg shadow-xl max-h-60 overflow-auto ${className}`}
-    >
-      {React.Children.map(children, (child) => {
-        if (child.type === SelectItem) {
-          return React.cloneElement(child, {
-            onValueChange,
-            setIsOpen,
-            isSelected: child.props.value === value,
-          });
-        }
-        return child;
-      })}
-    </div>
-  );
-};
-
-const SelectItem = ({
-  value,
-  children,
-  onValueChange,
-  setIsOpen,
-  isSelected,
-}) => {
-  return (
-    <div
-      onClick={() => {
-        onValueChange(value);
-        setIsOpen(false);
-      }}
-      className={`px-4 py-2 cursor-pointer hover:bg-[var(--color-gray-100)] dark:hover:bg-[var(--color-gray-950)] text-[var(--color-gray-900)] dark:text-[var(--color-gray-50)] ${
-        isSelected
-          ? "bg-[var(--color-gray-100)] dark:bg-[var(--color-gray-950)]"
-          : ""
-      }`}
-    >
-      {children}
-    </div>
-  );
-};
-
-// Main Component
-const OfferLetters = () => {
+const OfferLetterManager = () => {
   const [offers, setOffers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [viewMode, setViewMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [modalType, setModalType] = useState("offer");
+  const { theme, toggletheme } = useTheme();
   const [formData, setFormData] = useState({
     companyName: "",
     packageValue: "",
@@ -238,27 +30,6 @@ const OfferLetters = () => {
     offerLetterFile: null,
     joiningLetterFile: null,
   });
-  const [theme, setTheme] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("theme") || "light";
-    }
-    return "light";
-  });
-
-  // Apply theme to the HTML element
-  useEffect(() => {
-    const html = document.querySelector("html");
-    if (theme === "dark") {
-      html.classList.add("dark");
-    } else {
-      html.classList.remove("dark");
-    }
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-  };
 
   const stats = useMemo(() => {
     const totalOffers = offers.filter((o) => o.status === "offer").length;
@@ -289,10 +60,6 @@ const OfferLetters = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (value) => {
-    setFormData((prev) => ({ ...prev, companyType: value }));
   };
 
   const handleFileChange = (e, fieldName) => {
@@ -382,434 +149,669 @@ const OfferLetters = () => {
     setShowModal(true);
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-950 p-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-10">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Offer Letter Dashboard
-          </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Manage your job offers and final offer letters
-          </p>
-        </div>
-        <div className="flex gap-4 items-center">
-          <Button
-            onClick={() => openAddModal("offer")}
-            className="bg-gradient-to-r from-[var(--color-brand-500)] to-[var(--color-brand-600)] hover:from-[var(--color-brand-600)] hover:to-[var(--color-brand-700)] text-white shadow-md hover:shadow-lg transition-all"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add Offer Letter
-          </Button>
-          <Button
-            onClick={() => openAddModal("final")}
-            variant="outline"
-            className="border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add Final Offer
-          </Button>
-          <Button
-            onClick={toggleTheme}
-            variant="ghost"
-            size="icon"
-            className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-          >
-            {theme === "light" ? (
-              <Moon className="h-5 w-5" />
-            ) : (
-              <Sun className="h-5 w-5" />
-            )}
-          </Button>
-        </div>
-      </div>
+  // Light Theme Function
+  const getLightTheme = () => ({
+    background: "bg-gradient-to-br from-slate-50 to-slate-100",
+    cardBg: "bg-white",
+    cardBorder: "border-slate-200",
+    cardShadow: "shadow-md",
+    cardHoverShadow: "hover:shadow-xl",
+    textPrimary: "text-slate-900",
+    textSecondary: "text-slate-600",
+    textTertiary: "text-slate-400",
+    inputBg: "bg-white",
+    inputBorder: "border-slate-300",
+    inputDisabled: "disabled:bg-slate-100",
+    inputText: "text-slate-900",
+    inputPlaceholder: "placeholder:text-slate-400",
+    modalOverlay: "bg-black/60",
+    modalHeader: "bg-slate-100",
+    modalHeaderBorder: "border-slate-200",
+    emptyStateBg: "bg-slate-100",
+    emptyStateIcon: "text-slate-400",
+    statCard1Gradient: "from-white to-blue-50",
+    statCard2Gradient: "from-white to-green-50",
+    statCard3Gradient: "from-white to-purple-50",
+    statCard4Gradient: "from-white to-amber-50",
+    statIcon1Bg: "bg-blue-100",
+    statIcon1Text: "text-blue-600",
+    statIcon2Bg: "bg-green-100",
+    statIcon2Text: "text-green-600",
+    statIcon3Bg: "bg-purple-100",
+    statIcon3Text: "text-purple-600",
+    statIcon4Bg: "bg-amber-100",
+    statIcon4Text: "text-amber-600",
+    dividerBorder: "border-slate-200",
+    buttonBg: "bg-white",
+    buttonBorder: "border-slate-300",
+    buttonHover: "hover:bg-slate-50",
+    offerLetterText: "text-green-600",
+    statusOfferBg: "bg-blue-500",
+    statusFinalBg: "bg-green-500",
+    selectTriggerBg: "bg-white",
+    selectContentBg: "bg-white",
+    selectItemHover: "hover:bg-slate-100",
+  });
 
-      {/* Summary Statistics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <Card className="bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-blue-900/20 shadow-lg hover:shadow-xl transition-shadow">
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Offer Letters
-                </p>
-                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                  {stats.totalOffers}
-                </h3>
-              </div>
-              <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                <FileText className="h-6 w-6 text-blue-500 dark:text-blue-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-white to-green-50 dark:from-gray-800 dark:to-green-900/20 shadow-lg hover:shadow-xl transition-shadow">
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Final Offers
-                </p>
-                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                  {stats.finalOffers}
-                </h3>
-              </div>
-              <div className="h-12 w-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                <CheckCircle className="h-6 w-6 text-green-500 dark:text-green-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-white to-purple-50 dark:from-gray-800 dark:to-purple-900/20 shadow-lg hover:shadow-xl transition-shadow">
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Avg Package
-                </p>
-                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                  {stats.avgPackage.toFixed(1)}
-                  <span className="text-lg text-gray-500 dark:text-gray-400 ml-1">
-                    LPA
-                  </span>
-                </h3>
-              </div>
-              <div className="h-12 w-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-purple-500 dark:text-purple-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-white to-yellow-50 dark:from-gray-800 dark:to-yellow-900/20 shadow-lg hover:shadow-xl transition-shadow">
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Companies
-                </p>
-                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                  {stats.uniqueCompanies}
-                </h3>
-              </div>
-              <div className="h-12 w-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center">
-                <Briefcase className="h-6 w-6 text-yellow-500 dark:text-yellow-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+  // Dark Theme Function
+  const getDarkTheme = () => ({
+    background: "bg-gradient-to-br from-slate-950 to-slate-900",
+    cardBg: "bg-slate-900",
+    cardBorder: "border-slate-700",
+    cardShadow: "shadow-lg shadow-black/20",
+    cardHoverShadow: "hover:shadow-2xl hover:shadow-black/40",
+    textPrimary: "text-slate-50",
+    textSecondary: "text-slate-400",
+    textTertiary: "text-slate-500",
+    inputBg: "bg-slate-950",
+    inputBorder: "border-slate-600",
+    inputDisabled: "disabled:bg-slate-800",
+    inputText: "text-slate-50",
+    inputPlaceholder: "placeholder:text-slate-500",
+    modalOverlay: "bg-black/80",
+    modalHeader: "bg-slate-800",
+    modalHeaderBorder: "border-slate-700",
+    emptyStateBg: "bg-slate-800",
+    emptyStateIcon: "text-slate-500",
+    statCard1Gradient: "from-slate-800 to-blue-900/30",
+    statCard2Gradient: "from-slate-800 to-green-900/30",
+    statCard3Gradient: "from-slate-800 to-purple-900/30",
+    statCard4Gradient: "from-slate-800 to-amber-900/30",
+    statIcon1Bg: "bg-blue-900/30",
+    statIcon1Text: "text-blue-400",
+    statIcon2Bg: "bg-green-900/30",
+    statIcon2Text: "text-green-400",
+    statIcon3Bg: "bg-purple-900/30",
+    statIcon3Text: "text-purple-400",
+    statIcon4Bg: "bg-amber-900/30",
+    statIcon4Text: "text-amber-400",
+    dividerBorder: "border-slate-700",
+    buttonBg: "bg-slate-700",
+    buttonBorder: "border-slate-600",
+    buttonHover: "hover:bg-slate-600",
+    offerLetterText: "text-green-400",
+    statusOfferBg: "bg-blue-600",
+    statusFinalBg: "bg-green-600",
+    selectTriggerBg: "bg-slate-950",
+    selectContentBg: "bg-slate-700",
+    selectItemHover: "hover:bg-slate-800",
+  });
 
-      {/* Offer Letters */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-          Your Offer Letters
-        </h2>
-        {offers.length === 0 ? (
-          <Card className="shadow-lg">
-            <CardContent className="text-center py-12">
-              <div className="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-                <FileText className="h-12 w-12 text-gray-500 dark:text-gray-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                No Offer Letters Yet
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-6">
-                Start tracking your job offers by adding your first offer letter
-              </p>
-              <Button
-                onClick={() => openAddModal("offer")}
-                variant="outline"
-                className="border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Your First Offer Letter
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {offers.map((offer) => (
-              <Card
-                key={offer.id}
-                className="shadow-lg hover:shadow-xl transition-shadow duration-300"
-              >
+  const themeStyles = theme === "dark" ? getDarkTheme() : getLightTheme();
+
+  // Custom Select Component
+  const CustomSelect = ({ value, onChange, disabled, options }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => !disabled && setIsOpen(!isOpen)}
+          disabled={disabled}
+          className={`w-full flex items-center justify-between px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputText} ${themeStyles.inputDisabled} disabled:cursor-not-allowed transition-all`}
+        >
+          <span className={value ? "" : themeStyles.inputPlaceholder}>
+            {value || "Select an option"}
+          </span>
+          <ChevronDown
+            className={`h-4 w-4 transition-transform ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+        {isOpen && !disabled && (
+          <>
+            <div
+              className="fixed inset-0 z-10"
+              onClick={() => setIsOpen(false)}
+            />
+            <div
+              className={`absolute z-20 w-full mt-2 ${themeStyles.selectContentBg} border ${themeStyles.inputBorder} rounded-lg shadow-xl max-h-60 overflow-auto`}
+            >
+              {options.map((option) => (
                 <div
-                  className={`h-2 rounded-t-2xl ${
-                    offer.status === "final"
-                      ? "bg-[var(--color-success-500)] dark:bg-[var(--color-success-400)]"
-                      : "bg-[var(--color-brand-500)] dark:bg-[var(--color-brand-400)]"
+                  key={option}
+                  onClick={() => {
+                    onChange(option);
+                    setIsOpen(false);
+                  }}
+                  className={`px-4 py-2 cursor-pointer ${
+                    themeStyles.selectItemHover
+                  } ${themeStyles.textPrimary} ${
+                    value === option ? themeStyles.emptyStateBg : ""
                   }`}
-                />
-                <CardContent>
-                  <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex-1 pr-2 line-clamp-2">
-                      {offer.companyName}
-                    </h3>
-                    <Badge
-                      variant={offer.status === "final" ? "success" : "default"}
-                    >
-                      {offer.status === "final" ? "Final" : "Offer"}
-                    </Badge>
-                  </div>
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-800">
-                      <span className="text-sm text-gray-700 dark:text-gray-300">
-                        Package
-                      </span>
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {offer.packageValue} LPA
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-800">
-                      <span className="text-sm text-gray-700 dark:text-gray-300">
-                        Type
-                      </span>
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        {offer.companyType}
-                      </span>
-                    </div>
-                    {offer.offerLetterFile && (
-                      <div className="flex items-center gap-2 text-sm pt-2">
-                        <div className="h-2 w-2 rounded-full bg-[var(--color-success-500)] dark:bg-[var(--color-success-400)]" />
-                        <span className="text-[var(--color-success-500)] dark:text-[var(--color-success-400)] font-medium">
-                          Offer letter attached
-                        </span>
-                      </div>
-                    )}
-                    {offer.joiningLetterFile && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <div className="h-2 w-2 rounded-full bg-[var(--color-success-500)] dark:bg-[var(--color-success-400)]" />
-                        <span className="text-[var(--color-success-500)] dark:text-[var(--color-success-400)] font-medium">
-                          Joining letter attached
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleView(offer)}
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        View
-                      </Button>
-                      <Button
-                        onClick={() => handleEdit(offer)}
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                      >
-                        <Edit2 className="mr-2 h-4 w-4" />
-                        Edit
-                      </Button>
-                      <Button
-                        onClick={() => handleDelete(offer.id)}
-                        variant="outline"
-                        size="sm"
-                        className="text-[var(--color-error-500)] dark:text-[var(--color-error-400)] hover:bg-[var(--color-error-50)] dark:hover:bg-[var(--color-error-900)] border-[var(--color-error-500)] dark:border-[var(--color-error-400)]"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    {offer.status === "offer" && (
-                      <Button
-                        onClick={() => handleConvertToFinal(offer)}
-                        className="w-full bg-[var(--color-success-500)] hover:bg-[var(--color-success-600)] dark:bg-[var(--color-success-400)] dark:hover:bg-[var(--color-success-500)] text-white shadow-md hover:shadow-lg transition-all"
-                        size="sm"
-                      >
-                        <ArrowRight className="mr-2 h-4 w-4" />
-                        Convert to Final Offer
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                >
+                  {option}
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
+    );
+  };
 
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100000] animate-in fade-in duration-300">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-300 relative z-[100001]">
-            <div className="sticky top-0 bg-gray-100 dark:bg-[var(--color-gray-950)] border-b border-gray-200 dark:border-gray-800 px-6 py-4 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {viewMode
-                  ? `${
-                      modalType === "final"
-                        ? "Final Offer Letter"
-                        : "Offer Letter"
-                    } Details`
-                  : editingId
-                  ? `Edit ${
-                      modalType === "final"
-                        ? "Final Offer Letter"
-                        : "Offer Letter"
-                    }`
-                  : `Add ${
-                      modalType === "final"
-                        ? "Final Offer Letter"
-                        : "Offer Letter"
-                    }`}
-              </h2>
-              <Button
-                onClick={() => {
-                  setShowModal(false);
-                  resetForm();
-                }}
-                variant="ghost"
-                size="icon"
-                className="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-            <CardContent className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Company Name{" "}
-                  <span className="text-[var(--color-error-500)] dark:text-[var(--color-error-400)]">
-                    *
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  name="companyName"
-                  value={formData.companyName}
-                  onChange={handleInputChange}
-                  placeholder="Enter Company Name"
-                  disabled={viewMode}
-                  required
-                  className="w-full px-4 py-3 bg-white dark:bg-[var(--color-gray-950)] border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-500)] focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-[var(--color-gray-800)] disabled:cursor-not-allowed text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 transition-all"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Company Package Value (In LPA){" "}
-                  <span className="text-[var(--color-error-500)] dark:text-[var(--color-error-400)]">
-                    *
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  name="packageValue"
-                  value={formData.packageValue}
-                  onChange={handleInputChange}
-                  placeholder="Enter Package Value"
-                  disabled={viewMode}
-                  required
-                  className="w-full px-4 py-3 bg-white dark:bg-[var(--color-gray-950)] border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-500)] focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-[var(--color-gray-800)] disabled:cursor-not-allowed text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 transition-all"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Company Type{" "}
-                  <span className="text-[var(--color-error-500)] dark:text-[var(--color-error-400)]">
-                    *
-                  </span>
-                </label>
-                {viewMode ? (
-                  <div className="px-4 py-3 bg-gray-100 dark:bg-[var(--color-gray-800)] rounded-lg text-gray-900 dark:text-white">
-                    {formData.companyType || "Not specified"}
-                  </div>
-                ) : (
-                  <Select
-                    value={formData.companyType}
-                    onValueChange={handleSelectChange}
+  return (
+    <div
+      style={{ fontFamily: "Urbanist, sans-serif" }}
+      className={`min-h-screen ${themeStyles.background}`}
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap');
+        * {
+          font-family: 'Urbanist', sans-serif;
+        }
+      `}</style>
+
+      <div className="ax-w-[1400px] mx-auto p-6 space-y-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
+              Offer Letter Dashboard
+            </h1>
+            <p className={`${themeStyles.textSecondary} mt-1`}>
+              Manage your job offers and final offer letters
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => openAddModal("offer")}
+              className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-lg"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Offer Letter
+            </button>
+            <button
+              onClick={() => openAddModal("final")}
+              className={`inline-flex items-center px-4 py-2 rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Final Offer
+            </button>
+          </div>
+        </div>
+
+        {/* Summary Statistics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard1Gradient} transition-all`}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p
+                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
                   >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select an option">
-                        {formData.companyType || "Select an option"}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Product">Product</SelectItem>
-                      <SelectItem value="Service">Service</SelectItem>
-                      <SelectItem value="Startup">Startup</SelectItem>
-                      <SelectItem value="MNC">MNC</SelectItem>
-                      <SelectItem value="Government">Government</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Upload your Offer Letter
-                </label>
-                {viewMode ? (
-                  <div className="px-4 py-3 bg-gray-100 dark:bg-[var(--color-gray-800)] rounded-lg text-gray-900 dark:text-white">
-                    {formData.offerLetterFile || "No file uploaded"}
-                  </div>
-                ) : (
-                  <input
-                    type="file"
-                    onChange={(e) => handleFileChange(e, "offerLetterFile")}
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                    className="w-full px-4 py-3 bg-white dark:bg-[var(--color-gray-950)] border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-500)] focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--color-brand-500)] file:text-white hover:file:bg-[var(--color-brand-600)] dark:file:bg-[var(--color-brand-400)] dark:hover:file:bg-[var(--color-brand-500)] file:cursor-pointer cursor-pointer text-gray-900 dark:text-white transition-all"
-                  />
-                )}
-                {formData.offerLetterFile && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                    Selected: {formData.offerLetterFile}
+                    Offer Letters
                   </p>
-                )}
+                  <h3
+                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
+                  >
+                    {stats.totalOffers}
+                  </h3>
+                </div>
+                <div
+                  className={`h-12 w-12 ${themeStyles.statIcon1Bg} rounded-full flex items-center justify-center`}
+                >
+                  <FileText
+                    className={`h-6 w-6 ${themeStyles.statIcon1Text}`}
+                  />
+                </div>
               </div>
-              {modalType === "final" && (
+            </div>
+          </div>
+
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard2Gradient} transition-all`}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p
+                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
+                  >
+                    Final Offers
+                  </p>
+                  <h3
+                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
+                  >
+                    {stats.finalOffers}
+                  </h3>
+                </div>
+                <div
+                  className={`h-12 w-12 ${themeStyles.statIcon2Bg} rounded-full flex items-center justify-center`}
+                >
+                  <CheckCircle
+                    className={`h-6 w-6 ${themeStyles.statIcon2Text}`}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard3Gradient} transition-all`}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p
+                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
+                  >
+                    Avg Package
+                  </p>
+                  <h3
+                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
+                  >
+                    {stats.avgPackage.toFixed(1)}
+                    <span
+                      className={`text-lg ${themeStyles.textSecondary} ml-1`}
+                    >
+                      LPA
+                    </span>
+                  </h3>
+                </div>
+                <div
+                  className={`h-12 w-12 ${themeStyles.statIcon3Bg} rounded-full flex items-center justify-center`}
+                >
+                  <TrendingUp
+                    className={`h-6 w-6 ${themeStyles.statIcon3Text}`}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard4Gradient} transition-all`}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p
+                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
+                  >
+                    Companies
+                  </p>
+                  <h3
+                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
+                  >
+                    {stats.uniqueCompanies}
+                  </h3>
+                </div>
+                <div
+                  className={`h-12 w-12 ${themeStyles.statIcon4Bg} rounded-full flex items-center justify-center`}
+                >
+                  <Briefcase
+                    className={`h-6 w-6 ${themeStyles.statIcon4Text}`}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Offer Letters */}
+        <div>
+          <h2
+            className={`text-xl font-semibold ${themeStyles.textPrimary} mb-4`}
+          >
+            Your Offer Letters
+          </h2>
+          {offers.length === 0 ? (
+            <div
+              className={`rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} shadow-sm`}
+            >
+              <div className="p-12 text-center">
+                <div
+                  className={`mx-auto w-24 h-24 ${themeStyles.emptyStateBg} rounded-full flex items-center justify-center mb-4`}
+                >
+                  <FileText
+                    className={`h-12 w-12 ${themeStyles.emptyStateIcon}`}
+                  />
+                </div>
+                <h3
+                  className={`text-xl font-semibold ${themeStyles.textPrimary} mb-2`}
+                >
+                  No Offer Letters Yet
+                </h3>
+                <p className={`${themeStyles.textSecondary} mb-6`}>
+                  Start tracking your job offers by adding your first offer
+                  letter
+                </p>
+                <button
+                  onClick={() => openAddModal("offer")}
+                  className={`inline-flex items-center px-4 py-2 rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Your First Offer Letter
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {offers.map((offer) => (
+                <div
+                  key={offer.id}
+                  className={`rounded-xl border overflow-hidden ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all duration-300`}
+                >
+                  <div
+                    className={`h-2 ${
+                      offer.status === "final"
+                        ? "bg-gradient-to-r from-green-600 to-green-400"
+                        : "bg-gradient-to-r from-blue-600 to-blue-400"
+                    }`}
+                  />
+
+                  <div className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <h3
+                        className={`text-xl font-bold ${themeStyles.textPrimary} truncate flex-1 pr-2`}
+                      >
+                        {offer.companyName}
+                      </h3>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${
+                          offer.status === "final"
+                            ? themeStyles.statusFinalBg
+                            : themeStyles.statusOfferBg
+                        }`}
+                      >
+                        {offer.status === "final" ? "Final" : "Offer"}
+                      </span>
+                    </div>
+
+                    <div className="space-y-3 mb-6">
+                      <div
+                        className={`flex items-center justify-between py-2 border-b ${themeStyles.dividerBorder}`}
+                      >
+                        <span
+                          className={`text-sm ${themeStyles.textSecondary}`}
+                        >
+                          Package
+                        </span>
+                        <span
+                          className={`font-semibold ${themeStyles.textPrimary}`}
+                        >
+                          {offer.packageValue} LPA
+                        </span>
+                      </div>
+
+                      <div
+                        className={`flex items-center justify-between py-2 border-b ${themeStyles.dividerBorder}`}
+                      >
+                        <span
+                          className={`text-sm ${themeStyles.textSecondary}`}
+                        >
+                          Type
+                        </span>
+                        <span
+                          className={`font-medium ${themeStyles.textPrimary}`}
+                        >
+                          {offer.companyType}
+                        </span>
+                      </div>
+
+                      {offer.offerLetterFile && (
+                        <div className="flex items-center gap-2 text-sm pt-2">
+                          <div className="h-2 w-2 rounded-full bg-green-500" />
+                          <span
+                            className={`${themeStyles.offerLetterText} font-medium`}
+                          >
+                            Offer letter attached
+                          </span>
+                        </div>
+                      )}
+
+                      {offer.joiningLetterFile && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="h-2 w-2 rounded-full bg-green-500" />
+                          <span
+                            className={`${themeStyles.offerLetterText} font-medium`}
+                          >
+                            Joining letter attached
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleView(offer)}
+                          className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleEdit(offer)}
+                          className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
+                        >
+                          <Edit2 className="mr-2 h-4 w-4" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(offer.id)}
+                          className={`inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} text-red-600 hover:bg-red-600 hover:text-white transition-colors`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      {offer.status === "offer" && (
+                        <button
+                          onClick={() => handleConvertToFinal(offer)}
+                          className="w-full inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+                        >
+                          <ArrowRight className="mr-2 h-4 w-4" />
+                          Convert to Final Offer
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Modal */}
+        {showModal && (
+          <div
+            className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
+          >
+            <div
+              className={`w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder}`}
+            >
+              <div
+                className={`sticky top-0 ${themeStyles.modalHeader} ${themeStyles.modalHeaderBorder} border-b px-6 py-4 flex justify-between items-center`}
+              >
+                <h2 className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
+                  {viewMode
+                    ? `${
+                        modalType === "final"
+                          ? "Final Offer Letter"
+                          : "Offer Letter"
+                      } Details`
+                    : editingId
+                    ? `Edit ${
+                        modalType === "final"
+                          ? "Final Offer Letter"
+                          : "Offer Letter"
+                      }`
+                    : `Add ${
+                        modalType === "final"
+                          ? "Final Offer Letter"
+                          : "Offer Letter"
+                      }`}
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowModal(false);
+                    resetForm();
+                  }}
+                  className={`p-2 rounded-lg ${themeStyles.buttonHover} transition-colors`}
+                >
+                  <X className={`h-5 w-5 ${themeStyles.textPrimary}`} />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-120px)]">
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Upload your Joining Letter
+                  <label
+                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+                  >
+                    Company Name <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="companyName"
+                    value={formData.companyName}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Google, Microsoft, Meta"
+                    disabled={viewMode}
+                    required
+                    className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} disabled:cursor-not-allowed ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label
+                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+                  >
+                    Package Value (LPA) <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="packageValue"
+                    value={formData.packageValue}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 12.5"
+                    disabled={viewMode}
+                    required
+                    className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} disabled:cursor-not-allowed ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label
+                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+                  >
+                    Company Type <span className="text-red-600">*</span>
                   </label>
                   {viewMode ? (
-                    <div className="px-4 py-3 bg-gray-100 dark:bg-[var(--color-gray-800)] rounded-lg text-gray-900 dark:text-white">
-                      {formData.joiningLetterFile || "No file uploaded"}
+                    <div
+                      className={`px-4 py-3 ${themeStyles.emptyStateBg} rounded-lg ${themeStyles.textPrimary}`}
+                    >
+                      {formData.companyType || "Not specified"}
+                    </div>
+                  ) : (
+                    <CustomSelect
+                      value={formData.companyType}
+                      onChange={(value) =>
+                        setFormData((prev) => ({ ...prev, companyType: value }))
+                      }
+                      disabled={viewMode}
+                      options={[
+                        "Product",
+                        "Service",
+                        "Startup",
+                        "MNC",
+                        "Government",
+                      ]}
+                    />
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label
+                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+                  >
+                    Offer Letter
+                  </label>
+                  {viewMode ? (
+                    <div
+                      className={`px-4 py-3 ${themeStyles.emptyStateBg} rounded-lg ${themeStyles.textPrimary}`}
+                    >
+                      {formData.offerLetterFile || "No file uploaded"}
                     </div>
                   ) : (
                     <input
                       type="file"
-                      onChange={(e) => handleFileChange(e, "joiningLetterFile")}
+                      onChange={(e) => handleFileChange(e, "offerLetterFile")}
                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                      className="w-full px-4 py-3 bg-white dark:bg-[var(--color-gray-950)] border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[var(--color-brand-500)] focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--color-brand-500)] file:text-white hover:file:bg-[var(--color-brand-600)] dark:file:bg-[var(--color-brand-400)] dark:hover:file:bg-[var(--color-brand-500)] file:cursor-pointer cursor-pointer text-gray-900 dark:text-white transition-all"
+                      className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer cursor-pointer ${themeStyles.inputText} transition-all`}
                     />
                   )}
-                  {formData.joiningLetterFile && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                      Selected: {formData.joiningLetterFile}
+                  {formData.offerLetterFile && (
+                    <p className={`text-sm ${themeStyles.textSecondary} mt-2`}>
+                      Selected: {formData.offerLetterFile}
                     </p>
                   )}
                 </div>
-              )}
-              {!viewMode && (
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    onClick={() => {
-                      setShowModal(false);
-                      resetForm();
-                    }}
-                    variant="outline"
-                    className="flex-1 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleSubmit}
-                    className="flex-1 bg-gradient-to-r from-[var(--color-brand-500)] to-[var(--color-brand-600)] hover:from-[var(--color-brand-600)] hover:to-[var(--color-brand-700)] text-white shadow-md hover:shadow-lg transition-all"
-                  >
-                    {editingId ? "Update" : "Add"}{" "}
-                    {modalType === "final" ? "Final Offer" : "Offer Letter"}
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
+
+                {modalType === "final" && (
+                  <div className="space-y-2">
+                    <label
+                      className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+                    >
+                      Joining Letter
+                    </label>
+                    {viewMode ? (
+                      <div
+                        className={`px-4 py-3 ${themeStyles.emptyStateBg} rounded-lg ${themeStyles.textPrimary}`}
+                      >
+                        {formData.joiningLetterFile || "No file uploaded"}
+                      </div>
+                    ) : (
+                      <input
+                        type="file"
+                        onChange={(e) =>
+                          handleFileChange(e, "joiningLetterFile")
+                        }
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                        className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer cursor-pointer ${themeStyles.inputText} transition-all`}
+                      />
+                    )}
+                    {formData.joiningLetterFile && (
+                      <p
+                        className={`text-sm ${themeStyles.textSecondary} mt-2`}
+                      >
+                        Selected: {formData.joiningLetterFile}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {!viewMode && (
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      onClick={() => {
+                        setShowModal(false);
+                        resetForm();
+                      }}
+                      className={`flex-1 px-4 py-2 rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSubmit}
+                      className="flex-1 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                    >
+                      {editingId ? "Update" : "Add"}{" "}
+                      {modalType === "final" ? "Final Offer" : "Offer Letter"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default OfferLetters;
+export default OfferLetterManager;

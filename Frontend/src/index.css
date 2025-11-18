@@ -1,49 +1,99 @@
+@import url("https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 
 @layer base {
   :root {
-    --bg: #ffffff;
-    --text-primary: #101828;
-    --text-secondary: #667085;
-    --surface: #f2f4f7;
-    --brand: #465fff;
-    --brand-hover: #3641f5;
-    --info: #0ba5ec;
-    --success: #32d583;
-    --error: #f04438;
+    /* Light Theme Colors */
+    --color-white: #ffffff;
+    --color-black: #101828;
+    --color-gray-50: #f9fafb;
+    --color-gray-100: #f2f4f7;
+    --color-gray-400: #98a2b3;
+    --color-gray-500: #667085;
+    --color-gray-800: #1d2939;
+    --color-gray-900: #101828;
+    --color-gray-950: #0c111d;
+    --color-brand-400: #7592ff;
+    --color-brand-500: #465fff;
+    --color-brand-600: #1d41f5;
+    --color-blue-light-300: #84caff;
+    --color-blue-light-500: #0ba5ec;
+    --color-success-400: #16c784;
+    --color-success-500: #12b268;
+    --color-error-400: #f97066;
+    --color-error-500: #f04438;
+
+    /* Light theme variables */
+    --bg: var(--color-white);
+    --text-primary: var(--color-gray-900);
+    --text-secondary: var(--color-gray-500);
+    --surface: var(--color-gray-100);
+    --border: #d0d5dd;
+    --brand: var(--color-brand-500);
+    --brand-hover: var(--color-brand-600);
+    --info: var(--color-blue-light-500);
+    --success: var(--color-success-500);
+    --error: var(--color-error-500);
   }
 
   .dark {
-    --bg: #0c111d;
-    --text-primary: #f9fafb;
-    --text-secondary: #98a2b3;
-    --surface: #1d2939;
-    --brand: #7592ff;
-    --brand-hover: #465fff;
-    --info: #36bffa;
-    --success: #6ce9a6;
-    --error: #f97066;
+    /* Dark theme variables */
+    --bg: var(--color-gray-950);
+    --text-primary: var(--color-gray-50);
+    --text-secondary: var(--color-gray-400);
+    --surface: var(--color-gray-800);
+    --border: #344054;
+    --brand: var(--color-brand-400);
+    --brand-hover: var(--color-brand-500);
+    --info: var(--color-blue-light-300);
+    --success: var(--color-success-400);
+    --error: var(--color-error-400);
   }
 
   body {
     background-color: var(--bg);
     color: var(--text-primary);
+    font-family: "Urbanist", sans-serif;
   }
 }
 
-:root {
-  --font-sans: "Urbanist", sans-serif;
-  --letter-spacing-tight: -0.01em;
-  --letter-spacing-normal: 0;
+@layer utilities {
+  .bg-surface {
+    background-color: var(--surface);
+  }
+
+  .text-primary {
+    color: var(--text-primary);
+  }
+
+  .text-secondary {
+    color: var(--text-secondary);
+  }
+
+  .border-default {
+    border-color: var(--border);
+  }
 }
+
+/* Global styles */
 body {
   font-feature-settings: "liga", "kern";
-  letter-spacing: var(--letter-spacing-normal);
 }
+
 h1,
 h2,
 h3,
-h4 {
-  letter-spacing: var(--letter-spacing-tight);
+h4,
+h5,
+h6 {
+  letter-spacing: -0.01em;
   font-weight: 600;
+}
+
+/* Responsive font size */
+@media (min-width: 768px) {
+  body {
+    font-size: 0.9375rem;
+    line-height: 1.5rem;
+  }
 }

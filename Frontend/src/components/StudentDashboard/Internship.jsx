@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   Plus,
   Eye,
@@ -9,71 +9,17 @@ import {
   Calendar,
   TrendingUp,
   Clock,
+  Moon,
+  Sun,
 } from "lucide-react";
-
-// Custom Button Component
-const Button = ({
-  children,
-  onClick,
-  variant = "default",
-  size = "default",
-  className = "",
-  disabled = false,
-}) => {
-  const baseStyles =
-    "inline-flex items-center justify-center rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2";
-
-  const variants = {
-    default: "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500",
-    outline:
-      "border-2 border-slate-300 dark:border-slate-600 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-50",
-    ghost:
-      "bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-50",
-  };
-
-  const sizes = {
-    default: "px-4 py-2 text-sm",
-    sm: "px-3 py-1.5 text-sm",
-    icon: "p-2",
-  };
-
-  const disabledStyles = disabled
-    ? "opacity-50 cursor-not-allowed"
-    : "cursor-pointer";
-
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${disabledStyles} ${className}`}
-    >
-      {children}
-    </button>
-  );
-};
-
-// Custom Card Components
-const Card = ({ children, className = "" }) => {
-  return <div className={`rounded-xl border ${className}`}>{children}</div>;
-};
-
-const CardContent = ({ children, className = "" }) => {
-  return <div className={className}>{children}</div>;
-};
-
-// Custom Badge Component
-const Badge = ({ children, variant = "default", className = "" }) => {
-  const baseStyles =
-    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
-
-  return <span className={`${baseStyles} ${className}`}>{children}</span>;
-};
+import { useTheme } from "../../Utils/context/ThemeContext";
 
 const InternshipManager = () => {
   const [internships, setInternships] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [viewMode, setViewMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const { theme, toggleTheme } = useTheme();
   const [formData, setFormData] = useState({
     companyName: "",
     stipend: "",
@@ -82,7 +28,6 @@ const InternshipManager = () => {
     offerLetter: null,
   });
 
-  // Calculate summary statistics
   const stats = useMemo(() => {
     const total = internships.length;
     const today = new Date();
@@ -207,10 +152,100 @@ const InternshipManager = () => {
     return "active";
   };
 
+  // Light Theme Function
+  const getLightTheme = () => ({
+    background: "bg-gradient-to-br from-slate-50 to-slate-100",
+    cardBg: "bg-white",
+    cardBorder: "border-slate-200",
+    cardShadow: "shadow-md",
+    cardHoverShadow: "hover:shadow-xl",
+    textPrimary: "text-slate-900",
+    textSecondary: "text-slate-600",
+    textTertiary: "text-slate-400",
+    inputBg: "bg-white",
+    inputBorder: "border-slate-300",
+    inputDisabled: "disabled:bg-slate-100",
+    inputText: "text-slate-900",
+    inputPlaceholder: "placeholder:text-slate-400",
+    modalOverlay: "bg-black/60",
+    modalHeader: "bg-slate-100",
+    modalHeaderBorder: "border-slate-200",
+    emptyStateBg: "bg-slate-100",
+    emptyStateIcon: "text-slate-400",
+    statCard1Gradient: "from-white to-blue-50",
+    statCard2Gradient: "from-white to-green-50",
+    statCard3Gradient: "from-white to-purple-50",
+    statCard4Gradient: "from-white to-amber-50",
+    statIcon1Bg: "bg-blue-100",
+    statIcon1Text: "text-blue-600",
+    statIcon2Bg: "bg-green-100",
+    statIcon2Text: "text-green-600",
+    statIcon3Bg: "bg-purple-100",
+    statIcon3Text: "text-purple-600",
+    statIcon4Bg: "bg-amber-100",
+    statIcon4Text: "text-amber-600",
+    dividerBorder: "border-slate-200",
+    buttonBg: "bg-white",
+    buttonBorder: "border-slate-300",
+    buttonHover: "hover:bg-slate-50",
+    calendarIcon: "text-slate-500",
+    offerLetterText: "text-green-600",
+    statusActiveBg: "bg-green-500",
+    statusUpcomingBg: "bg-blue-500",
+    statusCompletedBg: "bg-slate-200",
+    statusCompletedText: "text-slate-700",
+  });
+
+  // Dark Theme Function
+  const getDarkTheme = () => ({
+    background: "bg-gradient-to-br from-slate-950 to-slate-900",
+    cardBg: "bg-slate-900",
+    cardBorder: "border-slate-700",
+    cardShadow: "shadow-lg shadow-black/20",
+    cardHoverShadow: "hover:shadow-2xl hover:shadow-black/40",
+    textPrimary: "text-slate-50",
+    textSecondary: "text-slate-400",
+    textTertiary: "text-slate-500",
+    inputBg: "bg-slate-950",
+    inputBorder: "border-slate-600",
+    inputDisabled: "disabled:bg-slate-800",
+    inputText: "text-slate-50",
+    inputPlaceholder: "placeholder:text-slate-500",
+    modalOverlay: "bg-black/80",
+    modalHeader: "bg-slate-800",
+    modalHeaderBorder: "border-slate-700",
+    emptyStateBg: "bg-slate-800",
+    emptyStateIcon: "text-slate-500",
+    statCard1Gradient: "from-slate-800 to-blue-900/30",
+    statCard2Gradient: "from-slate-800 to-green-900/30",
+    statCard3Gradient: "from-slate-800 to-purple-900/30",
+    statCard4Gradient: "from-slate-800 to-amber-900/30",
+    statIcon1Bg: "bg-blue-900/30",
+    statIcon1Text: "text-blue-400",
+    statIcon2Bg: "bg-green-900/30",
+    statIcon2Text: "text-green-400",
+    statIcon3Bg: "bg-purple-900/30",
+    statIcon3Text: "text-purple-400",
+    statIcon4Bg: "bg-amber-900/30",
+    statIcon4Text: "text-amber-400",
+    dividerBorder: "border-slate-700",
+    buttonBg: "bg-slate-700",
+    buttonBorder: "border-slate-600",
+    buttonHover: "hover:bg-slate-600",
+    calendarIcon: "text-slate-400",
+    offerLetterText: "text-green-400",
+    statusActiveBg: "bg-green-600",
+    statusUpcomingBg: "bg-blue-600",
+    statusCompletedBg: "bg-slate-700",
+    statusCompletedText: "text-slate-300",
+  });
+
+  const themeStyles = theme === "dark" ? getDarkTheme() : getLightTheme();
+
   return (
     <div
       style={{ fontFamily: "Urbanist, sans-serif" }}
-      className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900"
+      className={`min-h-screen ${themeStyles.background}`}
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap');
@@ -219,137 +254,185 @@ const InternshipManager = () => {
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+      <div className="ax-w-[1400px] mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
-              Internship Dashboard
+            <h1 className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
+              Internship
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-1">
-              Manage and track your internship experiences
-            </p>
           </div>
-          <Button
-            onClick={() => {
-              resetForm();
-              setShowModal(true);
-            }}
-            className="shadow-lg"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add Internship
-          </Button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                resetForm();
+                setShowModal(true);
+              }}
+              className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-lg"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Internship
+            </button>
+          </div>
         </div>
 
         {/* Summary Statistics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-slate-800 border-slate-200 dark:border-slate-700 shadow-md hover:shadow-lg transition-all">
-            <CardContent className="p-6">
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard1Gradient} transition-all`}
+          >
+            <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  <p
+                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
+                  >
                     Total Internships
                   </p>
-                  <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mt-2">
+                  <h3
+                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
+                  >
                     {stats.total}
                   </h3>
                 </div>
-                <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                  <Briefcase className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <div
+                  className={`h-12 w-12 ${themeStyles.statIcon1Bg} rounded-full flex items-center justify-center`}
+                >
+                  <Briefcase
+                    className={`h-6 w-6 ${themeStyles.statIcon1Text}`}
+                  />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="bg-gradient-to-br from-white to-green-50 dark:from-slate-900 dark:to-slate-800 border-slate-200 dark:border-slate-700 shadow-md hover:shadow-lg transition-all">
-            <CardContent className="p-6">
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard2Gradient} transition-all`}
+          >
+            <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  <p
+                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
+                  >
                     Active Now
                   </p>
-                  <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mt-2">
+                  <h3
+                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
+                  >
                     {stats.active}
                   </h3>
                 </div>
-                <div className="h-12 w-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <div
+                  className={`h-12 w-12 ${themeStyles.statIcon2Bg} rounded-full flex items-center justify-center`}
+                >
+                  <TrendingUp
+                    className={`h-6 w-6 ${themeStyles.statIcon2Text}`}
+                  />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="bg-gradient-to-br from-white to-purple-50 dark:from-slate-900 dark:to-slate-800 border-slate-200 dark:border-slate-700 shadow-md hover:shadow-lg transition-all">
-            <CardContent className="p-6">
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard3Gradient} transition-all`}
+          >
+            <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  <p
+                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
+                  >
                     Total Stipend
                   </p>
-                  <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mt-2">
+                  <h3
+                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
+                  >
                     ₹{stats.totalStipend.toLocaleString()}
                   </h3>
                 </div>
-                <div className="h-12 w-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                <div
+                  className={`h-12 w-12 ${themeStyles.statIcon3Bg} rounded-full flex items-center justify-center`}
+                >
+                  <TrendingUp
+                    className={`h-6 w-6 ${themeStyles.statIcon3Text}`}
+                  />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="bg-gradient-to-br from-white to-amber-50 dark:from-slate-900 dark:to-slate-800 border-slate-200 dark:border-slate-700 shadow-md hover:shadow-lg transition-all">
-            <CardContent className="p-6">
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard4Gradient} transition-all`}
+          >
+            <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  <p
+                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
+                  >
                     Avg Duration
                   </p>
-                  <h3 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mt-2">
+                  <h3
+                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
+                  >
                     {stats.avgDuration.toFixed(1)}
-                    <span className="text-lg text-slate-600 dark:text-slate-400 ml-1">
+                    <span
+                      className={`text-lg ${themeStyles.textSecondary} ml-1`}
+                    >
                       mo
                     </span>
                   </h3>
                 </div>
-                <div className="h-12 w-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
-                  <Clock className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                <div
+                  className={`h-12 w-12 ${themeStyles.statIcon4Bg} rounded-full flex items-center justify-center`}
+                >
+                  <Clock className={`h-6 w-6 ${themeStyles.statIcon4Text}`} />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Internship Cards */}
         <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-50 mb-4">
+          <h2
+            className={`text-xl font-semibold ${themeStyles.textPrimary} mb-4`}
+          >
             Your Internships
           </h2>
           {internships.length === 0 ? (
-            <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 shadow-sm">
-              <CardContent className="p-12 text-center">
-                <div className="mx-auto w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                  <Briefcase className="h-12 w-12 text-slate-400 dark:text-slate-500" />
+            <div
+              className={`rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} shadow-sm`}
+            >
+              <div className="p-12 text-center">
+                <div
+                  className={`mx-auto w-24 h-24 ${themeStyles.emptyStateBg} rounded-full flex items-center justify-center mb-4`}
+                >
+                  <Briefcase
+                    className={`h-12 w-12 ${themeStyles.emptyStateIcon}`}
+                  />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-50 mb-2">
+                <h3
+                  className={`text-xl font-semibold ${themeStyles.textPrimary} mb-2`}
+                >
                   No Internships Yet
                 </h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-6">
+                <p className={`${themeStyles.textSecondary} mb-6`}>
                   Start building your portfolio by adding your first internship
                 </p>
-                <Button
+                <button
                   onClick={() => {
                     resetForm();
                     setShowModal(true);
                   }}
-                  variant="outline"
-                  className="border-slate-300 dark:border-slate-600"
+                  className={`inline-flex items-center px-4 py-2 rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Your First Internship
-                </Button>
-              </CardContent>
-            </Card>
+                </button>
+              </div>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {internships.map((internship) => {
@@ -358,64 +441,73 @@ const InternshipManager = () => {
                   internship.endDate
                 );
                 return (
-                  <Card
+                  <div
                     key={internship.id}
-                    className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                    className={`rounded-xl border overflow-hidden ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all duration-300`}
                   >
                     <div className="h-2 bg-gradient-to-r from-blue-600 to-blue-400" />
 
-                    <CardContent className="p-6">
+                    <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 truncate flex-1 pr-2">
+                        <h3
+                          className={`text-xl font-bold ${themeStyles.textPrimary} truncate flex-1 pr-2`}
+                        >
                           {internship.companyName}
                         </h3>
-                        <Badge
-                          variant={
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${
                             status === "active"
-                              ? "default"
+                              ? themeStyles.statusActiveBg
                               : status === "upcoming"
-                              ? "secondary"
-                              : "outline"
-                          }
-                          className={
-                            status === "active"
-                              ? "bg-green-500 text-white dark:bg-green-600"
-                              : status === "upcoming"
-                              ? "bg-blue-500 text-white dark:bg-blue-600"
-                              : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
-                          }
+                              ? themeStyles.statusUpcomingBg
+                              : `${themeStyles.statusCompletedBg} ${themeStyles.statusCompletedText}`
+                          }`}
                         >
                           {status}
-                        </Badge>
+                        </span>
                       </div>
 
                       <div className="space-y-3 mb-6">
-                        <div className="flex items-center justify-between py-2 border-b border-slate-200 dark:border-slate-700">
-                          <span className="text-sm text-slate-600 dark:text-slate-400">
+                        <div
+                          className={`flex items-center justify-between py-2 border-b ${themeStyles.dividerBorder}`}
+                        >
+                          <span
+                            className={`text-sm ${themeStyles.textSecondary}`}
+                          >
                             Stipend
                           </span>
-                          <span className="font-semibold text-slate-900 dark:text-slate-50">
+                          <span
+                            className={`font-semibold ${themeStyles.textPrimary}`}
+                          >
                             ₹{parseFloat(internship.stipend).toLocaleString()}
                             /mo
                           </span>
                         </div>
 
                         <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                          <span className="text-slate-600 dark:text-slate-400">
+                          <Calendar
+                            className={`h-4 w-4 ${themeStyles.calendarIcon}`}
+                          />
+                          <span className={themeStyles.textSecondary}>
                             Start:
                           </span>
-                          <span className="font-medium text-slate-900 dark:text-slate-50">
+                          <span
+                            className={`font-medium ${themeStyles.textPrimary}`}
+                          >
                             {formatDate(internship.startDate)}
                           </span>
                         </div>
 
                         <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                          <span className="text-slate-600 dark:text-slate-400">
+                          <Calendar
+                            className={`h-4 w-4 ${themeStyles.calendarIcon}`}
+                          />
+                          <span className={themeStyles.textSecondary}>
                             End:
                           </span>
-                          <span className="font-medium text-slate-900 dark:text-slate-50">
+                          <span
+                            className={`font-medium ${themeStyles.textPrimary}`}
+                          >
                             {formatDate(internship.endDate)}
                           </span>
                         </div>
@@ -423,7 +515,9 @@ const InternshipManager = () => {
                         {internship.offerLetter && (
                           <div className="flex items-center gap-2 text-sm pt-2">
                             <div className="h-2 w-2 rounded-full bg-green-500" />
-                            <span className="text-green-600 dark:text-green-400 font-medium">
+                            <span
+                              className={`${themeStyles.offerLetterText} font-medium`}
+                            >
                               Offer letter attached
                             </span>
                           </div>
@@ -431,35 +525,29 @@ const InternshipManager = () => {
                       </div>
 
                       <div className="flex gap-2">
-                        <Button
+                        <button
                           onClick={() => handleView(internship)}
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 border-slate-300 dark:border-slate-600"
+                          className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
                         >
                           <Eye className="mr-2 h-4 w-4" />
                           View
-                        </Button>
-                        <Button
+                        </button>
+                        <button
                           onClick={() => handleEdit(internship)}
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 border-slate-300 dark:border-slate-600"
+                          className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
                         >
                           <Edit2 className="mr-2 h-4 w-4" />
                           Edit
-                        </Button>
-                        <Button
+                        </button>
+                        <button
                           onClick={() => handleDelete(internship.id)}
-                          variant="outline"
-                          size="sm"
-                          className="text-red-600 hover:bg-red-600 hover:text-white border-slate-300 dark:border-slate-600"
+                          className={`inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} text-red-600 hover:bg-red-600 hover:text-white transition-colors`}
                         >
                           <Trash2 className="h-4 w-4" />
-                        </Button>
+                        </button>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -468,31 +556,38 @@ const InternshipManager = () => {
 
         {/* Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <Card className="w-full max-w-2xl max-h-[90vh] overflow-hidden bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700">
-              <div className="sticky top-0 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
+          <div
+            className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
+          >
+            <div
+              className={`w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder}`}
+            >
+              <div
+                className={`sticky top-0 ${themeStyles.modalHeader} ${themeStyles.modalHeaderBorder} border-b px-6 py-4 flex justify-between items-center`}
+              >
+                <h2 className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
                   {viewMode
                     ? "Internship Details"
                     : editingId
                     ? "Edit Internship"
                     : "Add New Internship"}
                 </h2>
-                <Button
+                <button
                   onClick={() => {
                     setShowModal(false);
                     resetForm();
                   }}
-                  variant="ghost"
-                  size="icon"
+                  className={`p-2 rounded-lg ${themeStyles.buttonHover} transition-colors`}
                 >
-                  <X className="h-5 w-5" />
-                </Button>
+                  <X className={`h-5 w-5 ${themeStyles.textPrimary}`} />
+                </button>
               </div>
 
-              <CardContent className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-120px)]">
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-900 dark:text-slate-50">
+                  <label
+                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+                  >
                     Company Name <span className="text-red-600">*</span>
                   </label>
                   <input
@@ -503,12 +598,14 @@ const InternshipManager = () => {
                     placeholder="e.g., Google, Microsoft, Meta"
                     disabled={viewMode}
                     required
-                    className="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:cursor-not-allowed text-slate-900 dark:text-slate-50 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all"
+                    className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} disabled:cursor-not-allowed ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-900 dark:text-slate-50">
+                  <label
+                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+                  >
                     Monthly Stipend (₹) <span className="text-red-600">*</span>
                   </label>
                   <input
@@ -519,13 +616,15 @@ const InternshipManager = () => {
                     placeholder="e.g., 25000"
                     disabled={viewMode}
                     required
-                    className="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:cursor-not-allowed text-slate-900 dark:text-slate-50 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all"
+                    className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} disabled:cursor-not-allowed ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-900 dark:text-slate-50">
+                    <label
+                      className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+                    >
                       Start Date <span className="text-red-600">*</span>
                     </label>
                     <input
@@ -535,12 +634,14 @@ const InternshipManager = () => {
                       onChange={handleInputChange}
                       disabled={viewMode}
                       required
-                      className="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:cursor-not-allowed text-slate-900 dark:text-slate-50 transition-all"
+                      className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} disabled:cursor-not-allowed ${themeStyles.inputText} transition-all`}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-900 dark:text-slate-50">
+                    <label
+                      className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+                    >
                       End Date <span className="text-red-600">*</span>
                     </label>
                     <input
@@ -550,17 +651,21 @@ const InternshipManager = () => {
                       onChange={handleInputChange}
                       disabled={viewMode}
                       required
-                      className="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:cursor-not-allowed text-slate-900 dark:text-slate-50 transition-all"
+                      className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} disabled:cursor-not-allowed ${themeStyles.inputText} transition-all`}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-900 dark:text-slate-50">
+                  <label
+                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+                  >
                     Offer Letter
                   </label>
                   {viewMode ? (
-                    <div className="px-4 py-3 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-900 dark:text-slate-50">
+                    <div
+                      className={`px-4 py-3 ${themeStyles.emptyStateBg} rounded-lg ${themeStyles.textPrimary}`}
+                    >
                       {formData.offerLetter || "No file uploaded"}
                     </div>
                   ) : (
@@ -568,11 +673,11 @@ const InternshipManager = () => {
                       type="file"
                       onChange={handleFileChange}
                       accept=".pdf,.doc,.docx"
-                      className="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer cursor-pointer text-slate-900 dark:text-slate-50 transition-all"
+                      className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer cursor-pointer ${themeStyles.inputText} transition-all`}
                     />
                   )}
                   {formData.offerLetter && (
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                    <p className={`text-sm ${themeStyles.textSecondary} mt-2`}>
                       Selected: {formData.offerLetter}
                     </p>
                   )}
@@ -580,26 +685,25 @@ const InternshipManager = () => {
 
                 {!viewMode && (
                   <div className="flex gap-3 pt-4">
-                    <Button
+                    <button
                       onClick={() => {
                         setShowModal(false);
                         resetForm();
                       }}
-                      variant="outline"
-                      className="flex-1 border-slate-300 dark:border-slate-600"
+                      className={`flex-1 px-4 py-2 rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
                     >
                       Cancel
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                       onClick={handleSubmit}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                      className="flex-1 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
                     >
                       {editingId ? "Update Internship" : "Add Internship"}
-                    </Button>
+                    </button>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         )}
       </div>

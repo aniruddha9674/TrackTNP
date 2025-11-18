@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Plus,
   Eye,
@@ -9,108 +9,12 @@ import {
   Users,
   Code,
   TrendingUp,
+  ArrowLeft,
 } from "lucide-react";
-
-// Add Urbanist font
-const style = document.createElement("style");
-style.textContent = `
-  @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap');
-  * {
-    font-family: 'Urbanist', sans-serif;
-  }
-`;
-document.head.appendChild(style);
-
-// Custom Button Component
-const Button = ({
-  children,
-  onClick,
-  variant = "default",
-  size = "default",
-  className = "",
-  ...props
-}) => {
-  const baseStyles =
-    "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
-
-  const variants = {
-    default:
-      "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-md hover:shadow-lg",
-    outline:
-      "border border-slate-300 bg-white text-slate-900 hover:bg-slate-50",
-    ghost: "text-slate-700 hover:bg-slate-100",
-  };
-
-  const sizes = {
-    default: "px-4 py-2",
-    sm: "px-3 py-1.5 text-sm",
-    icon: "h-9 w-9",
-  };
-
-  return (
-    <button
-      onClick={onClick}
-      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-};
-
-// Custom Card Component
-const Card = ({ children, className = "", ...props }) => {
-  return (
-    <div
-      className={`rounded-lg border bg-white shadow-sm ${className}`}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-};
-
-// Custom CardContent Component
-const CardContent = ({ children, className = "", ...props }) => {
-  return (
-    <div className={className} {...props}>
-      {children}
-    </div>
-  );
-};
-
-// Custom Badge Component
-const Badge = ({ children, variant = "default", className = "", ...props }) => {
-  const baseStyles =
-    "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors";
-
-  const variants = {
-    default: "bg-slate-900 text-slate-50",
-    secondary: "bg-slate-100 text-slate-900",
-    outline: "border border-slate-300 bg-transparent text-slate-900",
-  };
-
-  return (
-    <span
-      className={`${baseStyles} ${variants[variant]} ${className}`}
-      {...props}
-    >
-      {children}
-    </span>
-  );
-};
-
-// Custom Textarea Component
-const Textarea = ({ className = "", ...props }) => {
-  return (
-    <textarea
-      className={`flex min-h-[80px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-100 ${className}`}
-      {...props}
-    />
-  );
-};
+import { useTheme } from "../../Utils/context/ThemeContext";
 
 const ProjectManager = () => {
+  const { theme } = useTheme();
   const [projects, setProjects] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [viewMode, setViewMode] = useState(false);
@@ -122,23 +26,114 @@ const ProjectManager = () => {
     description: "",
   });
 
+  // Light Theme Function
+  const getLightTheme = () => ({
+    background: "bg-gradient-to-br from-gray-50 to-white",
+    cardBg: "bg-white",
+    cardBorder: "border-slate-200",
+    cardShadow: "shadow-md",
+    cardHoverShadow: "hover:shadow-xl",
+    textPrimary: "text-gray-900",
+    textSecondary: "text-gray-600",
+    textTertiary: "text-gray-400",
+    inputBg: "bg-white",
+    inputBorder: "border-gray-300",
+    inputDisabled: "disabled:bg-gray-100",
+    inputText: "text-gray-900",
+    inputPlaceholder: "placeholder:text-gray-400",
+    modalOverlay: "bg-black/60",
+    modalHeader: "bg-slate-100",
+    emptyStateBg: "bg-white",
+    emptyStateIcon: "text-gray-400",
+    statCard1Gradient: "from-white to-blue-50",
+    statCard2Gradient: "from-white to-green-50",
+    statCard3Gradient: "from-white to-purple-50",
+    statCard4Gradient: "from-white to-amber-50",
+    statIcon1Bg: "bg-blue-100",
+    statIcon1Text: "text-blue-600",
+    statIcon2Bg: "bg-green-100",
+    statIcon2Text: "text-green-600",
+    statIcon3Bg: "bg-purple-100",
+    statIcon3Text: "text-purple-600",
+    statIcon4Bg: "bg-amber-100",
+    statIcon4Text: "text-amber-600",
+    dividerBorder: "border-gray-200",
+    buttonBg: "bg-white",
+    buttonBorder: "border-gray-300",
+    buttonHover: "hover:bg-gray-50",
+    projectCardBg: "bg-gray-100",
+    projectCardBorder: "border-gray-200",
+    projectCardHover: "hover:border-gray-300",
+    iconGradient: "from-blue-50 to-blue-100",
+    badgeBg: "bg-gray-100",
+    detailsCardBg: "bg-gray-50",
+    techBadgeBg: "bg-white",
+    techBadgeBorder: "border-gray-300",
+    techBadgeText: "text-gray-900",
+  });
+
+  // Dark Theme Function
+  const getDarkTheme = () => ({
+    background: "bg-gradient-to-br from-slate-950 to-slate-900",
+    cardBg: "bg-gray-900",
+    cardBorder: "border-slate-700",
+    cardShadow: "shadow-lg shadow-black/20",
+    cardHoverShadow: "hover:shadow-2xl hover:shadow-black/40",
+    textPrimary: "text-gray-50",
+    textSecondary: "text-gray-400",
+    textTertiary: "text-gray-500",
+    inputBg: "bg-gray-950",
+    inputBorder: "border-gray-700",
+    inputDisabled: "disabled:bg-gray-800",
+    inputText: "text-gray-50",
+    inputPlaceholder: "placeholder:text-gray-500",
+    modalOverlay: "bg-black/80",
+    modalHeader: "border-slate-200",
+    modalHeaderBorder: "border-slate-700",
+    emptyStateBg: "bg-slate-900",
+    emptyStateIcon: "text-gray-500",
+    statCard1Gradient: "from-gray-800 to-blue-900/30",
+    statCard2Gradient: "from-gray-800 to-green-900/30",
+    statCard3Gradient: "from-gray-800 to-purple-900/30",
+    statCard4Gradient: "from-gray-800 to-amber-900/30",
+    statIcon1Bg: "bg-blue-900/30",
+    statIcon1Text: "text-blue-400",
+    statIcon2Bg: "bg-green-900/30",
+    statIcon2Text: "text-green-400",
+    statIcon3Bg: "bg-purple-900/30",
+    statIcon3Text: "text-purple-400",
+    statIcon4Bg: "bg-amber-900/30",
+    statIcon4Text: "text-amber-400",
+    dividerBorder: "border-gray-700",
+    buttonBg: "bg-gray-800",
+    buttonBorder: "border-gray-700",
+    buttonHover: "hover:bg-gray-700",
+    projectCardBg: "bg-gray-800",
+    projectCardBorder: "border-gray-700",
+    projectCardHover: "hover:border-gray-600",
+    iconGradient: "from-blue-900/30 to-blue-800/30",
+    badgeBg: "bg-gray-800",
+    detailsCardBg: "bg-gray-800",
+    techBadgeBg: "bg-gray-950",
+    techBadgeBorder: "border-gray-700",
+    techBadgeText: "text-gray-100",
+  });
+
+  const themeStyles = theme === "dark" ? getDarkTheme() : getLightTheme();
+
   // Calculate summary statistics
   const stats = useMemo(() => {
     const total = projects.length;
-
     const totalMembers = projects.reduce(
       (sum, project) => sum + (parseInt(project.groupMembers) || 0),
       0
     );
-
     const allTechs = projects.flatMap((p) =>
       p.technologies.split(",").map((t) => t.trim().toLowerCase())
     );
     const uniqueTechs = new Set(allTechs).size;
-
     const avgTeamSize =
       projects.length > 0 ? totalMembers / projects.length : 0;
-
     return { total, totalMembers, uniqueTechs, avgTeamSize };
   }, [projects]);
 
@@ -172,7 +167,6 @@ const ProjectManager = () => {
       };
       setProjects((prev) => [...prev, newProject]);
     }
-
     setShowModal(false);
     resetForm();
   };
@@ -214,228 +208,229 @@ const ProjectManager = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <div className={`min-h-screen ${themeStyles.background} p-6`}>
+      <div className="max-w-[1400px] mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">
-              Project Dashboard
+            <h1 className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
+              Projects
             </h1>
-            <p className="text-slate-600 mt-1">
-              Manage and showcase your project portfolio
-            </p>
           </div>
-          <Button
+          <button
             onClick={() => {
               resetForm();
               setShowModal(true);
             }}
-            className="shadow-lg"
+            className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium transition-all shadow-lg"
           >
             <Plus className="mr-2 h-4 w-4" />
             Add Project
-          </Button>
+          </button>
         </div>
 
         {/* Summary Statistics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-gradient-to-br from-white to-blue-50 border-slate-200 shadow-md hover:shadow-lg transition-all">
-            <CardContent className="p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {[
+            {
+              icon: FolderGit2,
+              label: "Total Projects",
+              value: stats.total,
+              subtitle: "in portfolio",
+              bgColor: themeStyles.statCard1Gradient,
+              borderColor: themeStyles.dividerBorder,
+              iconBg: themeStyles.statIcon1Bg,
+              iconColor: themeStyles.statIcon1Text,
+            },
+            {
+              icon: Users,
+              label: "Team Members",
+              value: stats.totalMembers,
+              subtitle: "collaborators",
+              bgColor: themeStyles.statCard2Gradient,
+              borderColor: themeStyles.dividerBorder,
+              iconBg: themeStyles.statIcon2Bg,
+              iconColor: themeStyles.statIcon2Text,
+            },
+            {
+              icon: Code,
+              label: "Technologies",
+              value: stats.uniqueTechs,
+              subtitle: "unique techs",
+              bgColor: themeStyles.statCard3Gradient,
+              borderColor: themeStyles.dividerBorder,
+              iconBg: themeStyles.statIcon3Bg,
+              iconColor: themeStyles.statIcon3Text,
+            },
+            {
+              icon: TrendingUp,
+              label: "Avg Team Size",
+              value: stats.avgTeamSize.toFixed(1),
+              subtitle: "members per project",
+              bgColor: themeStyles.statCard4Gradient,
+              borderColor: themeStyles.dividerBorder,
+              iconBg: themeStyles.statIcon4Bg,
+              iconColor: themeStyles.statIcon4Text,
+            },
+          ].map((stat, idx) => (
+            <div
+              key={idx}
+              className={`rounded-2xl border ${stat.borderColor} p-6 shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm bg-gradient-to-br ${stat.bgColor}`}
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">
-                    Total Projects
+                  <p
+                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
+                  >
+                    {stat.label}
                   </p>
-                  <h3 className="text-3xl font-bold text-slate-900 mt-2">
-                    {stats.total}
+                  <h3
+                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
+                  >
+                    {stat.value}
                   </h3>
+                  <p className={`text-sm ${themeStyles.textTertiary} mt-1`}>
+                    {stat.subtitle}
+                  </p>
                 </div>
-                <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <FolderGit2 className="h-6 w-6 text-blue-600" />
+                <div
+                  className={`h-12 w-12 ${stat.iconBg} rounded-full flex items-center justify-center flex-shrink-0`}
+                >
+                  <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-white to-green-50 border-slate-200 shadow-md hover:shadow-lg transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">
-                    Team Members
-                  </p>
-                  <h3 className="text-3xl font-bold text-slate-900 mt-2">
-                    {stats.totalMembers}
-                  </h3>
-                </div>
-                <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <Users className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-white to-purple-50 border-slate-200 shadow-md hover:shadow-lg transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">
-                    Technologies
-                  </p>
-                  <h3 className="text-3xl font-bold text-slate-900 mt-2">
-                    {stats.uniqueTechs}
-                  </h3>
-                </div>
-                <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <Code className="h-6 w-6 text-purple-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-white to-amber-50 border-slate-200 shadow-md hover:shadow-lg transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">
-                    Avg Team Size
-                  </p>
-                  <h3 className="text-3xl font-bold text-slate-900 mt-2">
-                    {stats.avgTeamSize.toFixed(1)}
-                  </h3>
-                </div>
-                <div className="h-12 w-12 bg-amber-100 rounded-full flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-amber-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          ))}
         </div>
 
         {/* Project Cards */}
         <div>
-          <h2 className="text-xl font-semibold text-slate-900 mb-4">
+          <h2
+            className={`text-xl font-semibold ${themeStyles.textPrimary} mb-4`}
+          >
             Your Projects
           </h2>
+
           {projects.length === 0 ? (
-            <Card className="bg-white border-slate-200 shadow-sm">
-              <CardContent className="p-12 text-center">
-                <div className="mx-auto w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                  <FolderGit2 className="h-12 w-12 text-slate-400" />
+            <div
+              className={`rounded-2xl border ${themeStyles.projectCardBorder} ${themeStyles.cardShadow} ${themeStyles.emptyStateBg}`}
+            >
+              <div className="p-12 text-center">
+                <div
+                  className={`mx-auto w-24 h-24 ${themeStyles.emptyStateBg} rounded-full flex items-center justify-center mb-4`}
+                >
+                  <FolderGit2
+                    className={`h-12 w-12 ${themeStyles.emptyStateIcon}`}
+                  />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                <h3
+                  className={`text-xl font-semibold ${themeStyles.textPrimary} mb-2`}
+                >
                   No Projects Yet
                 </h3>
-                <p className="text-slate-600 mb-6">
+                <p className={`${themeStyles.textSecondary} mb-6`}>
                   Start building your portfolio by adding your first project
                 </p>
-                <Button
+                <button
                   onClick={() => {
                     resetForm();
                     setShowModal(true);
                   }}
-                  variant="outline"
-                  className="border-slate-300"
+                  className={`inline-flex items-center justify-center px-4 py-2 rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Your First Project
-                </Button>
-              </CardContent>
-            </Card>
+                </button>
+              </div>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project) => (
-                <Card
+                <div
                   key={project.id}
-                  className="bg-white border-slate-200 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                  className={`rounded-2xl border ${themeStyles.projectCardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all duration-300 overflow-hidden group ${themeStyles.projectCardBg}`}
                 >
-                  <div className="h-2 bg-gradient-to-r from-blue-600 to-blue-400" />
-
-                  <CardContent className="p-6">
+                  <div className="h-2 bg-gradient-to-r from-[var(--color-brand-500)] to-[var(--color-brand-400)]" />
+                  <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
-                      <h3 className="text-xl font-bold text-slate-900 flex-1 pr-2 line-clamp-2">
+                      <h3
+                        className={`text-xl font-bold ${themeStyles.textPrimary} flex-1 pr-2 line-clamp-2`}
+                      >
                         {project.projectTitle}
                       </h3>
-                      <Badge
-                        variant="secondary"
-                        className="bg-blue-100 text-blue-600 whitespace-nowrap"
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-[var(--color-brand-500)] dark:bg-[var(--color-brand-400)] text-white whitespace-nowrap`}
                       >
                         {project.groupMembers}{" "}
                         {parseInt(project.groupMembers) === 1
                           ? "member"
                           : "members"}
-                      </Badge>
+                      </span>
                     </div>
-
                     <div className="space-y-4 mb-6">
                       <div>
-                        <p className="text-sm text-slate-600 mb-2">
+                        <p
+                          className={`text-sm ${themeStyles.textSecondary} mb-2 font-medium`}
+                        >
                           Technologies
                         </p>
                         <div className="flex flex-wrap gap-1.5">
                           {getTechBadges(project.technologies)
                             .slice(0, 3)
                             .map((tech, idx) => (
-                              <Badge
+                              <span
                                 key={idx}
-                                variant="outline"
-                                className="text-xs border-slate-300"
+                                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold border ${themeStyles.techBadgeBorder} ${themeStyles.techBadgeText} ${themeStyles.techBadgeBg}`}
                               >
                                 {tech}
-                              </Badge>
+                              </span>
                             ))}
                           {getTechBadges(project.technologies).length > 3 && (
-                            <Badge
-                              variant="outline"
-                              className="text-xs border-slate-300"
+                            <span
+                              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold border ${themeStyles.techBadgeBorder} ${themeStyles.techBadgeText} ${themeStyles.techBadgeBg}`}
                             >
                               +{getTechBadges(project.technologies).length - 3}
-                            </Badge>
+                            </span>
                           )}
                         </div>
                       </div>
-
                       <div>
-                        <p className="text-sm text-slate-600 mb-1">
+                        <p
+                          className={`text-sm ${themeStyles.textSecondary} mb-1 font-medium`}
+                        >
                           Description
                         </p>
-                        <p className="text-sm text-slate-900 line-clamp-3">
+                        <p
+                          className={`text-sm ${themeStyles.textTertiary} line-clamp-3`}
+                        >
                           {project.description}
                         </p>
                       </div>
                     </div>
-
                     <div className="flex gap-2">
-                      <Button
+                      <button
                         onClick={() => handleView(project)}
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 border-slate-300"
+                        className={`flex-1 inline-flex items-center justify-center px-3 py-2 text-sm rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
                       >
                         <Eye className="mr-2 h-4 w-4" />
                         View
-                      </Button>
-                      <Button
+                      </button>
+                      <button
                         onClick={() => handleEdit(project)}
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 border-slate-300"
+                        className={`flex-1 inline-flex items-center justify-center px-3 py-2 text-sm rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
                       >
                         <Edit2 className="mr-2 h-4 w-4" />
                         Edit
-                      </Button>
-                      <Button
+                      </button>
+                      <button
                         onClick={() => handleDelete(project.id)}
-                        variant="outline"
-                        size="sm"
-                        className="text-red-600 hover:bg-red-600 hover:text-white border-slate-300"
+                        className="inline-flex items-center justify-center px-3 py-2 text-sm rounded-lg border-2 border-[var(--color-error-500)] dark:border-[var(--color-error-400)] text-[var(--color-error-500)] dark:text-[var(--color-error-400)] hover:bg-[var(--color-error-500)] hover:dark:bg-[var(--color-error-400)] hover:text-white transition-all"
                       >
                         <Trash2 className="h-4 w-4" />
-                      </Button>
+                      </button>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           )}
@@ -443,32 +438,54 @@ const ProjectManager = () => {
 
         {/* Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-            <Card className="w-full max-w-2xl max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200 bg-white">
-              <div className="sticky top-0 bg-slate-100 border-b border-slate-200 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-slate-900">
-                  {viewMode
-                    ? "Project Details"
-                    : editingId
-                    ? "Edit Project"
-                    : "Add New Project"}
-                </h2>
-                <Button
+          <div
+            className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50 scrollbar-hidden`}
+          >
+            <div
+              className={`w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-2xl shadow-lg border ${themeStyles.cardBg} ${themeStyles.cardBorder}`}
+            >
+              <div
+                className={`${themeStyles.modalHeader} ${themeStyles.modalHeaderBorder} border-b px-6 py-4 flex justify-between items-center`}
+              >
+                <div className="flex items-center gap-3">
+                  {viewMode && (
+                    <button
+                      onClick={() => {
+                        setShowModal(false);
+                        resetForm();
+                      }}
+                      className="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-all"
+                    >
+                      <ArrowLeft className="h-5 w-5" />
+                    </button>
+                  )}
+                  <h2
+                    className={`text-2xl font-bold ${themeStyles.textPrimary}`}
+                  >
+                    {viewMode
+                      ? "Project Details"
+                      : editingId
+                      ? "Edit Project"
+                      : "Add New Project"}
+                  </h2>
+                </div>
+                <button
                   onClick={() => {
                     setShowModal(false);
                     resetForm();
                   }}
-                  variant="ghost"
-                  size="icon"
+                  className={`inline-flex items-center justify-center p-2 rounded-lg ${themeStyles.buttonHover} transition-all ${themeStyles.textPrimary}`}
                 >
                   <X className="h-5 w-5" />
-                </Button>
+                </button>
               </div>
-
-              <CardContent className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <div className="p-8 space-y-6 overflow-y-auto max-h-[calc(90vh-120px)]">
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-900">
-                    Project Title <span className="text-red-600">*</span>
+                  <label
+                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+                  >
+                    Project Title{" "}
+                    <span className="text-[var(--color-error-500)]">*</span>
                   </label>
                   <input
                     type="text"
@@ -478,13 +495,15 @@ const ProjectManager = () => {
                     placeholder="Enter Project Title"
                     disabled={viewMode}
                     required
-                    className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed text-slate-900 placeholder:text-slate-400 transition-all"
+                    className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-[var(--color-brand-500)] focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
                   />
                 </div>
-
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-900">
-                    Technologies used <span className="text-red-600">*</span>
+                  <label
+                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+                  >
+                    Technologies used{" "}
+                    <span className="text-[var(--color-error-500)]">*</span>
                   </label>
                   <input
                     type="text"
@@ -494,18 +513,19 @@ const ProjectManager = () => {
                     placeholder="Enter technologies used"
                     disabled={viewMode}
                     required
-                    className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed text-slate-900 placeholder:text-slate-400 transition-all"
+                    className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-[var(--color-brand-500)] focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
                   />
-                  <p className="text-xs text-slate-600">
+                  <p className={`text-xs ${themeStyles.textTertiary}`}>
                     Separate multiple technologies with commas (e.g., React,
                     TypeScript, Node.js)
                   </p>
                 </div>
-
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-900">
+                  <label
+                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+                  >
                     Number of group members{" "}
-                    <span className="text-red-600">*</span>
+                    <span className="text-[var(--color-error-500)]">*</span>
                   </label>
                   <input
                     type="number"
@@ -516,15 +536,17 @@ const ProjectManager = () => {
                     disabled={viewMode}
                     required
                     min="1"
-                    className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed text-slate-900 placeholder:text-slate-400 transition-all"
+                    className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-[var(--color-brand-500)] focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
                   />
                 </div>
-
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-900">
-                    Description <span className="text-red-600">*</span>
+                  <label
+                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+                  >
+                    Description{" "}
+                    <span className="text-[var(--color-error-500)]">*</span>
                   </label>
-                  <Textarea
+                  <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
@@ -532,29 +554,30 @@ const ProjectManager = () => {
                     disabled={viewMode}
                     required
                     rows={6}
-                    className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed text-slate-900 placeholder:text-slate-400 transition-all resize-none"
+                    className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-[var(--color-brand-500)] focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all resize-none`}
                   />
                 </div>
-
                 {!viewMode && (
                   <div className="flex gap-3 pt-4">
-                    <Button
+                    <button
                       onClick={() => {
                         setShowModal(false);
                         resetForm();
                       }}
-                      variant="outline"
-                      className="flex-1 border-slate-300"
+                      className={`flex-1 inline-flex items-center justify-center px-4 py-3 text-sm rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
                     >
                       Cancel
-                    </Button>
-                    <Button onClick={handleSubmit} className="flex-1">
+                    </button>
+                    <button
+                      onClick={handleSubmit}
+                      className="flex-1 inline-flex items-center justify-center px-4 py-3 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium transition-all"
+                    >
                       Submit
-                    </Button>
+                    </button>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         )}
       </div>

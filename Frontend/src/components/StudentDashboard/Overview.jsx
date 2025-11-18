@@ -7,16 +7,15 @@ import {
   TrendingUp,
   Calendar,
   Clock,
-  ArrowRight,
   BarChart3,
   Users,
   Building2,
-  Sparkles,
   Sun,
   Moon,
 } from "lucide-react";
+import { useTheme } from "../../Utils/context/ThemeContext";
 
-// Add Urbanist font
+// Add Urbanist font and CSS variables
 const style = document.createElement("style");
 style.textContent = `
   @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap');
@@ -26,68 +25,116 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Color themes
-const lightTheme = {
-  background: "#ffffff",
-  textPrimary: "#101828",
-  textSecondary: "#667085",
-  surface: "#F2F4F7",
-  brand: "#465FFF",
-  brandHover: "#3641F5",
-  blueLight: "#0BA5EC",
-  success: "#32D583",
-  error: "#F04438",
-  border: "#E2E8F0",
-};
-
-const darkTheme = {
-  background: "#0C111D",
-  textPrimary: "#F9FAFB",
-  textSecondary: "#98A2B3",
-  surface: "#1D2939",
-  brand: "#7592FF",
-  brandHover: "#465FFF",
-  blueLight: "#36BFFA",
-  success: "#6CE9A6",
-  error: "#F97066",
-  border: "#374151",
-};
-
 const Overview = () => {
-  const [darkMode, setDarkMode] = useState(false);
+  const { theme } = useTheme();
+  const isDarkTheme = theme === "dark";
 
-  // Load theme from localStorage ("dark" / "light")
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
+  // Light Theme Function
+  const getLightTheme = () => ({
+    background: "bg-gradient-to-br from-slate-50 to-slate-100",
+    cardBg: "bg-white",
+    cardBorder: "border-slate-200",
+    cardShadow: "shadow-md",
+    cardHoverShadow: "hover:shadow-xl",
+    textPrimary: "text-slate-900",
+    textSecondary: "text-slate-600",
+    textTertiary: "text-slate-400",
+    headerBg: "bg-white",
+    headerBorder: "border-slate-300",
+    headerHover: "hover:bg-slate-50",
+    statCard1Gradient: "from-white to-blue-50",
+    statCard2Gradient: "from-white to-green-50",
+    statCard3Gradient: "from-white to-purple-50",
+    statCard4Gradient: "from-white to-amber-50",
+    statIcon1Bg: "bg-blue-100",
+    statIcon1Text: "text-blue-600",
+    statIcon2Bg: "bg-green-100",
+    statIcon2Text: "text-green-600",
+    statIcon3Bg: "bg-purple-100",
+    statIcon3Text: "text-purple-600",
+    statIcon4Bg: "bg-amber-100",
+    statIcon4Text: "text-amber-600",
+    sectionHeaderBg: "bg-white",
+    offerCardBg: "bg-white",
+    offerCardBorder: "border-slate-200",
+    offerCardHover: "hover:border-blue-600",
+    offerIconBg: "bg-blue-100",
+    offerIconColor: "text-blue-600",
+    statusFinalBg: "bg-green-500",
+    statusPendingBg: "bg-gray-500",
+    summaryDivider: "border-slate-200",
+    projectCardBg: "bg-white",
+    projectCardBorder: "border-slate-200",
+    projectCardHover: "hover:border-purple-600",
+    projectIconBg: "bg-slate-100",
+    techBadgeBg: "bg-purple-100",
+    techBadgeText: "text-purple-600",
+    certCardBg: "bg-white",
+    certCardBorder: "border-slate-200",
+    certCardHover: "hover:border-green-600",
+    internCardBg: "bg-white",
+    internCardBorder: "border-slate-200",
+    internCardHover: "hover:border-amber-600",
+    activeBadgeBg: "bg-green-100",
+    activeBadgeText: "text-green-600",
+    activeBadgeBorder: "border-green-200",
+    dividerBorder: "border-slate-200",
+  });
 
-    if (savedTheme === "dark") {
-      setDarkMode(true);
-      document.documentElement.classList.add("dark");
-    } else if (savedTheme === "light") {
-      setDarkMode(false);
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
+  // Dark Theme Function
+  const getDarkTheme = () => ({
+    background: "bg-gradient-to-br from-slate-950 to-slate-900",
+    cardBg: "bg-slate-900",
+    cardBorder: "border-slate-700",
+    cardShadow: "shadow-lg shadow-black/20",
+    cardHoverShadow: "hover:shadow-2xl hover:shadow-black/40",
+    textPrimary: "text-slate-50",
+    textSecondary: "text-slate-400",
+    textTertiary: "text-slate-500",
+    headerBg: "bg-slate-950",
+    headerBorder: "border-slate-700",
+    headerHover: "hover:bg-slate-800",
+    statCard1Gradient: "from-slate-800 to-blue-900/30",
+    statCard2Gradient: "from-slate-800 to-green-900/30",
+    statCard3Gradient: "from-slate-800 to-purple-900/30",
+    statCard4Gradient: "from-slate-800 to-amber-900/30",
+    statIcon1Bg: "bg-blue-900/30",
+    statIcon1Text: "text-blue-400",
+    statIcon2Bg: "bg-green-900/30",
+    statIcon2Text: "text-green-400",
+    statIcon3Bg: "bg-purple-900/30",
+    statIcon3Text: "text-purple-400",
+    statIcon4Bg: "bg-amber-900/30",
+    statIcon4Text: "text-amber-400",
+    sectionHeaderBg: "bg-slate-900",
+    offerCardBg: "bg-slate-950",
+    offerCardBorder: "border-slate-800",
+    offerCardHover: "hover:border-blue-400",
+    offerIconBg: "bg-blue-900/30",
+    offerIconColor: "text-blue-400",
+    statusFinalBg: "bg-green-600",
+    statusPendingBg: "bg-gray-400",
+    summaryDivider: "border-slate-800",
+    projectCardBg: "bg-slate-950",
+    projectCardBorder: "border-slate-800",
+    projectCardHover: "hover:border-purple-400",
+    projectIconBg: "bg-slate-800",
+    techBadgeBg: "bg-purple-900/30",
+    techBadgeText: "text-purple-400",
+    certCardBg: "bg-slate-950",
+    certCardBorder: "border-slate-800",
+    certCardHover: "hover:border-green-400",
+    internCardBg: "bg-slate-950",
+    internCardBorder: "border-slate-700",
+    internCardHover: "hover:border-amber-400",
+    activeBadgeBg: "bg-green-900/30",
+    activeBadgeText: "text-green-400",
+    activeBadgeBorder: "border-green-900/20",
+    dividerBorder: "border-slate-700",
+  });
 
-  // Update Tailwind + save to localStorage when darkMode changes
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+  const themeStyles = isDarkTheme ? getDarkTheme() : getLightTheme();
 
-    localStorage.setItem("theme", darkMode ? "dark" : "light");
-  }, [darkMode]);
-
-  const toggleDarkMode = () => {
-    setDarkMode((prev) => !prev);
-  };
-
-  // theme object
-  const colors = darkMode ? darkTheme : lightTheme;
-
-  // Your existing data arrays remain exactly the same...
   const [offers] = useState([
     {
       id: 1,
@@ -207,7 +254,6 @@ const Overview = () => {
     const totalCertifications = certifications.length;
     const totalProjects = projects.length;
     const totalInternships = internships.length;
-
     const avgPackage =
       offers.length > 0
         ? offers.reduce(
@@ -215,33 +261,27 @@ const Overview = () => {
             0
           ) / offers.length
         : 0;
-
     const highestPackage =
       offers.length > 0
         ? Math.max(...offers.map((o) => parseFloat(o.packageValue)))
         : 0;
-
     const totalLearningWeeks = certifications.reduce(
       (sum, cert) => sum + parseFloat(cert.duration),
       0
     );
-
     const uniqueTechs = new Set(
       projects.flatMap((p) => p.technologies.split(",").map((t) => t.trim()))
     ).size;
-
     const today = new Date();
     const activeInternships = internships.filter((i) => {
       const start = new Date(i.startDate);
       const end = new Date(i.endDate);
       return start <= today && end >= today;
     }).length;
-
     const totalStipend = internships.reduce(
       (sum, i) => sum + parseFloat(i.stipend),
       0
     );
-
     return {
       totalOffers,
       finalOffers,
@@ -257,90 +297,23 @@ const Overview = () => {
     };
   }, [offers, certifications, projects, internships]);
 
-  // The rest of your component JSX remains exactly the same...
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: colors.background,
-        color: colors.textPrimary,
-        transition: "all 0.3s ease",
-      }}
-    >
-      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "2rem" }}>
-        {/* Header with Theme Toggle */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "2.5rem",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <h1
-              style={{
-                fontSize: "2.25rem",
-                fontWeight: "bold",
-                background: `linear-gradient(to right, ${colors.brand}, ${colors.blueLight})`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              Overview
+    <div className={`min-h-screen ${themeStyles.background} p-6`}>
+      <div className="max-w-[1400px] mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-10">
+          <div>
+            <h1 className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
+              Overview Dashboard
             </h1>
+            <p className={`mt-2 ${themeStyles.textSecondary}`}>
+              Track your offers, projects, certifications, and internships
+            </p>
           </div>
-
-          {/* Theme Toggle Button */}
-          <button
-            onClick={toggleDarkMode}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 1rem",
-              background: colors.surface,
-              border: `1px solid ${colors.border}`,
-              borderRadius: "0.75rem",
-              color: colors.textPrimary,
-              cursor: "pointer",
-              transition: "all 0.2s",
-              fontSize: "0.875rem",
-              fontWeight: "500",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = colors.brand;
-              e.currentTarget.style.color = "#ffffff";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = colors.surface;
-              e.currentTarget.style.color = colors.textPrimary;
-            }}
-          >
-            {darkMode ? (
-              <>
-                <Sun size={16} />
-                Light Mode
-              </>
-            ) : (
-              <>
-                <Moon size={16} />
-                Dark Mode
-              </>
-            )}
-          </button>
         </div>
 
         {/* Stats Grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-            gap: "1.5rem",
-            marginBottom: "2rem",
-          }}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {[
             {
               icon: FileText,
@@ -349,98 +322,66 @@ const Overview = () => {
               subtitle: `${overallStats.finalOffers} final offer${
                 overallStats.finalOffers !== 1 ? "s" : ""
               }`,
-              color: colors.brand,
+              bgColor: themeStyles.statCard1Gradient,
+              borderColor: themeStyles.dividerBorder,
+              iconBg: themeStyles.statIcon1Bg,
+              iconColor: themeStyles.statIcon1Text,
             },
             {
               icon: Award,
               label: "Certifications",
               value: overallStats.totalCertifications,
               subtitle: `${overallStats.totalLearningWeeks} weeks total`,
-              color: colors.success,
+              bgColor: themeStyles.statCard2Gradient,
+              borderColor: themeStyles.dividerBorder,
+              iconBg: themeStyles.statIcon2Bg,
+              iconColor: themeStyles.statIcon2Text,
             },
             {
               icon: FolderGit2,
               label: "Projects",
               value: overallStats.totalProjects,
               subtitle: `${overallStats.uniqueTechs} technologies`,
-              color: colors.blueLight,
+              bgColor: themeStyles.statCard3Gradient,
+              borderColor: themeStyles.dividerBorder,
+              iconBg: themeStyles.statIcon3Bg,
+              iconColor: themeStyles.statIcon3Text,
             },
             {
               icon: Briefcase,
               label: "Internships",
               value: overallStats.totalInternships,
               subtitle: `${overallStats.activeInternships} active`,
-              color: colors.error,
+              bgColor: themeStyles.statCard4Gradient,
+              borderColor: themeStyles.dividerBorder,
+              iconBg: themeStyles.statIcon4Bg,
+              iconColor: themeStyles.statIcon4Text,
             },
           ].map((stat, idx) => (
             <div
               key={idx}
-              style={{
-                background: colors.surface,
-                border: `1px solid ${colors.border}`,
-                borderRadius: "1rem",
-                padding: "1.5rem",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                transition: "transform 0.2s, box-shadow 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
-              }}
+              className={`rounded-2xl border ${stat.borderColor} p-6 shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm bg-gradient-to-br ${stat.bgColor}`}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
+              <div className="flex items-center justify-between">
                 <div>
                   <p
-                    style={{
-                      fontSize: "0.875rem",
-                      color: colors.textSecondary,
-                      marginBottom: "0.25rem",
-                      fontWeight: "500",
-                    }}
+                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
                   >
                     {stat.label}
                   </p>
-                  <p
-                    style={{
-                      fontSize: "2.5rem",
-                      fontWeight: "bold",
-                      color: colors.textPrimary,
-                      marginBottom: "0.25rem",
-                    }}
+                  <h3
+                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
                   >
                     {stat.value}
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "0.875rem",
-                      color: colors.textSecondary,
-                    }}
-                  >
+                  </h3>
+                  <p className={`text-sm ${themeStyles.textTertiary} mt-1`}>
                     {stat.subtitle}
                   </p>
                 </div>
                 <div
-                  style={{
-                    height: "3.5rem",
-                    width: "3.5rem",
-                    background: `${stat.color}15`,
-                    borderRadius: "0.75rem",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
+                  className={`h-12 w-12 ${stat.iconBg} rounded-full flex items-center justify-center flex-shrink-0`}
                 >
-                  <stat.icon size={28} color={stat.color} />
+                  <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
                 </div>
               </div>
             </div>
@@ -448,139 +389,58 @@ const Overview = () => {
         </div>
 
         {/* Main Content */}
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1.5rem" }}
-        >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-              gap: "1.5rem",
-            }}
-          >
+        <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Offers */}
             <div
-              style={{
-                background: colors.surface,
-                border: `1px solid ${colors.border}`,
-                borderRadius: "1rem",
-                padding: "1.5rem",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-              }}
+              className={`${themeStyles.sectionHeaderBg} border ${themeStyles.cardBorder} rounded-2xl p-6 ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-shadow`}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  marginBottom: "1.5rem",
-                }}
-              >
-                <Building2 size={20} color={colors.brand} />
+              <div className="flex items-center gap-2 mb-6">
+                <Building2 size={20} className={themeStyles.statIcon1Text} />
                 <h2
-                  style={{
-                    fontSize: "1.25rem",
-                    fontWeight: "600",
-                    color: colors.textPrimary,
-                  }}
+                  className={`text-xl font-semibold ${themeStyles.textPrimary}`}
                 >
                   Job Offers
                 </h2>
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.75rem",
-                }}
-              >
+              <div className="flex flex-col gap-3">
                 {offers.map((offer) => (
                   <div
                     key={offer.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "1.25rem",
-                      background: `${colors.textSecondary}10`,
-                      borderRadius: "0.75rem",
-                      border: `1px solid ${colors.border}`,
-                      cursor: "pointer",
-                      transition: "all 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow =
-                        "0 2px 8px rgba(0,0,0,0.1)";
-                      e.currentTarget.style.background = `${colors.brand}08`;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = "none";
-                      e.currentTarget.style.background = `${colors.textSecondary}10`;
-                    }}
+                    className={`flex items-center justify-between p-5 ${themeStyles.offerCardBg} rounded-xl border ${themeStyles.offerCardBorder} hover:shadow-md ${themeStyles.offerCardHover} transition-all`}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "1rem",
-                      }}
-                    >
+                    <div className="flex items-center gap-4">
                       <div
-                        style={{
-                          height: "3rem",
-                          width: "3rem",
-                          background: `${colors.brand}15`,
-                          borderRadius: "0.75rem",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
+                        className={`h-12 w-12 ${themeStyles.offerIconBg} rounded-lg flex items-center justify-center flex-shrink-0`}
                       >
-                        <Building2 size={24} color={colors.brand} />
+                        <Building2
+                          size={24}
+                          className={themeStyles.offerIconColor}
+                        />
                       </div>
                       <div>
                         <h3
-                          style={{
-                            fontWeight: "600",
-                            color: colors.textPrimary,
-                            fontSize: "1.125rem",
-                          }}
+                          className={`font-semibold ${themeStyles.textPrimary} text-base`}
                         >
                           {offer.companyName}
                         </h3>
-                        <p
-                          style={{
-                            fontSize: "0.875rem",
-                            color: colors.textSecondary,
-                          }}
-                        >
+                        <p className={`text-sm ${themeStyles.textSecondary}`}>
                           {offer.companyType}
                         </p>
                       </div>
                     </div>
-                    <div style={{ textAlign: "right" }}>
+                    <div className="text-right">
                       <p
-                        style={{
-                          fontWeight: "bold",
-                          color: colors.textPrimary,
-                          fontSize: "1.25rem",
-                          marginBottom: "0.25rem",
-                        }}
+                        className={`font-bold ${themeStyles.textPrimary} text-lg mb-1`}
                       >
                         ₹{offer.packageValue} LPA
                       </p>
                       <span
-                        style={{
-                          padding: "0.25rem 0.75rem",
-                          borderRadius: "9999px",
-                          fontSize: "0.75rem",
-                          fontWeight: "500",
-                          background:
-                            offer.status === "final"
-                              ? colors.success
-                              : colors.textSecondary,
-                          color: "white",
-                        }}
+                        className={`px-3 py-1 text-xs font-medium rounded-full ${
+                          offer.status === "final"
+                            ? themeStyles.statusFinalBg
+                            : themeStyles.statusPendingBg
+                        } text-white`}
                       >
                         {offer.status === "final" ? "✓ Final Offer" : "Pending"}
                       </span>
@@ -592,29 +452,12 @@ const Overview = () => {
 
             {/* Summary Stats */}
             <div
-              style={{
-                background: colors.surface,
-                border: `1px solid ${colors.border}`,
-                borderRadius: "1rem",
-                padding: "1.5rem",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-              }}
+              className={`${themeStyles.sectionHeaderBg} border ${themeStyles.cardBorder} rounded-2xl p-6 ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-shadow`}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  marginBottom: "1.5rem",
-                }}
-              >
-                <BarChart3 size={20} color={colors.brand} />
+              <div className="flex items-center gap-2 mb-6">
+                <BarChart3 size={20} className={themeStyles.statIcon1Text} />
                 <h2
-                  style={{
-                    fontSize: "1.25rem",
-                    fontWeight: "600",
-                    color: colors.textPrimary,
-                  }}
+                  className={`text-xl font-semibold ${themeStyles.textPrimary}`}
                 >
                   Summary
                 </h2>
@@ -645,42 +488,26 @@ const Overview = () => {
                 ].map((item, idx) => (
                   <div
                     key={idx}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "0.75rem 0",
-                      borderBottom:
-                        idx < 3 ? `1px solid ${colors.border}` : "none",
-                    }}
+                    className={`flex items-center justify-between py-4 ${
+                      idx < 3 ? `border-b ${themeStyles.summaryDivider}` : ""
+                    }`}
                   >
                     <span
-                      style={{
-                        fontSize: "0.875rem",
-                        color: colors.textSecondary,
-                        fontWeight: "500",
-                      }}
+                      className={`text-sm font-medium ${themeStyles.textSecondary}`}
                     >
                       {item.label}
                     </span>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                      }}
-                    >
+                    <div className="flex items-center gap-2">
                       <span
-                        style={{
-                          fontWeight: "bold",
-                          color: colors.textPrimary,
-                          fontSize: "1.125rem",
-                        }}
+                        className={`font-bold ${themeStyles.textPrimary} text-lg`}
                       >
                         {item.value}
                       </span>
                       {item.icon && (
-                        <item.icon size={16} color={colors.success} />
+                        <item.icon
+                          size={16}
+                          className={themeStyles.statIcon2Text}
+                        />
                       )}
                     </div>
                   </div>
@@ -691,119 +518,47 @@ const Overview = () => {
 
           {/* Projects */}
           <div
-            style={{
-              background: colors.surface,
-              border: `1px solid ${colors.border}`,
-              borderRadius: "1rem",
-              padding: "1.5rem",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-            }}
+            className={`${themeStyles.sectionHeaderBg} border ${themeStyles.cardBorder} rounded-2xl p-6 ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-shadow`}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                marginBottom: "1.5rem",
-              }}
-            >
-              <FolderGit2 size={20} color={colors.blueLight} />
+            <div className="flex items-center gap-2 mb-6">
+              <FolderGit2 size={20} className={themeStyles.statIcon3Text} />
               <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: "600",
-                  color: colors.textPrimary,
-                }}
+                className={`text-xl font-semibold ${themeStyles.textPrimary}`}
               >
                 Projects
               </h2>
             </div>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-            >
+            <div className="flex flex-col gap-4">
               {projects.map((project) => (
                 <div
                   key={project.id}
-                  style={{
-                    padding: "1.25rem",
-                    background: `${colors.textSecondary}10`,
-                    borderRadius: "0.75rem",
-                    border: `1px solid ${colors.border}`,
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow =
-                      "0 2px 8px rgba(0,0,0,0.1)";
-                    e.currentTarget.style.background = `${colors.blueLight}08`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = "none";
-                    e.currentTarget.style.background = `${colors.textSecondary}10`;
-                  }}
+                  className={`p-5 ${themeStyles.projectCardBg} rounded-xl border ${themeStyles.projectCardBorder} hover:shadow-md ${themeStyles.projectCardHover} transition-all`}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "start",
-                      justifyContent: "space-between",
-                      marginBottom: "0.75rem",
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
                       <h3
-                        style={{
-                          fontWeight: "600",
-                          color: colors.textPrimary,
-                          fontSize: "1.125rem",
-                          marginBottom: "0.5rem",
-                        }}
+                        className={`font-semibold ${themeStyles.textPrimary} text-base mb-2`}
                       >
                         {project.projectTitle}
                       </h3>
                       <p
-                        style={{
-                          fontSize: "0.875rem",
-                          color: colors.textSecondary,
-                          lineHeight: "1.5",
-                        }}
+                        className={`text-sm ${themeStyles.textSecondary} leading-relaxed`}
                       >
                         {project.description}
                       </p>
                     </div>
                     <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.25rem",
-                        padding: "0.25rem 0.75rem",
-                        border: `1px solid ${colors.border}`,
-                        borderRadius: "9999px",
-                        fontSize: "0.75rem",
-                        color: colors.textSecondary,
-                        marginLeft: "0.75rem",
-                        flexShrink: 0,
-                        background: colors.surface,
-                      }}
+                      className={`flex items-center gap-1 px-3 py-1 text-xs border ${themeStyles.cardBorder} rounded-full ${themeStyles.textSecondary} ml-3 flex-shrink-0 ${themeStyles.projectIconBg}`}
                     >
                       <Users size={12} />
                       {project.groupMembers}
                     </span>
                   </div>
-                  <div
-                    style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}
-                  >
+                  <div className="flex flex-wrap gap-2">
                     {project.technologies.split(",").map((tech, idx) => (
                       <span
                         key={idx}
-                        style={{
-                          padding: "0.25rem 0.75rem",
-                          background: `${colors.blueLight}15`,
-                          color: colors.blueLight,
-                          borderRadius: "9999px",
-                          fontSize: "0.75rem",
-                          fontWeight: "500",
-                        }}
+                        className={`px-3 py-1 text-xs font-medium rounded-full ${themeStyles.techBadgeBg} ${themeStyles.techBadgeText}`}
                       >
                         {tech.trim()}
                       </span>
@@ -814,103 +569,38 @@ const Overview = () => {
             </div>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-              gap: "1.5rem",
-            }}
-          >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Certifications */}
             <div
-              style={{
-                background: colors.surface,
-                border: `1px solid ${colors.border}`,
-                borderRadius: "1rem",
-                padding: "1.5rem",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-              }}
+              className={`${themeStyles.sectionHeaderBg} border ${themeStyles.cardBorder} rounded-2xl p-6 ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-shadow`}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  marginBottom: "1.5rem",
-                }}
-              >
-                <Award size={20} color={colors.success} />
+              <div className="flex items-center gap-2 mb-6">
+                <Award size={20} className={themeStyles.statIcon2Text} />
                 <h2
-                  style={{
-                    fontSize: "1.25rem",
-                    fontWeight: "600",
-                    color: colors.textPrimary,
-                  }}
+                  className={`text-xl font-semibold ${themeStyles.textPrimary}`}
                 >
                   Certifications
                 </h2>
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.75rem",
-                }}
-              >
+              <div className="flex flex-col gap-3">
                 {certifications.slice(0, 3).map((cert) => (
                   <div
                     key={cert.id}
-                    style={{
-                      padding: "1rem",
-                      background: `${colors.textSecondary}10`,
-                      borderRadius: "0.5rem",
-                      border: `1px solid ${colors.border}`,
-                      cursor: "pointer",
-                      transition: "all 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow =
-                        "0 2px 8px rgba(0,0,0,0.1)";
-                      e.currentTarget.style.background = `${colors.success}08`;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = "none";
-                      e.currentTarget.style.background = `${colors.textSecondary}10`;
-                    }}
+                    className={`p-4 ${themeStyles.certCardBg} rounded-xl border ${themeStyles.certCardBorder} hover:shadow-md ${themeStyles.certCardHover} transition-all`}
                   >
                     <h4
-                      style={{
-                        fontWeight: "600",
-                        fontSize: "0.875rem",
-                        color: colors.textPrimary,
-                        marginBottom: "0.5rem",
-                      }}
+                      className={`font-semibold ${themeStyles.textPrimary} text-sm mb-2`}
                     >
                       {cert.certificationName}
                     </h4>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        fontSize: "0.75rem",
-                      }}
-                    >
+                    <div className="flex items-center justify-between text-xs">
                       <span
-                        style={{
-                          color: colors.textSecondary,
-                          fontWeight: "500",
-                        }}
+                        className={`${themeStyles.textSecondary} font-medium`}
                       >
                         {cert.platform}
                       </span>
                       <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.25rem",
-                          color: colors.textSecondary,
-                        }}
+                        className={`flex items-center gap-1 ${themeStyles.textSecondary}`}
                       >
                         <Clock size={12} />
                         <span>{cert.duration} weeks</span>
@@ -923,108 +613,43 @@ const Overview = () => {
 
             {/* Internships */}
             <div
-              style={{
-                background: colors.surface,
-                border: `1px solid ${colors.border}`,
-                borderRadius: "1rem",
-                padding: "1.5rem",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-              }}
+              className={`${themeStyles.sectionHeaderBg} border ${themeStyles.cardBorder} rounded-2xl p-6 ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-shadow`}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  marginBottom: "1.5rem",
-                }}
-              >
-                <Briefcase size={20} color={colors.error} />
+              <div className="flex items-center gap-2 mb-6">
+                <Briefcase size={20} className={themeStyles.statIcon4Text} />
                 <h2
-                  style={{
-                    fontSize: "1.25rem",
-                    fontWeight: "600",
-                    color: colors.textPrimary,
-                  }}
+                  className={`text-xl font-semibold ${themeStyles.textPrimary}`}
                 >
                   Internships
                 </h2>
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.75rem",
-                }}
-              >
+              <div className="flex flex-col gap-3">
                 {internships.map((intern) => {
                   const start = new Date(intern.startDate);
                   const end = new Date(intern.endDate);
                   const today = new Date();
                   const isActive = start <= today && end >= today;
-
                   return (
                     <div
                       key={intern.id}
-                      style={{
-                        padding: "1rem",
-                        background: `${colors.textSecondary}10`,
-                        borderRadius: "0.5rem",
-                        border: `1px solid ${colors.border}`,
-                        cursor: "pointer",
-                        transition: "all 0.2s",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.boxShadow =
-                          "0 2px 8px rgba(0,0,0,0.1)";
-                        e.currentTarget.style.background = `${colors.error}08`;
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.boxShadow = "none";
-                        e.currentTarget.style.background = `${colors.textSecondary}10`;
-                      }}
+                      className={`p-4 ${themeStyles.internCardBg} rounded-xl border ${themeStyles.internCardBorder} hover:shadow-md ${themeStyles.internCardHover} transition-all`}
                     >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "start",
-                          justifyContent: "space-between",
-                          marginBottom: "0.75rem",
-                        }}
-                      >
+                      <div className="flex items-start justify-between mb-3">
                         <h4
-                          style={{
-                            fontWeight: "600",
-                            fontSize: "0.875rem",
-                            color: colors.textPrimary,
-                          }}
+                          className={`font-semibold ${themeStyles.textPrimary} text-sm`}
                         >
                           {intern.companyName}
                         </h4>
                         {isActive && (
                           <span
-                            style={{
-                              padding: "0.125rem 0.5rem",
-                              background: `${colors.success}15`,
-                              color: colors.success,
-                              border: `1px solid ${colors.success}30`,
-                              borderRadius: "9999px",
-                              fontSize: "0.75rem",
-                            }}
+                            className={`px-2 py-0.5 text-xs ${themeStyles.activeBadgeBg} ${themeStyles.activeBadgeText} border ${themeStyles.activeBadgeBorder} rounded-full`}
                           >
                             ● Active
                           </span>
                         )}
                       </div>
                       <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                          fontSize: "0.75rem",
-                          color: colors.textSecondary,
-                          marginBottom: "0.5rem",
-                        }}
+                        className={`flex items-center gap-2 text-xs ${themeStyles.textSecondary} mb-2`}
                       >
                         <Calendar size={12} />
                         <span>
@@ -1040,11 +665,7 @@ const Overview = () => {
                         </span>
                       </div>
                       <p
-                        style={{
-                          fontSize: "0.875rem",
-                          fontWeight: "600",
-                          color: colors.textPrimary,
-                        }}
+                        className={`text-sm font-medium ${themeStyles.textPrimary}`}
                       >
                         ₹{parseFloat(intern.stipend).toLocaleString()}/month
                       </p>
