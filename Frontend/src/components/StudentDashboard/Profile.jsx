@@ -836,7 +836,7 @@ const Profile = () => {
           : "bg-gradient-to-br from-slate-50 to-slate-100"
       }`}
     >
-      <div className="max-w-[1400px] mx-auto px-6 py-8">
+      <div className="max-w-full mx-auto px-6 py-8">
         <div className="mb-8">
           <h1
             className={`text-3xl font-bold ${

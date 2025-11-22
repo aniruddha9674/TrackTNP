@@ -30,6 +30,8 @@ const OfferLetterManager = () => {
     offerLetterFile: null,
     joiningLetterFile: null,
   });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const stats = useMemo(() => {
     const totalOffers = offers.filter((o) => o.status === "offer").length;
@@ -124,9 +126,14 @@ const OfferLetterManager = () => {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this offer letter?")) {
-      setOffers((prev) => prev.filter((offer) => offer.id !== id));
-    }
+    setDeleteId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    setOffers((prev) => prev.filter((cert) => cert.id !== deleteId));
+    setShowDeleteConfirm(false);
+    setDeleteId(null);
   };
 
   const handleConvertToFinal = (offer) => {
@@ -304,12 +311,12 @@ const OfferLetterManager = () => {
         }
       `}</style>
 
-      <div className="ax-w-[1400px] mx-auto p-6 space-y-8">
+      <div className="max-w-full mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
-              Offer Letter Dashboard
+              Offer Letter
             </h1>
             <p className={`${themeStyles.textSecondary} mt-1`}>
               Manage your job offers and final offer letters
@@ -805,6 +812,52 @@ const OfferLetterManager = () => {
                     </button>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showDeleteConfirm && (
+          <div
+            className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
+          >
+            <div
+              className={`w-full max-w-md rounded-2xl shadow-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} p-6`}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h2 className={`text-xl font-bold ${themeStyles.textPrimary}`}>
+                  Confirm Deletion
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setDeleteId(null);
+                  }}
+                  className={`inline-flex items-center justify-center p-2 rounded-lg ${themeStyles.buttonHover} ${themeStyles.textPrimary}`}
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <p className={`${themeStyles.textSecondary} mb-6`}>
+                Are you sure you want to delete this offer letter details? This
+                action cannot be undone.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setDeleteId(null);
+                  }}
+                  className={`inline-flex items-center justify-center px-4 py-2 rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium transition-all"
+                >
+                  Delete
+                </button>
               </div>
             </div>
           </div>

@@ -124,7 +124,7 @@ const StudentCalendar = () => {
       <div
         className={`min-h-screen bg-gradient-to-br ${themeStyles.background} overflow-x-hidden`}
       >
-        <div className="max-w-[1400px] mx-auto p-4 sm:p-6 space-y-6">
+        <div className="max-w-full mx-auto p-4 sm:p-6 space-y-6">
           {/* Header */}
           <h1
             className={`text-2xl sm:text-3xl font-bold ${themeStyles.textPrimary}`}
@@ -143,7 +143,7 @@ const StudentCalendar = () => {
               <div className="flex items-center gap-3">
                 <button
                   onClick={handlePrevMonth}
-                  className="p-2 rounded-lg border hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  className="p-2 rounded-lg border hover:bg-slate-100 dark:hover:bg-slate-400 transition"
                 >
                   <ChevronLeft size={18} />
                 </button>
@@ -177,7 +177,7 @@ const StudentCalendar = () => {
 
                 <button
                   onClick={handleNextMonth}
-                  className="p-2 rounded-lg border hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  className="p-2 rounded-lg border hover:bg-slate-100 dark:hover:bg-slate-400 transition"
                 >
                   <ChevronRight size={18} />
                 </button>

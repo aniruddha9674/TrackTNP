@@ -299,7 +299,7 @@ const Overview = () => {
 
   return (
     <div className={`min-h-screen ${themeStyles.background} p-6`}>
-      <div className="max-w-[1400px] mx-auto">
+      <div className="max-w-full mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-10">
           <div>

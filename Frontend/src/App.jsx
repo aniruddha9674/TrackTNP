@@ -2,10 +2,15 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-{
-  /*import MainPage from "./Pages/MainPage/main";*/
-}
+import MainPage from "./Pages/MainPage/main";
 import AuthApp from "./Pages/LoginSection/Auth";
+import FAQ from "./Pages/FAQ/FAQ";
+import Pricing from "./Pages/Pricing/pricing";
+import Documentation from "./Pages/Docs/Documentation";
+import PrivacyPolicy from "./Pages/PPsection/privacy";
+import ContactUsPage from "./Pages/Contactus/Contact";
+import ServicesPage from "./Pages/Services/services";
+import Aboutus from "./Pages/Aboutus/About";
 
 import StudentDash from "./Pages/StudentDash/StudentDash";
 import StudentOverview from "./components/StudentDashboard/overview";
@@ -17,6 +22,20 @@ import InternshipManagerfrom from "./components/StudentDashboard/Internship";
 import Profile from "./components/StudentDashboard/Profile";
 import ProjectManager from "./components/StudentDashboard/Project";
 import StudentCalendar from "./components/StudentDashboard/Calender";
+import ResumeBuilder from "./components/StudentDashboard/ResumeBuilder/ResumeBuilder";
+
+import AdminDash from "./Pages/AdminDash/AdminDash";
+import Calendar from "./components/AdminDashboard/Calendar";
+import Settings from "./components/AdminDashboard/Settings";
+import StaffDetailsManager from "./components/AdminDashboard/Staff/AddStaff";
+import AddCompany from "./components/AdminDashboard/Company/AddCompany";
+import CompanyDrivesManager from "./components/AdminDashboard/Company/CompanyDrives";
+import PlacementResultsManager from "./components/AdminDashboard/Result/Result";
+import Overview from "./components/AdminDashboard/Overview/Overview";
+import StudentDetails from "./components/AdminDashboard/Student/StudentDetails";
+import Addstudent from "./components/AdminDashboard/Student/AddSudent";
+
+import CollegeCoordinatorDash from "./Pages/CollegeCoordinatordash/CollegeCoordinatorDash";
 
 function App() {
   useEffect(() => {
@@ -30,8 +49,27 @@ function App() {
   }, []);
   return (
     <Routes>
-      <Route path="/" element={<AuthApp />} />
+      <Route path="/" element={<MainPage />} />
       <Route path="/login" element={<AuthApp />} />
+      <Route path="/faq" element={<FAQ />} />
+      <Route path="/pricing" element={<Pricing />} />
+      <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+      <Route path="/docs" element={<Documentation />} />
+      <Route path="/contactus" element={<ContactUsPage />} />
+      <Route path="/services" element={<ServicesPage />} />
+      <Route path="/aboutus" element={<Aboutus />} />
+
+      <Route path="/admindashboard" element={<AdminDash />}>
+        <Route path="" element={<Overview />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="calender" element={<Calendar />} />
+        <Route path="staff" element={<StaffDetailsManager />} />
+        <Route path="company/add" element={<AddCompany />} />
+        <Route path="company/drive" element={<CompanyDrivesManager />} />
+        <Route path="results" element={<PlacementResultsManager />} />
+        <Route path="student/details" element={<StudentDetails />} />
+        <Route path="student/add" element={<Addstudent />} />
+      </Route>
 
       <Route path="/studentdashboard" element={<StudentDash />}>
         <Route path="" element={<StudentOverview />} />
@@ -46,7 +84,13 @@ function App() {
         <Route path="projectdetails" element={<ProjectManager />} />
         <Route path="profilesettings" element={<Profile />} />
         <Route path="calender" element={<StudentCalendar />} />
+        <Route path="resume" element={<ResumeBuilder />} />
       </Route>
+
+      <Route
+        path="/collegecoordinatordashboard"
+        element={<CollegeCoordinatorDash />}
+      ></Route>
     </Routes>
   );
 }

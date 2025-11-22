@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import {
-  Menu,
-  X,
-  User,
-  Moon,
-  Sun,
   Home,
   Building,
   FileText,
@@ -15,7 +10,12 @@ import {
   MessageSquare,
   Calendar,
   Settings,
+  List,
   LogOut,
+  Menu,
+  Sun,
+  Moon,
+  User,
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
 
@@ -178,8 +178,13 @@ const Dashboard = () => {
       path: "/studentdashboard/calender",
     },
     {
+      icon: <List className="w-6 h-6" />,
+      name: "Resume",
+      path: "/studentdashboard/resume",
+    },
+    {
       icon: <Settings className="w-6 h-6" />,
-      name: "Profile / Settings",
+      name: "Settings",
       path: "/studentdashboard/profilesettings",
     },
   ];

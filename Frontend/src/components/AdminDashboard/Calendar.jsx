@@ -9,6 +9,7 @@ import {
   Clock,
   AlignLeft,
 } from "lucide-react";
+import { useTheme } from "../../Utils/context/ThemeContext";
 
 const Calendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
@@ -21,7 +22,8 @@ const Calendar = () => {
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("10:00");
   const [eventColor, setEventColor] = useState("#465FFF");
-  const [isDark, setIsDark] = useState(false);
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const months = [
     "January",
@@ -150,13 +152,13 @@ const Calendar = () => {
 
       <div
         className="min-h-screen transition-colors duration-300"
-        style={{ backgroundColor: isDark ? "#101828" : "#ffffff" }}
+        style={{ backgroundColor: isDark ? "#020617" : "#ffffff" }}
       >
-        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="max-w-full mx-auto p-4 sm:p-6 lg:p-8">
           <div
-            className="rounded-xl shadow-sm border p-6 mb-6"
+            className="rounded-xl shadow-sm  p-6 mb-6"
             style={{
-              backgroundColor: isDark ? "#1D2939" : "#ffffff",
+              backgroundColor: isDark ? "#020617" : "#ffffff",
               borderColor: isDark ? "#1D2939" : "#e5e7eb",
             }}
           >
@@ -205,16 +207,6 @@ const Calendar = () => {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsDark(!isDark)}
-                className="p-3 rounded-lg transition-all"
-                style={{
-                  backgroundColor: isDark ? "#1D2939" : "#F2F4F7",
-                  color: isDark ? "#fbbf24" : "#101828",
-                }}
-              >
-                {isDark ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
             </div>
 
             <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -492,7 +484,7 @@ const Calendar = () => {
         </div>
 
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="fixed inset-0 bg-black/80 bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
             <div
               className="rounded-xl shadow-2xl max-w-lg w-full border transform transition-all"
               style={{

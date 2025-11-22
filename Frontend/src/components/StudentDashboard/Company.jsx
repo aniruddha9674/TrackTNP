@@ -371,7 +371,7 @@ const CompanyRegistration = () => {
   return (
     <div className={`min-h-screen ${themeStyles.background}`}>
       {!showDetailsModal ? (
-        <div className="ax-w-[1400px] mx-auto p-4 sm:p-6 space-y-6">
+        <div className="max-w-full mx-auto p-4 sm:p-6 space-y-6">
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
