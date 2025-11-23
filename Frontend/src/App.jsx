@@ -34,8 +34,10 @@ import PlacementResultsManager from "./components/AdminDashboard/Result/Result";
 import Overview from "./components/AdminDashboard/Overview/Overview";
 import StudentDetails from "./components/AdminDashboard/Student/StudentDetails";
 import Addstudent from "./components/AdminDashboard/Student/AddSudent";
+import NotificationAdmin from "./components/AdminDashboard/Notification/Notification";
 
 import CollegeCoordinatorDash from "./Pages/CollegeCoordinatordash/CollegeCoordinatorDash";
+import FirstLogin from "./Pages/FirstTimeLogin";
 
 function App() {
   useEffect(() => {
@@ -59,6 +61,8 @@ function App() {
       <Route path="/services" element={<ServicesPage />} />
       <Route path="/aboutus" element={<Aboutus />} />
 
+      <Route path="/firstlogin" element={<FirstLogin />} />
+
       <Route path="/admindashboard" element={<AdminDash />}>
         <Route path="" element={<Overview />} />
         <Route path="settings" element={<Settings />} />
@@ -69,6 +73,7 @@ function App() {
         <Route path="results" element={<PlacementResultsManager />} />
         <Route path="student/details" element={<StudentDetails />} />
         <Route path="student/add" element={<Addstudent />} />
+        <Route path="notifications" element={<NotificationAdmin />} />
       </Route>
 
       <Route path="/studentdashboard" element={<StudentDash />}>
@@ -90,7 +95,8 @@ function App() {
       <Route
         path="/collegecoordinatordashboard"
         element={<CollegeCoordinatorDash />}
-      ></Route>
+      >
+      </Route>
     </Routes>
   );
 }

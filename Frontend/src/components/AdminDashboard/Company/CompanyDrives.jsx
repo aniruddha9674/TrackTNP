@@ -12,9 +12,10 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
+import { useTheme } from "../../../Utils/context/ThemeContext";
 
 const CompanyDrivesManager = () => {
-  const [theme, setTheme] = useState("light");
+  const { theme } = useTheme();
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [selectedStudentDetail, setSelectedStudentDetail] = useState(null);
   const [selectedStudents, setSelectedStudents] = useState([]);
@@ -435,23 +436,7 @@ const CompanyDrivesManager = () => {
                 </p>
               </div>
             </div>
-
-            {/* Theme Toggle Button */}
-            <button
-              onClick={toggleTheme}
-              className="p-3 rounded-xl transition-all hover:scale-105 shadow-lg"
-              style={{
-                backgroundColor: colors.cardBg,
-                border: `2px solid ${colors.border}`,
-              }}
-              title={`Switch to ${isDark ? "light" : "dark"} mode`}
-            >
-              {isDark ? (
-                <Sun size={24} style={{ color: "#FDB022" }} />
-              ) : (
-                <Moon size={24} style={{ color: "#465FFF" }} />
-              )}
-            </button>
+        
           </div>
 
           {/* Stats Cards */}

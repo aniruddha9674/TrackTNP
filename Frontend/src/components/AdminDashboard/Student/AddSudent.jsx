@@ -16,15 +16,183 @@ import {
   Search,
   GraduationCap,
   BookOpen,
+  Download,
+  Upload,
 } from "lucide-react";
+import { useTheme } from "../../../Utils/context/ThemeContext";
 
 const StudentDetailsManager = () => {
-  const [theme] = useState("light"); // You can connect this to your ThemeContext
-  const [students, setStudents] = useState([]);
+  const { theme } = useTheme();
+  const [students, setStudents] = useState([
+    {
+      id: 1,
+      prnNumber: "ST2024001",
+      name: "Rahul Sharma",
+      email: "rahul.sharma@example.com",
+      collegeName: "ABC Engineering College",
+      department: "Computer Science",
+      year: "3",
+      phoneNumber: "9876543210",
+      status: "Active",
+    },
+    {
+      id: 2,
+      prnNumber: "ST2024002",
+      name: "Priya Patel",
+      email: "priya.patel@example.com",
+      collegeName: "ABC Engineering College",
+      department: "Computer Science",
+      year: "3",
+      phoneNumber: "9876543211",
+      status: "Active",
+    },
+    {
+      id: 3,
+      prnNumber: "ST2024003",
+      name: "Amit Kumar",
+      email: "amit.kumar@example.com",
+      collegeName: "ABC Engineering College",
+      department: "Information Technology",
+      year: "4",
+      phoneNumber: "9876543212",
+      status: "Active",
+    },
+    {
+      id: 4,
+      prnNumber: "ST2024004",
+      name: "Sneha Desai",
+      email: "sneha.desai@example.com",
+      collegeName: "XYZ Institute of Technology",
+      department: "Electronics & Telecommunication",
+      year: "3",
+      phoneNumber: "9876543213",
+      status: "Active",
+    },
+    {
+      id: 5,
+      prnNumber: "ST2024005",
+      name: "Rohan Mehta",
+      email: "rohan.mehta@example.com",
+      collegeName: "XYZ Institute of Technology",
+      department: "Computer Science",
+      year: "4",
+      phoneNumber: "9876543214",
+      status: "Active",
+    },
+    {
+      id: 6,
+      prnNumber: "ST2024006",
+      name: "Anjali Singh",
+      email: "anjali.singh@example.com",
+      collegeName: "PQR College of Engineering",
+      department: "Mechanical",
+      year: "3",
+      phoneNumber: "9876543215",
+      status: "Active",
+    },
+    {
+      id: 7,
+      prnNumber: "ST2024007",
+      name: "Vikram Joshi",
+      email: "vikram.joshi@example.com",
+      collegeName: "PQR College of Engineering",
+      department: "Civil",
+      year: "4",
+      phoneNumber: "9876543216",
+      status: "Inactive",
+    },
+    {
+      id: 8,
+      prnNumber: "ST2024008",
+      name: "Pooja Reddy",
+      email: "pooja.reddy@example.com",
+      collegeName: "ABC Engineering College",
+      department: "Computer Science",
+      year: "4",
+      phoneNumber: "9876543217",
+      status: "Active",
+    },
+    {
+      id: 9,
+      prnNumber: "ST2024009",
+      name: "Karthik Iyer",
+      email: "karthik.iyer@example.com",
+      collegeName: "LMN Technical Campus",
+      department: "Information Technology",
+      year: "3",
+      phoneNumber: "9876543218",
+      status: "Active",
+    },
+    {
+      id: 10,
+      prnNumber: "ST2024010",
+      name: "Neha Gupta",
+      email: "neha.gupta@example.com",
+      collegeName: "LMN Technical Campus",
+      department: "Computer Science",
+      year: "4",
+      phoneNumber: "9876543219",
+      status: "Active",
+    },
+    {
+      id: 11,
+      prnNumber: "ST2024011",
+      name: "Arjun Nair",
+      email: "arjun.nair@example.com",
+      collegeName: "ABC Engineering College",
+      department: "Electronics & Telecommunication",
+      year: "3",
+      phoneNumber: "9876543220",
+      status: "Active",
+    },
+    {
+      id: 12,
+      prnNumber: "ST2024012",
+      name: "Divya Kapoor",
+      email: "divya.kapoor@example.com",
+      collegeName: "XYZ Institute of Technology",
+      department: "Mechanical",
+      year: "4",
+      phoneNumber: "9876543221",
+      status: "Active",
+    },
+    {
+      id: 13,
+      prnNumber: "ST2024013",
+      name: "Siddharth Roy",
+      email: "siddharth.roy@example.com",
+      collegeName: "PQR College of Engineering",
+      department: "Computer Science",
+      year: "3",
+      phoneNumber: "9876543222",
+      status: "Active",
+    },
+    {
+      id: 14,
+      prnNumber: "ST2024014",
+      name: "Meera Shah",
+      email: "meera.shah@example.com",
+      collegeName: "ABC Engineering College",
+      department: "Information Technology",
+      year: "3",
+      phoneNumber: "9876543223",
+      status: "Inactive",
+    },
+    {
+      id: 15,
+      prnNumber: "ST2024015",
+      name: "Aditya Varma",
+      email: "aditya.varma@example.com",
+      collegeName: "LMN Technical Campus",
+      department: "Civil",
+      year: "4",
+      phoneNumber: "9876543224",
+      status: "Active",
+    },
+  ]);
   const [showModal, setShowModal] = useState(false);
-  const [showCollegeView, setShowCollegeView] = useState(false);
-  const [showDepartmentView, setShowDepartmentView] = useState(false);
-  const [showYearView, setShowYearView] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [filterStep, setFilterStep] = useState(1);
   const [selectedCollege, setSelectedCollege] = useState(null);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
@@ -62,6 +230,7 @@ const StudentDetailsManager = () => {
     inputText: "text-slate-900",
     inputPlaceholder: "placeholder:text-slate-400",
     modalOverlay: "bg-black/60",
+    modalBg: "bg-white",
     modalHeader: "bg-slate-100",
     modalHeaderBorder: "border-slate-200",
     emptyStateBg: "bg-white",
@@ -85,6 +254,7 @@ const StudentDetailsManager = () => {
     tableBorder: "border-slate-200",
     tableHeader: "bg-slate-50",
     tableRow: "hover:bg-slate-50",
+    hoverBg: "hover:bg-slate-50",
   });
 
   const getDarkTheme = () => ({
@@ -102,6 +272,7 @@ const StudentDetailsManager = () => {
     inputText: "text-slate-50",
     inputPlaceholder: "placeholder:text-slate-500",
     modalOverlay: "bg-black/80",
+    modalBg: "bg-slate-900",
     modalHeader: "bg-slate-800",
     modalHeaderBorder: "border-slate-700",
     emptyStateBg: "bg-slate-900",
@@ -125,9 +296,38 @@ const StudentDetailsManager = () => {
     tableBorder: "border-slate-700",
     tableHeader: "bg-slate-800",
     tableRow: "hover:bg-slate-800",
+    hoverBg: "hover:bg-slate-800",
   });
 
   const themeStyles = isDarkTheme ? getDarkTheme() : getLightTheme();
+
+  // All departments - always show these 5 in order
+  const allDepartments = [
+    { id: 1, name: "Computer Science", short: "Computer" },
+    { id: 2, name: "Information Technology", short: "IT" },
+    { id: 3, name: "Electronics & Telecommunication", short: "ENTC" },
+    { id: 4, name: "Mechanical", short: "Mechanical" },
+    { id: 5, name: "Civil", short: "Civil" },
+  ];
+
+  // Get unique colleges
+  const colleges = useMemo(() => {
+    const collegeSet = new Set(students.map((s) => s.collegeName));
+    return Array.from(collegeSet).map((name, index) => ({ id: index + 1, name }));
+  }, [students]);
+
+  // Always return all 5 departments regardless of whether students exist
+  const departments = useMemo(() => {
+    if (!selectedCollege) return [];
+    return allDepartments;
+  }, [selectedCollege]);
+
+  const years = useMemo(() => {
+    return [
+      { id: 1, name: "Third Year", value: "3" },
+      { id: 2, name: "Fourth Year", value: "4" },
+    ];
+  }, []);
 
   const stats = useMemo(() => {
     const uniqueColleges = new Set(students.map((s) => s.collegeName)).size;
@@ -139,24 +339,18 @@ const StudentDetailsManager = () => {
     return { uniqueColleges, totalStudents, activeStudents, inactiveStudents };
   }, [students]);
 
-  const collegeGroups = useMemo(() => {
-    const groups = {};
-    students.forEach((student) => {
-      if (!groups[student.collegeName]) {
-        groups[student.collegeName] = {};
-      }
-      if (!groups[student.collegeName][student.department]) {
-        groups[student.collegeName][student.department] = {};
-      }
-      if (!groups[student.collegeName][student.department][student.year]) {
-        groups[student.collegeName][student.department][student.year] = [];
-      }
-      groups[student.collegeName][student.department][student.year].push(
-        student
-      );
-    });
-    return groups;
-  }, [students]);
+  const filteredStudents = useMemo(() => {
+    if (!selectedCollege || !selectedDepartment || !selectedYear) return [];
+
+    return students.filter(
+      (s) =>
+        s.collegeName === selectedCollege.name &&
+        s.department === selectedDepartment.name &&
+        s.year === selectedYear.value &&
+        (s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.prnNumber.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  }, [students, selectedCollege, selectedDepartment, selectedYear, searchQuery]);
 
   const resetForm = () => {
     setFormData({
@@ -238,69 +432,100 @@ const StudentDetailsManager = () => {
     setDeleteId(null);
   };
 
-  const handleCollegeClick = (collegeName) => {
-    setSelectedCollege(collegeName);
-    setShowCollegeView(true);
-    setShowDepartmentView(false);
-    setShowYearView(false);
-    setSearchQuery("");
-  };
-
-  const handleDepartmentClick = (department) => {
-    setSelectedDepartment(department);
-    setShowDepartmentView(true);
-    setShowYearView(false);
-    setSearchQuery("");
-  };
-
-  const handleYearClick = (year) => {
-    setSelectedYear(year);
-    setShowYearView(true);
-    setSearchQuery("");
-  };
-
-  const handleBackToColleges = () => {
-    setShowCollegeView(false);
-    setShowDepartmentView(false);
-    setShowYearView(false);
+  const handleViewStudents = () => {
+    setShowFilterModal(true);
+    setFilterStep(1);
     setSelectedCollege(null);
     setSelectedDepartment(null);
     setSelectedYear(null);
     setSearchQuery("");
   };
 
-  const handleBackToDepartments = () => {
-    setShowDepartmentView(false);
-    setShowYearView(false);
+  const handleCollegeSelect = (college) => {
+    setSelectedCollege(college);
+    setFilterStep(2);
+  };
+
+  const handleDepartmentSelect = (department) => {
+    setSelectedDepartment(department);
+    setFilterStep(3);
+  };
+
+  const handleYearSelect = (year) => {
+    setSelectedYear(year);
+    setShowFilterModal(false);
+  };
+
+  const handleCloseModal = () => {
+    setShowFilterModal(false);
+    setFilterStep(1);
+    setSelectedCollege(null);
+    setSelectedDepartment(null);
+    setSelectedYear(null);
+  };
+
+  const handleBackToMain = () => {
+    setSelectedCollege(null);
     setSelectedDepartment(null);
     setSelectedYear(null);
     setSearchQuery("");
   };
 
-  const handleBackToYears = () => {
-    setShowYearView(false);
-    setSelectedYear(null);
-    setSearchQuery("");
+  const handleImportExcel = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".xlsx,.xls,.csv";
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        alert(`Importing students from ${file.name}...`);
+        // Here you would implement actual Excel parsing logic
+        // For now, just showing a placeholder
+      }
+    };
+    input.click();
   };
 
-  const filteredStudents =
-    selectedCollege && selectedDepartment && selectedYear
-      ? collegeGroups[selectedCollege][selectedDepartment][selectedYear].filter(
-          (student) =>
-            student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            student.prnNumber
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase()) ||
-            student.phoneNumber.includes(searchQuery)
-        )
-      : [];
+  const handleDownloadExcel = () => {
+    if (filteredStudents.length === 0) {
+      alert("No students to download!");
+      return;
+    }
+
+    // Create CSV content
+    const headers = ["Sr No", "PRN Number", "Name", "Email", "Phone", "Status", "College", "Department", "Year"];
+    const csvContent = [
+      headers.join(","),
+      ...filteredStudents.map((student, index) =>
+        [
+          index + 1,
+          student.prnNumber,
+          student.name,
+          student.email,
+          student.phoneNumber,
+          student.status,
+          student.collegeName,
+          student.department,
+          student.year,
+        ].join(",")
+      ),
+    ].join("\n");
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `students_${selectedCollege?.name}_${selectedDepartment?.name}_Year${selectedYear?.value}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   return (
     <div className={`min-h-screen ${themeStyles.background} p-6`}>
       <div className="max-w-full mx-auto">
-        {/* Main View - Colleges */}
-        {!showCollegeView && (
+        {/* Main View - Stats and Actions */}
+        {!selectedCollege && !selectedDepartment && !selectedYear && (
           <>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
               <div>
@@ -313,14 +538,18 @@ const StudentDetailsManager = () => {
               </div>
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => {
-                    resetForm();
-                    setShowModal(true);
-                  }}
+                  onClick={handleImportExcel}
+                  className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 font-medium transition-all shadow-lg"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Import Excel
+                </button>
+                <button
+                  onClick={handleViewStudents}
                   className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium transition-all shadow-lg"
                 >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Student
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Students
                 </button>
               </div>
             </div>
@@ -399,348 +628,228 @@ const StudentDetailsManager = () => {
               ))}
             </div>
 
-            {/* College Cards */}
-            <div>
-              <h2
-                className={`text-xl font-semibold ${themeStyles.textPrimary} mb-4`}
-              >
-                Colleges
-              </h2>
-
-              {Object.keys(collegeGroups).length === 0 ? (
+            {/* Empty State or Info */}
+            <div
+              className={`rounded-2xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardBg}`}
+            >
+              <div className="p-12 text-center">
                 <div
-                  className={`rounded-2xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.emptyStateBg}`}
+                  className={`mx-auto w-24 h-24 ${themeStyles.emptyStateBg} rounded-full flex items-center justify-center mb-4`}
                 >
-                  <div className="p-12 text-center">
-                    <div
-                      className={`mx-auto w-24 h-24 ${themeStyles.emptyStateBg} rounded-full flex items-center justify-center mb-4`}
-                    >
-                      <GraduationCap
-                        className={`h-12 w-12 ${themeStyles.emptyStateIcon}`}
-                      />
-                    </div>
-                    <h3
-                      className={`text-xl font-semibold ${themeStyles.textPrimary} mb-2`}
-                    >
-                      No Students Added Yet
-                    </h3>
-                    <p className={`${themeStyles.textSecondary} mb-6`}>
-                      Start by adding your first student
-                    </p>
-                    <button
-                      onClick={() => {
-                        resetForm();
-                        setShowModal(true);
-                      }}
-                      className={`inline-flex items-center justify-center px-4 py-2 rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add First Student
-                    </button>
-                  </div>
+                  <GraduationCap
+                    className={`h-12 w-12 ${themeStyles.emptyStateIcon}`}
+                  />
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {Object.entries(collegeGroups).map(
-                    ([collegeName, departments]) => {
-                      const totalStudents = Object.values(departments).reduce(
-                        (sum, years) =>
-                          sum +
-                          Object.values(years).reduce(
-                            (yearSum, students) => yearSum + students.length,
-                            0
-                          ),
-                        0
-                      );
-                      const activeStudents = Object.values(departments).reduce(
-                        (sum, years) =>
-                          sum +
-                          Object.values(years).reduce(
-                            (yearSum, students) =>
-                              yearSum +
-                              students.filter((s) => s.status === "Active")
-                                .length,
-                            0
-                          ),
-                        0
-                      );
-
-                      return (
-                        <div
-                          key={collegeName}
-                          className={`rounded-2xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all duration-300 overflow-hidden group ${themeStyles.cardBg}`}
-                        >
-                          <div className="h-2 bg-gradient-to-r from-blue-500 to-purple-600" />
-                          <div className="p-6">
-                            <div className="flex items-start justify-between mb-4">
-                              <div className="flex items-center gap-3">
-                                <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-                                  <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                                </div>
-                                <div>
-                                  <h3
-                                    className={`text-xl font-bold ${themeStyles.textPrimary} line-clamp-2`}
-                                  >
-                                    {collegeName}
-                                  </h3>
-                                  <p
-                                    className={`text-sm ${themeStyles.textSecondary} mt-1`}
-                                  >
-                                    {totalStudents} student
-                                    {totalStudents !== 1 ? "s" : ""}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="space-y-3 mb-6">
-                              <div
-                                className={`flex items-center justify-between py-2 border-b ${themeStyles.dividerBorder}`}
-                              >
-                                <span
-                                  className={`text-sm ${themeStyles.textSecondary}`}
-                                >
-                                  Departments
-                                </span>
-                                <span
-                                  className={`font-semibold text-blue-600 dark:text-blue-400`}
-                                >
-                                  {Object.keys(departments).length}
-                                </span>
-                              </div>
-                              <div
-                                className={`flex items-center justify-between py-2 border-b ${themeStyles.dividerBorder}`}
-                              >
-                                <span
-                                  className={`text-sm ${themeStyles.textSecondary}`}
-                                >
-                                  Active Students
-                                </span>
-                                <span
-                                  className={`font-semibold text-emerald-600 dark:text-emerald-400`}
-                                >
-                                  {activeStudents}
-                                </span>
-                              </div>
-                            </div>
-
-                            <button
-                              onClick={() => handleCollegeClick(collegeName)}
-                              className="w-full inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium transition-all"
-                            >
-                              View Departments
-                              <ChevronRight className="ml-2 h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    }
-                  )}
+                <h3
+                  className={`text-xl font-semibold ${themeStyles.textPrimary} mb-2`}
+                >
+                  Student Management System
+                </h3>
+                <p className={`${themeStyles.textSecondary} mb-6`}>
+                  Import students from Excel or view existing students by college, department, and year
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={handleImportExcel}
+                    className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 font-medium transition-all"
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Import Students
+                  </button>
+                  <button
+                    onClick={handleViewStudents}
+                    className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium transition-all"
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Students
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
           </>
         )}
 
-        {/* Department View */}
-        {showCollegeView && !showDepartmentView && selectedCollege && (
-          <div>
-            <div className="flex items-center gap-4 mb-6">
-              <button
-                onClick={handleBackToColleges}
-                className={`inline-flex items-center justify-center p-2 rounded-lg ${themeStyles.buttonBg} ${themeStyles.buttonBorder} ${themeStyles.buttonHover} ${themeStyles.textPrimary} transition-all`}
+        {/* Filter Modal */}
+        {showFilterModal && (
+          <div
+            className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${themeStyles.modalOverlay}`}
+          >
+            <div
+              className={`rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-y-auto ${themeStyles.modalBg}`}
+            >
+              <div
+                className={`p-6 border-b ${themeStyles.modalHeaderBorder} flex items-center justify-between sticky top-0 z-10 ${themeStyles.modalBg}`}
               >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-              <div>
-                <h1 className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
-                  {selectedCollege}
-                </h1>
-                <p className={`${themeStyles.textSecondary} mt-1`}>
-                  {Object.keys(collegeGroups[selectedCollege]).length}{" "}
-                  department
-                  {Object.keys(collegeGroups[selectedCollege]).length !== 1
-                    ? "s"
-                    : ""}
-                </p>
+                <div>
+                  <h2
+                    className={`text-2xl font-bold ${themeStyles.textPrimary}`}
+                  >
+                    Filter Students
+                  </h2>
+                  <p
+                    className={`text-sm mt-1 ${themeStyles.textSecondary}`}
+                  >
+                    Step {filterStep} of 3: Select{" "}
+                    {filterStep === 1
+                      ? "College"
+                      : filterStep === 2
+                        ? "Department"
+                        : "Year"}
+                  </p>
+                </div>
+                <button
+                  onClick={handleCloseModal}
+                  className={`p-2 rounded-lg ${themeStyles.buttonHover} transition-all`}
+                >
+                  <X size={24} className={themeStyles.textPrimary} />
+                </button>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Object.entries(collegeGroups[selectedCollege]).map(
-                ([department, years]) => {
-                  const totalStudents = Object.values(years).reduce(
-                    (sum, students) => sum + students.length,
-                    0
-                  );
-
-                  return (
-                    <div
-                      key={department}
-                      className={`rounded-2xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all duration-300 overflow-hidden group ${themeStyles.cardBg}`}
+              <div className="p-6">
+                {filterStep === 1 && (
+                  <div>
+                    <h3
+                      className={`text-lg font-semibold mb-4 ${themeStyles.textPrimary}`}
                     >
-                      <div className="h-2 bg-gradient-to-r from-purple-500 to-pink-600" />
-                      <div className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="h-12 w-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-                              <BookOpen className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                      Select College
+                    </h3>
+                    {colleges.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className={themeStyles.textSecondary}>
+                          No colleges found. Please import students first.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {colleges.map((college) => (
+                          <div
+                            key={college.id}
+                            onClick={() => handleCollegeSelect(college)}
+                            className={`p-6 rounded-xl border cursor-pointer ${themeStyles.cardBorder} ${themeStyles.buttonHover} transition-all hover:scale-105`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4
+                                  className={`font-semibold text-lg ${themeStyles.textPrimary}`}
+                                >
+                                  {college.name}
+                                </h4>
+                                <p
+                                  className={`text-sm mt-1 ${themeStyles.textSecondary}`}
+                                >
+                                  Click to select
+                                </p>
+                              </div>
+                              <ChevronRight size={24} className="text-blue-600" />
                             </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {filterStep === 2 && (
+                  <div>
+                    <button
+                      onClick={() => setFilterStep(1)}
+                      className="mb-4 text-sm font-semibold flex items-center gap-2 text-blue-600"
+                    >
+                      ← Back to Colleges
+                    </button>
+                    <h3
+                      className={`text-lg font-semibold mb-4 ${themeStyles.textPrimary}`}
+                    >
+                      Select Department
+                    </h3>
+                    {departments.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className={themeStyles.textSecondary}>
+                          No departments found for this college.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {departments.map((dept) => (
+                          <div
+                            key={dept.id}
+                            onClick={() => handleDepartmentSelect(dept)}
+                            className={`p-6 rounded-xl border cursor-pointer ${themeStyles.cardBorder} ${themeStyles.buttonHover} transition-all hover:scale-105`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4
+                                  className={`font-semibold text-lg ${themeStyles.textPrimary}`}
+                                >
+                                  {dept.short}
+                                </h4>
+                                <p
+                                  className={`text-sm mt-1 ${themeStyles.textSecondary}`}
+                                >
+                                  {dept.name}
+                                </p>
+                              </div>
+                              <ChevronRight size={24} className="text-blue-600" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {filterStep === 3 && (
+                  <div>
+                    <button
+                      onClick={() => setFilterStep(2)}
+                      className="mb-4 text-sm font-semibold flex items-center gap-2 text-blue-600"
+                    >
+                      ← Back to Departments
+                    </button>
+                    <h3
+                      className={`text-lg font-semibold mb-4 ${themeStyles.textPrimary}`}
+                    >
+                      Select Year
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {years.map((year) => (
+                        <div
+                          key={year.id}
+                          onClick={() => handleYearSelect(year)}
+                          className={`p-8 rounded-xl border cursor-pointer ${themeStyles.cardBorder} ${themeStyles.buttonHover} transition-all hover:scale-105`}
+                        >
+                          <div className="flex items-center justify-between">
                             <div>
-                              <h3
-                                className={`text-xl font-bold ${themeStyles.textPrimary}`}
+                              <h4
+                                className={`font-semibold text-2xl ${themeStyles.textPrimary}`}
                               >
-                                {department}
-                              </h3>
+                                {year.name}
+                              </h4>
                               <p
-                                className={`text-sm ${themeStyles.textSecondary} mt-1`}
+                                className={`text-sm mt-1 ${themeStyles.textSecondary}`}
                               >
-                                {totalStudents} student
-                                {totalStudents !== 1 ? "s" : ""}
+                                Click to view students
                               </p>
                             </div>
+                            <ChevronRight size={28} className="text-blue-600" />
                           </div>
                         </div>
-
-                        <div className="space-y-3 mb-6">
-                          <div
-                            className={`flex items-center justify-between py-2 border-b ${themeStyles.dividerBorder}`}
-                          >
-                            <span
-                              className={`text-sm ${themeStyles.textSecondary}`}
-                            >
-                              Years
-                            </span>
-                            <span
-                              className={`font-semibold text-purple-600 dark:text-purple-400`}
-                            >
-                              {Object.keys(years).length}
-                            </span>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => handleDepartmentClick(department)}
-                          className="w-full inline-flex items-center justify-center px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 font-medium transition-all"
-                        >
-                          View Years
-                          <ChevronRight className="ml-2 h-4 w-4" />
-                        </button>
-                      </div>
+                      ))}
                     </div>
-                  );
-                }
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Year View */}
-        {showDepartmentView && !showYearView && selectedDepartment && (
-          <div>
-            <div className="flex items-center gap-4 mb-6">
-              <button
-                onClick={handleBackToDepartments}
-                className={`inline-flex items-center justify-center p-2 rounded-lg ${themeStyles.buttonBg} ${themeStyles.buttonBorder} ${themeStyles.buttonHover} ${themeStyles.textPrimary} transition-all`}
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-              <div>
-                <h1 className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
-                  {selectedDepartment}
-                </h1>
-                <p className={`${themeStyles.textSecondary} mt-1`}>
-                  {selectedCollege}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {Object.entries(
-                collegeGroups[selectedCollege][selectedDepartment]
-              ).map(([year, students]) => (
-                <div
-                  key={year}
-                  className={`rounded-2xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all duration-300 overflow-hidden group ${themeStyles.cardBg}`}
-                >
-                  <div className="h-2 bg-gradient-to-r from-cyan-500 to-blue-600" />
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-                          <GraduationCap className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
-                        </div>
-                        <div>
-                          <h3
-                            className={`text-xl font-bold ${themeStyles.textPrimary}`}
-                          >
-                            Year {year}
-                          </h3>
-                          <p
-                            className={`text-sm ${themeStyles.textSecondary} mt-1`}
-                          >
-                            {students.length} student
-                            {students.length !== 1 ? "s" : ""}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3 mb-6">
-                      <div
-                        className={`flex items-center justify-between py-2 border-b ${themeStyles.dividerBorder}`}
-                      >
-                        <span
-                          className={`text-sm ${themeStyles.textSecondary}`}
-                        >
-                          Active Students
-                        </span>
-                        <span
-                          className={`font-semibold text-emerald-600 dark:text-emerald-400`}
-                        >
-                          {students.filter((s) => s.status === "Active").length}
-                        </span>
-                      </div>
-                      <div
-                        className={`flex items-center justify-between py-2 border-b ${themeStyles.dividerBorder}`}
-                      >
-                        <span
-                          className={`text-sm ${themeStyles.textSecondary}`}
-                        >
-                          Inactive Students
-                        </span>
-                        <span
-                          className={`font-semibold text-red-600 dark:text-red-400`}
-                        >
-                          {
-                            students.filter((s) => s.status === "Inactive")
-                              .length
-                          }
-                        </span>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => handleYearClick(year)}
-                      className="w-full inline-flex items-center justify-center px-4 py-2 rounded-lg bg-cyan-600 text-white hover:bg-cyan-700 font-medium transition-all"
-                    >
-                      View Students
-                      <ChevronRight className="ml-2 h-4 w-4" />
-                    </button>
                   </div>
-                </div>
-              ))}
+                )}
+              </div>
             </div>
           </div>
         )}
 
         {/* Student Table View */}
-        {showYearView && selectedYear && (
+        {selectedCollege && selectedDepartment && selectedYear && (
           <div>
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div className="flex items-center gap-4">
                 <button
-                  onClick={handleBackToYears}
+                  onClick={handleBackToMain}
                   className={`inline-flex items-center justify-center p-2 rounded-lg ${themeStyles.buttonBg} ${themeStyles.buttonBorder} ${themeStyles.buttonHover} ${themeStyles.textPrimary} transition-all`}
                 >
                   <ArrowLeft className="h-5 w-5" />
@@ -749,13 +858,21 @@ const StudentDetailsManager = () => {
                   <h1
                     className={`text-3xl font-bold ${themeStyles.textPrimary}`}
                   >
-                    Year {selectedYear} - {selectedDepartment}
+                    Students - Year {selectedYear.value}
                   </h1>
                   <p className={`${themeStyles.textSecondary} mt-1`}>
-                    {selectedCollege}
+                    {selectedCollege.name} - {selectedDepartment.name}
                   </p>
                 </div>
               </div>
+              <button
+                onClick={handleDownloadExcel}
+                disabled={filteredStudents.length === 0}
+                className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 font-medium transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Download Excel
+              </button>
             </div>
 
             {/* Search Bar */}
@@ -763,7 +880,7 @@ const StudentDetailsManager = () => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search by name, email, PRN, or phone..."
+                  placeholder="Search by name or PRN number..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className={`w-full px-4 py-3 pl-12 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
@@ -811,7 +928,7 @@ const StudentDetailsManager = () => {
                           <div className={`${themeStyles.textSecondary}`}>
                             {searchQuery
                               ? "No students found matching your search"
-                              : "No students in this year"}
+                              : "No students found for this selection"}
                           </div>
                         </td>
                       </tr>
@@ -854,11 +971,10 @@ const StudentDetailsManager = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
                             <span
-                              className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
-                                student.status === "Active"
-                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
-                                  : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                              }`}
+                              className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${student.status === "Active"
+                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
+                                : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                                }`}
                             >
                               {student.status}
                             </span>
@@ -914,8 +1030,8 @@ const StudentDetailsManager = () => {
                   {viewMode
                     ? "Student Details"
                     : editingId
-                    ? "Edit Student"
-                    : "Add New Student"}
+                      ? "Edit Student"
+                      : "Add New Student"}
                 </h2>
                 <button
                   onClick={() => {

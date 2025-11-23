@@ -11,10 +11,6 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "./card";
-import { Input } from "./input";
-import { Badge } from "./badge";
-import { Button } from "./button";
 import { useTheme } from "../../../Utils/context/ThemeContext";
 
 // Hardcoded student data
@@ -430,86 +426,9 @@ const STUDENTS_DATA = [
   },
 ];
 
-const getLightTheme = () => ({
-  background: "bg-gradient-to-br from-slate-50 to-slate-100",
-  cardBg: "bg-white",
-  cardBorder: "border-slate-200",
-  cardShadow: "shadow-md",
-  cardHoverShadow: "hover:shadow-xl",
-  textPrimary: "text-slate-900",
-  textSecondary: "text-slate-600",
-  textTertiary: "text-slate-400",
-  inputBg: "bg-white",
-  inputBorder: "border-slate-300",
-  modalOverlay: "bg-black/60",
-  modalBg: "bg-slate-50",
-  modalHeader: "bg-white",
-  modalHeaderBorder: "border-slate-200",
-  statCard1Gradient: "from-white to-blue-50",
-  statCard2Gradient: "from-white to-green-50",
-  statCard3Gradient: "from-white to-purple-50",
-  statCard4Gradient: "from-white to-amber-50",
-  statIcon1Bg: "bg-blue-100",
-  statIcon1Text: "text-blue-600",
-  statIcon2Bg: "bg-green-100",
-  statIcon2Text: "text-green-600",
-  statIcon3Bg: "bg-purple-100",
-  statIcon3Text: "text-purple-600",
-  statIcon4Bg: "bg-amber-100",
-  statIcon4Text: "text-amber-600",
-  dividerBorder: "border-slate-200",
-  buttonBg: "bg-white",
-  buttonBorder: "border-slate-300",
-  buttonHover: "hover:bg-slate-50",
-  tableBg: "bg-white",
-  tableHeaderBg: "bg-slate-100",
-  tableRowHover: "hover:bg-slate-50",
-  checkboxBorder: "border-slate-300",
-  scrollbar: "scrollbar-light",
-});
-
-const getDarkTheme = () => ({
-  background: "bg-gradient-to-br from-slate-950 to-slate-900",
-  cardBg: "bg-slate-900",
-  cardBorder: "border-slate-700",
-  cardShadow: "shadow-lg shadow-black/20",
-  cardHoverShadow: "hover:shadow-2xl hover:shadow-black/40",
-  textPrimary: "text-slate-50",
-  textSecondary: "text-slate-400",
-  textTertiary: "text-slate-500",
-  inputBg: "bg-slate-950",
-  inputBorder: "border-slate-600",
-  modalOverlay: "bg-black/80",
-  modalBg: "bg-slate-950",
-  modalHeader: "bg-slate-900",
-  modalHeaderBorder: "border-slate-700",
-  statCard1Gradient: "from-slate-800 to-blue-900/30",
-  statCard2Gradient: "from-slate-800 to-green-900/30",
-  statCard3Gradient: "from-slate-800 to-purple-900/30",
-  statCard4Gradient: "from-slate-800 to-amber-900/30",
-  statIcon1Bg: "bg-blue-900/30",
-  statIcon1Text: "text-blue-400",
-  statIcon2Bg: "bg-green-900/30",
-  statIcon2Text: "text-green-400",
-  statIcon3Bg: "bg-purple-900/30",
-  statIcon3Text: "text-purple-400",
-  statIcon4Bg: "bg-amber-900/30",
-  statIcon4Text: "text-amber-400",
-  dividerBorder: "border-slate-700",
-  buttonBg: "bg-slate-700",
-  buttonBorder: "border-slate-600",
-  buttonHover: "hover:bg-slate-600",
-  tableBg: "bg-slate-900",
-  tableHeaderBg: "bg-slate-800",
-  tableRowHover: "hover:bg-slate-800/50",
-  checkboxBorder: "border-slate-600",
-  scrollbar: "scrollbar-dark",
-});
-
 const TrackAndPlacement = () => {
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
   const isDarkTheme = theme === "dark";
-  const themeStyles = isDarkTheme ? getDarkTheme() : getLightTheme();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -547,668 +466,411 @@ const TrackAndPlacement = () => {
   };
 
   return (
-    <div className={`min-h-screen ${themeStyles.background} p-6`}>
+    <div className={`min-h-screen ${isDarkTheme ? 'bg-gradient-to-br from-slate-950 to-slate-900' : 'bg-gradient-to-br from-slate-50 to-slate-100'} p-3 sm:p-6`}>
       <style>{`
-        .scrollbar-light::-webkit-scrollbar {
+        .scrollbar-custom::-webkit-scrollbar {
           width: 8px;
           height: 8px;
         }
-        .scrollbar-light::-webkit-scrollbar-track {
-          background: #f1f5f9;
+        .scrollbar-custom::-webkit-scrollbar-track {
+          background: ${isDarkTheme ? '#1e293b' : '#f1f5f9'};
           border-radius: 4px;
         }
-        .scrollbar-light::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+          background: ${isDarkTheme ? '#475569' : '#cbd5e1'};
           border-radius: 4px;
         }
-        .scrollbar-light::-webkit-scrollbar-thumb:hover {
-          background: #94a3b8;
-        }
-
-        .scrollbar-dark::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-        }
-        .scrollbar-dark::-webkit-scrollbar-track {
-          background: #1e293b;
-          border-radius: 4px;
-        }
-        .scrollbar-dark::-webkit-scrollbar-thumb {
-          background: #475569;
-          border-radius: 4px;
-        }
-        .scrollbar-dark::-webkit-scrollbar-thumb:hover {
-          background: #64748b;
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+          background: ${isDarkTheme ? '#64748b' : '#94a3b8'};
         }
       `}</style>
+
       {/* Header */}
-      <div
-        className={`${themeStyles.cardBg}/80 backdrop-blur-sm border-b ${themeStyles.cardBorder} sticky top-0 z-10`}
-      >
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                <GraduationCap className="w-8 h-8 text-white" />
-              </div>
+      <div className={`${isDarkTheme ? 'bg-slate-900/80' : 'bg-white/80'} backdrop-blur-sm border-b ${isDarkTheme ? 'border-slate-700' : 'border-slate-200'} sticky top-0 z-10`}>
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-6">
+            <div className="flex items-center gap-3 sm:gap-4">
               <div>
-                <h1 className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
+                <h1 className={`text-xl sm:text-3xl font-bold ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
                   Track & Placement Portal
                 </h1>
-                <p className={`text-sm ${themeStyles.textSecondary} mt-1`}>
+                <p className={`text-xs sm:text-sm ${isDarkTheme ? 'text-slate-400' : 'text-slate-600'} mt-1`}>
                   Search and view student placement records
                 </p>
               </div>
             </div>
           </div>
+
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-            <Input
+            <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4 sm:w-5 sm:h-5" />
+            <input
               type="text"
-              placeholder="Search by PRN number or student name..."
+              placeholder="Search by PRN or name..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 setShowDropdown(true);
               }}
               onFocus={() => setShowDropdown(true)}
-              className={`pl-12 h-14 text-lg ${themeStyles.inputBg} ${themeStyles.inputBorder} focus:ring-2 focus:ring-blue-500 transition-all`}
+              className={`w-full pl-10 sm:pl-12 pr-4 h-12 sm:h-14 text-base sm:text-lg rounded-lg ${isDarkTheme ? 'bg-slate-950 border-slate-600 text-slate-50' : 'bg-white border-slate-300 text-slate-900'} border-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none`}
             />
           </div>
+
           {/* Search Results Dropdown */}
           {searchQuery && showDropdown && filteredStudents.length > 0 && (
-            <div
-              className={`absolute mt-2 w-full max-w-3xl ${themeStyles.cardBg} rounded-xl shadow-2xl ${themeStyles.cardBorder} overflow-hidden z-50`}
-            >
+            <div className={`absolute mt-2 left-3 right-3 sm:left-6 sm:right-6 max-w-7xl ${isDarkTheme ? 'bg-slate-900' : 'bg-white'} rounded-xl shadow-2xl border-2 ${isDarkTheme ? 'border-slate-700' : 'border-slate-200'} overflow-hidden z-50`}>
               {filteredStudents.map((student) => (
                 <button
                   key={student.prn}
                   onClick={() => handleStudentSelect(student)}
-                  className={`w-full px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left border-b ${themeStyles.dividerBorder} last:border-0`}
+                  className={`w-full px-4 sm:px-6 py-3 sm:py-4 ${isDarkTheme ? 'hover:bg-slate-800' : 'hover:bg-slate-50'} transition-colors text-left border-b ${isDarkTheme ? 'border-slate-700' : 'border-slate-200'} last:border-0`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                      <User className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className={`p-2 sm:p-3 ${isDarkTheme ? 'bg-blue-900/30' : 'bg-blue-100'} rounded-lg`}>
+                      <User className={`w-4 h-4 sm:w-6 sm:h-6 ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
                     </div>
-                    <div className="flex-1">
-                      <p className={`font-semibold ${themeStyles.textPrimary}`}>
-                        {student.personalInfo.firstName}{" "}
-                        {student.personalInfo.lastName}
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-semibold text-sm sm:text-base ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'} truncate`}>
+                        {student.personalInfo.firstName} {student.personalInfo.lastName}
                       </p>
-                      <p className={`text-sm ${themeStyles.textSecondary}`}>
+                      <p className={`text-xs sm:text-sm ${isDarkTheme ? 'text-slate-400' : 'text-slate-600'} truncate`}>
                         {student.prn} • {student.academicDetails.branch}
                       </p>
                     </div>
-                    <Badge
-                      variant="secondary"
-                      className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
-                    >
+                    <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${isDarkTheme ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'}`}>
                       CGPA: {calculateCGPA(student.academicDetails)}
-                    </Badge>
+                    </span>
                   </div>
                 </button>
               ))}
             </div>
           )}
+
           {searchQuery && showDropdown && filteredStudents.length === 0 && (
-            <div
-              className={`absolute mt-2 w-full max-w-3xl ${themeStyles.cardBg} rounded-xl shadow-xl ${themeStyles.cardBorder} p-6 text-center z-50`}
-            >
-              <p className={themeStyles.textSecondary}>
+            <div className={`absolute mt-2 left-3 right-3 sm:left-6 sm:right-6 max-w-7xl ${isDarkTheme ? 'bg-slate-900' : 'bg-white'} rounded-xl shadow-xl border-2 ${isDarkTheme ? 'border-slate-700' : 'border-slate-200'} p-4 sm:p-6 text-center z-50`}>
+              <p className={isDarkTheme ? 'text-slate-400' : 'text-slate-600'}>
                 No students found matching "{searchQuery}"
               </p>
             </div>
           )}
         </div>
       </div>
+
       {/* Student Details */}
       {selectedStudent ? (
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="mb-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
+          <div className="mb-4 sm:mb-6">
             <button
               onClick={() => {
                 setSelectedStudent(null);
                 setSearchQuery("");
                 setShowDropdown(false);
               }}
-              className="text-blue-600 dark:text-blue-400 hover:underline mb-4"
+              className={`${isDarkTheme ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} font-medium text-sm sm:text-base`}
             >
               ← Back to search
             </button>
           </div>
-          <div className="space-y-6">
+
+          <div className="space-y-4 sm:space-y-6">
             {/* Profile Header Card */}
-            <Card
-              className={`overflow-hidden ${themeStyles.cardBorder} ${themeStyles.cardShadow}`}
-            >
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 h-32"></div>
-              <CardContent className="pt-0 pb-6">
-                <div className="flex flex-col md:flex-row items-start md:items-end gap-6 -mt-16">
-                  <div className="p-1 bg-white dark:bg-slate-900 rounded-full">
-                    <div className="w-32 h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                      <User className="w-16 h-16 text-white" />
+            <div className={`overflow-hidden rounded-xl border-2 ${isDarkTheme ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-white'} shadow-lg`}>
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 h-24 sm:h-32"></div>
+              <div className="p-4 sm:p-6 pt-0">
+                <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6 -mt-12 sm:-mt-16">
+                  <div className={`p-1 ${isDarkTheme ? 'bg-slate-900' : 'bg-white'} rounded-full`}>
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
+                      <User className="w-12 h-12 sm:w-16 sm:h-16 text-white" />
                     </div>
                   </div>
-                  <div className="flex-1 mt-4 md:mt-0">
-                    <h2
-                      className={`text-3xl font-bold ${themeStyles.textPrimary}`}
-                    >
-                      {selectedStudent.personalInfo.firstName}{" "}
-                      {selectedStudent.personalInfo.middleName}{" "}
-                      {selectedStudent.personalInfo.lastName}
+                  <div className="flex-1 text-center sm:text-left mt-2 sm:mt-0">
+                    <h2 className={`text-xl sm:text-3xl font-bold ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
+                      {selectedStudent.personalInfo.firstName} {selectedStudent.personalInfo.middleName} {selectedStudent.personalInfo.lastName}
                     </h2>
-                    <p className={`text-lg ${themeStyles.textSecondary} mt-1`}>
+                    <p className={`text-base sm:text-lg ${isDarkTheme ? 'text-slate-400' : 'text-slate-600'} mt-1`}>
                       {selectedStudent.academicDetails.branch}
                     </p>
-                    <div className="flex flex-wrap gap-3 mt-4">
-                      <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-0">
+                    <div className="flex flex-wrap justify-center sm:justify-start gap-2 sm:gap-3 mt-3 sm:mt-4">
+                      <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${isDarkTheme ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'}`}>
                         {selectedStudent.prn}
-                      </Badge>
-                      <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-0">
+                      </span>
+                      <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${isDarkTheme ? 'bg-green-900/30 text-green-300' : 'bg-green-100 text-green-700'}`}>
                         CGPA: {calculateCGPA(selectedStudent.academicDetails)}
-                      </Badge>
-                      <Badge className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-0">
+                      </span>
+                      <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${isDarkTheme ? 'bg-purple-900/30 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
                         {selectedStudent.academicDetails.division}
-                      </Badge>
+                      </span>
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+
             {/* Personal Information */}
-            <Card
-              className={`${themeStyles.cardBorder} ${themeStyles.cardShadow}`}
-            >
-              <CardHeader className={`border-b ${themeStyles.dividerBorder}`}>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="w-5 h-5 text-blue-600" />
-                  <span className={themeStyles.textPrimary}>
-                    Personal Information
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <InfoItem
-                    icon={<Mail />}
-                    label="Student Email"
-                    value={selectedStudent.personalInfo.studentEmail}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    icon={<Mail />}
-                    label="Personal Email"
-                    value={selectedStudent.personalInfo.personalEmail}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    icon={<Phone />}
-                    label="Student Mobile"
-                    value={selectedStudent.personalInfo.studentMobNo}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    icon={<Phone />}
-                    label="Parent Mobile"
-                    value={selectedStudent.personalInfo.parentMobNo}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    icon={<MapPin />}
-                    label="Home Town"
-                    value={selectedStudent.personalInfo.homeTown}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    label="Date of Birth"
-                    value={selectedStudent.personalInfo.dateOfBirth}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    label="Gender"
-                    value={selectedStudent.personalInfo.gender}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    label="Aadhar No"
-                    value={selectedStudent.personalInfo.aadharNo}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    label="LinkedIn"
-                    value={selectedStudent.personalInfo.linkedin}
-                    themeStyles={themeStyles}
-                  />
+            <div className={`rounded-xl border-2 ${isDarkTheme ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-white'} shadow-lg overflow-hidden`}>
+              <div className={`px-4 sm:px-6 py-3 sm:py-4 border-b ${isDarkTheme ? 'border-slate-700' : 'border-slate-200'}`}>
+                <h3 className={`text-lg sm:text-xl font-bold flex items-center gap-2 ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
+                  <User className={`w-4 h-4 sm:w-5 sm:h-5 ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
+                  Personal Information
+                </h3>
+              </div>
+              <div className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  <InfoItem icon={<Mail className="w-4 h-4" />} label="Student Email" value={selectedStudent.personalInfo.studentEmail} isDark={isDarkTheme} />
+                  <InfoItem icon={<Mail className="w-4 h-4" />} label="Personal Email" value={selectedStudent.personalInfo.personalEmail} isDark={isDarkTheme} />
+                  <InfoItem icon={<Phone className="w-4 h-4" />} label="Student Mobile" value={selectedStudent.personalInfo.studentMobNo} isDark={isDarkTheme} />
+                  <InfoItem icon={<Phone className="w-4 h-4" />} label="Parent Mobile" value={selectedStudent.personalInfo.parentMobNo} isDark={isDarkTheme} />
+                  <InfoItem icon={<MapPin className="w-4 h-4" />} label="Home Town" value={selectedStudent.personalInfo.homeTown} isDark={isDarkTheme} />
+                  <InfoItem label="Date of Birth" value={selectedStudent.personalInfo.dateOfBirth} isDark={isDarkTheme} />
+                  <InfoItem label="Gender" value={selectedStudent.personalInfo.gender} isDark={isDarkTheme} />
+                  <InfoItem label="Aadhar No" value={selectedStudent.personalInfo.aadharNo} isDark={isDarkTheme} />
+                  <InfoItem label="LinkedIn" value={selectedStudent.personalInfo.linkedin} isDark={isDarkTheme} />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+
             {/* Academic Details */}
-            <Card
-              className={`${themeStyles.cardBorder} ${themeStyles.cardShadow}`}
-            >
-              <CardHeader className={`border-b ${themeStyles.dividerBorder}`}>
-                <CardTitle className="flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5 text-blue-600" />
-                  <span className={themeStyles.textPrimary}>
-                    Academic Details
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  <InfoItem
-                    label="Course"
-                    value={selectedStudent.academicDetails.courseName}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    label="Branch"
-                    value={selectedStudent.academicDetails.branch}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    label="Roll No"
-                    value={selectedStudent.academicDetails.rollNo}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    label="University Reg No"
-                    value={selectedStudent.academicDetails.universityRegNo}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    label="Year of Completion"
-                    value={selectedStudent.academicDetails.yearOfCompletion}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    label="Honours"
-                    value={selectedStudent.academicDetails.honours || "None"}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    label="Live Backlogs"
-                    value={selectedStudent.academicDetails.liveBacklogs}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    label="Dead Backlogs"
-                    value={selectedStudent.academicDetails.deadBacklogs}
-                    themeStyles={themeStyles}
-                  />
-                  <InfoItem
-                    label="Years Down"
-                    value={selectedStudent.academicDetails.yearsDown}
-                    themeStyles={themeStyles}
-                  />
+            <div className={`rounded-xl border-2 ${isDarkTheme ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-white'} shadow-lg overflow-hidden`}>
+              <div className={`px-4 sm:px-6 py-3 sm:py-4 border-b ${isDarkTheme ? 'border-slate-700' : 'border-slate-200'}`}>
+                <h3 className={`text-lg sm:text-xl font-bold flex items-center gap-2 ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
+                  <GraduationCap className={`w-4 h-4 sm:w-5 sm:h-5 ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
+                  Academic Details
+                </h3>
+              </div>
+              <div className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                  <InfoItem label="Course" value={selectedStudent.academicDetails.courseName} isDark={isDarkTheme} />
+                  <InfoItem label="Branch" value={selectedStudent.academicDetails.branch} isDark={isDarkTheme} />
+                  <InfoItem label="Roll No" value={selectedStudent.academicDetails.rollNo} isDark={isDarkTheme} />
+                  <InfoItem label="University Reg No" value={selectedStudent.academicDetails.universityRegNo} isDark={isDarkTheme} />
+                  <InfoItem label="Year of Completion" value={selectedStudent.academicDetails.yearOfCompletion} isDark={isDarkTheme} />
+                  <InfoItem label="Honours" value={selectedStudent.academicDetails.honours || "None"} isDark={isDarkTheme} />
+                  <InfoItem label="Live Backlogs" value={selectedStudent.academicDetails.liveBacklogs} isDark={isDarkTheme} />
+                  <InfoItem label="Dead Backlogs" value={selectedStudent.academicDetails.deadBacklogs} isDark={isDarkTheme} />
+                  <InfoItem label="Years Down" value={selectedStudent.academicDetails.yearsDown} isDark={isDarkTheme} />
                 </div>
-                <h4
-                  className={`font-semibold text-lg mb-4 ${themeStyles.textPrimary}`}
-                >
+                <h4 className={`font-semibold text-base sm:text-lg mb-3 sm:mb-4 ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
                   Semester-wise SGPA
                 </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
                   {Object.entries(selectedStudent.academicDetails)
                     .filter(([key]) => key.includes("Sem"))
                     .map(([key, value]) => (
-                      <div
-                        key={key}
-                        className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4 text-center"
-                      >
-                        <p
-                          className={`text-xs ${themeStyles.textSecondary} mb-1`}
-                        >
+                      <div key={key} className={`${isDarkTheme ? 'bg-slate-800' : 'bg-slate-50'} rounded-lg p-3 sm:p-4 text-center`}>
+                        <p className={`text-xs ${isDarkTheme ? 'text-slate-400' : 'text-slate-600'} mb-1`}>
                           {key.replace("Sem", " Sem ").toUpperCase()}
                         </p>
-                        <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                        <p className={`text-lg sm:text-xl font-bold ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`}>
                           {value.sgpa || "-"}
                         </p>
                       </div>
                     ))}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+
             {/* Past Qualifications */}
-            <Card
-              className={`${themeStyles.cardBorder} ${themeStyles.cardShadow}`}
-            >
-              <CardHeader className={`border-b ${themeStyles.dividerBorder}`}>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="w-5 h-5 text-blue-600" />
-                  <span className={themeStyles.textPrimary}>
-                    Past Qualifications
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
+            <div className={`rounded-xl border-2 ${isDarkTheme ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-white'} shadow-lg overflow-hidden`}>
+              <div className={`px-4 sm:px-6 py-3 sm:py-4 border-b ${isDarkTheme ? 'border-slate-700' : 'border-slate-200'}`}>
+                <h3 className={`text-lg sm:text-xl font-bold flex items-center gap-2 ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
+                  <Award className={`w-4 h-4 sm:w-5 sm:h-5 ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
+                  Past Qualifications
+                </h3>
+              </div>
+              <div className="p-4 sm:p-6">
                 <div className="space-y-6">
                   <div>
-                    <h4
-                      className={`font-semibold text-lg mb-4 ${themeStyles.textPrimary}`}
-                    >
+                    <h4 className={`font-semibold text-base sm:text-lg mb-3 sm:mb-4 ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
                       SSC Details
                     </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      <InfoItem
-                        label="Board"
-                        value={selectedStudent.pastQualifications.ssc.board}
-                        themeStyles={themeStyles}
-                      />
-                      <InfoItem
-                        label="School Name"
-                        value={
-                          selectedStudent.pastQualifications.ssc.schoolName
-                        }
-                        themeStyles={themeStyles}
-                      />
-                      <InfoItem
-                        label="Passing Year"
-                        value={
-                          selectedStudent.pastQualifications.ssc.passingYear
-                        }
-                        themeStyles={themeStyles}
-                      />
-                      <InfoItem
-                        label="Percentage"
-                        value={`${selectedStudent.pastQualifications.ssc.percentage}%`}
-                        themeStyles={themeStyles}
-                      />
-                      <InfoItem
-                        label="City"
-                        value={selectedStudent.pastQualifications.ssc.city}
-                        themeStyles={themeStyles}
-                      />
-                      <InfoItem
-                        label="State"
-                        value={selectedStudent.pastQualifications.ssc.state}
-                        themeStyles={themeStyles}
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                      <InfoItem label="Board" value={selectedStudent.pastQualifications.ssc.board} isDark={isDarkTheme} />
+                      <InfoItem label="School Name" value={selectedStudent.pastQualifications.ssc.schoolName} isDark={isDarkTheme} />
+                      <InfoItem label="Passing Year" value={selectedStudent.pastQualifications.ssc.passingYear} isDark={isDarkTheme} />
+                      <InfoItem label="Percentage" value={`${selectedStudent.pastQualifications.ssc.percentage}%`} isDark={isDarkTheme} />
+                      <InfoItem label="City" value={selectedStudent.pastQualifications.ssc.city} isDark={isDarkTheme} />
+                      <InfoItem label="State" value={selectedStudent.pastQualifications.ssc.state} isDark={isDarkTheme} />
                     </div>
                   </div>
                   <div>
-                    <h4
-                      className={`font-semibold text-lg mb-4 ${themeStyles.textPrimary}`}
-                    >
+                    <h4 className={`font-semibold text-base sm:text-lg mb-3 sm:mb-4 ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
                       HSC Details
                     </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      <InfoItem
-                        label="Board"
-                        value={selectedStudent.pastQualifications.hsc.board}
-                        themeStyles={themeStyles}
-                      />
-                      <InfoItem
-                        label="College Name"
-                        value={
-                          selectedStudent.pastQualifications.hsc.collegeName
-                        }
-                        themeStyles={themeStyles}
-                      />
-                      <InfoItem
-                        label="Passing Year"
-                        value={
-                          selectedStudent.pastQualifications.hsc.passingYear
-                        }
-                        themeStyles={themeStyles}
-                      />
-                      <InfoItem
-                        label="Percentage"
-                        value={`${selectedStudent.pastQualifications.hsc.percentage}%`}
-                        themeStyles={themeStyles}
-                      />
-                      <InfoItem
-                        label="City"
-                        value={selectedStudent.pastQualifications.hsc.city}
-                        themeStyles={themeStyles}
-                      />
-                      <InfoItem
-                        label="State"
-                        value={selectedStudent.pastQualifications.hsc.state}
-                        themeStyles={themeStyles}
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                      <InfoItem label="Board" value={selectedStudent.pastQualifications.hsc.board} isDark={isDarkTheme} />
+                      <InfoItem label="College Name" value={selectedStudent.pastQualifications.hsc.collegeName} isDark={isDarkTheme} />
+                      <InfoItem label="Passing Year" value={selectedStudent.pastQualifications.hsc.passingYear} isDark={isDarkTheme} />
+                      <InfoItem label="Percentage" value={`${selectedStudent.pastQualifications.hsc.percentage}%`} isDark={isDarkTheme} />
+                      <InfoItem label="City" value={selectedStudent.pastQualifications.hsc.city} isDark={isDarkTheme} />
+                      <InfoItem label="State" value={selectedStudent.pastQualifications.hsc.state} isDark={isDarkTheme} />
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+
             {/* Achievements & Coding Platforms */}
-            <Card
-              className={`${themeStyles.cardBorder} ${themeStyles.cardShadow}`}
-            >
-              <CardHeader className={`border-b ${themeStyles.dividerBorder}`}>
-                <CardTitle className="flex items-center gap-2">
-                  <Code className="w-5 h-5 text-blue-600" />
-                  <span className={themeStyles.textPrimary}>
-                    Achievements & Coding Profiles
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
+            <div className={`rounded-xl border-2 ${isDarkTheme ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-white'} shadow-lg overflow-hidden`}>
+              <div className={`px-4 sm:px-6 py-3 sm:py-4 border-b ${isDarkTheme ? 'border-slate-700' : 'border-slate-200'}`}>
+                <h3 className={`text-lg sm:text-xl font-bold flex items-center gap-2 ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
+                  <Code className={`w-4 h-4 sm:w-5 sm:h-5 ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
+                  Achievements & Coding Profiles
+                </h3>
+              </div>
+              <div className="p-4 sm:p-6">
                 <div className="space-y-6">
                   {/* Certificates */}
                   <div>
-                    <h4
-                      className={`font-semibold text-lg mb-3 ${themeStyles.textPrimary}`}
-                    >
+                    <h4 className={`font-semibold text-base sm:text-lg mb-3 ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
                       Certificates
                     </h4>
-                    {selectedStudent.otherInfo.certificates &&
-                    selectedStudent.otherInfo.certificates.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {selectedStudent.otherInfo.certificates.map(
-                          (cert, index) => (
-                            <div
-                              key={index}
-                              className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700"
-                            >
-                              <p
-                                className={`font-semibold ${themeStyles.textPrimary} mb-1`}
-                              >
-                                {cert.name}
-                              </p>
-                              <p
-                                className={`text-sm ${themeStyles.textSecondary}`}
-                              >
-                                {cert.issuer}
-                              </p>
-                              <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-0 text-xs mt-2">
-                                {cert.year}
-                              </Badge>
-                            </div>
-                          )
-                        )}
+                    {selectedStudent.otherInfo.certificates && selectedStudent.otherInfo.certificates.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                        {selectedStudent.otherInfo.certificates.map((cert, index) => (
+                          <div key={index} className={`${isDarkTheme ? 'bg-slate-800 border-slate-600' : 'bg-white border-slate-300'} p-4 rounded-lg border-2 shadow-sm hover:shadow-md transition-shadow`}>
+                            <p className={`font-semibold text-sm sm:text-base ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'} mb-1`}>
+                              {cert.name}
+                            </p>
+                            <p className={`text-xs sm:text-sm ${isDarkTheme ? 'text-slate-400' : 'text-slate-700'}`}>
+                              {cert.issuer}
+                            </p>
+                            <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-2 ${isDarkTheme ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'}`}>
+                              {cert.year}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     ) : (
-                      <p
-                        className={`text-sm ${themeStyles.textSecondary} bg-slate-50 dark:bg-slate-800 p-4 rounded-lg`}
-                      >
+                      <p className={`text-sm ${isDarkTheme ? 'text-slate-400 bg-slate-800' : 'text-slate-600 bg-slate-50'} p-4 rounded-lg`}>
                         Not provided
                       </p>
                     )}
                   </div>
+
                   {/* Projects */}
                   <div>
-                    <h4
-                      className={`font-semibold text-lg mb-3 ${themeStyles.textPrimary}`}
-                    >
+                    <h4 className={`font-semibold text-base sm:text-lg mb-3 ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
                       Projects
                     </h4>
-                    {selectedStudent.otherInfo.projects &&
-                    selectedStudent.otherInfo.projects.length > 0 ? (
-                      <div className="space-y-4">
-                        {selectedStudent.otherInfo.projects.map(
-                          (project, index) => (
-                            <div
-                              key={index}
-                              className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700"
-                            >
-                              <p
-                                className={`font-semibold ${themeStyles.textPrimary} mb-2`}
-                              >
-                                {project.title}
-                              </p>
-                              <p
-                                className={`text-sm ${themeStyles.textSecondary} mb-2`}
-                              >
-                                {project.description}
-                              </p>
-                              <div className="flex flex-wrap gap-1">
-                                {project.technologies
-                                  .split(",")
-                                  .map((tech, i) => (
-                                    <Badge
-                                      key={i}
-                                      variant="secondary"
-                                      className="text-xs"
-                                    >
-                                      {tech.trim()}
-                                    </Badge>
-                                  ))}
-                              </div>
+                    {selectedStudent.otherInfo.projects && selectedStudent.otherInfo.projects.length > 0 ? (
+                      <div className="space-y-3 sm:space-y-4">
+                        {selectedStudent.otherInfo.projects.map((project, index) => (
+                          <div key={index} className={`${isDarkTheme ? 'bg-slate-800 border-slate-600' : 'bg-white border-slate-300'} p-4 rounded-lg border-2 shadow-sm hover:shadow-md transition-shadow`}>
+                            <p className={`font-semibold text-sm sm:text-base ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'} mb-2`}>
+                              {project.title}
+                            </p>
+                            <p className={`text-xs sm:text-sm ${isDarkTheme ? 'text-slate-400' : 'text-slate-700'} mb-2`}>
+                              {project.description}
+                            </p>
+                            <div className="flex flex-wrap gap-1">
+                              {project.technologies.split(",").map((tech, i) => (
+                                <span key={i} className={`px-2 py-1 rounded text-xs font-medium ${isDarkTheme ? 'bg-slate-700 text-slate-300' : 'bg-slate-200 text-slate-700'}`}>
+                                  {tech.trim()}
+                                </span>
+                              ))}
                             </div>
-                          )
-                        )}
+                          </div>
+                        ))}
                       </div>
                     ) : (
-                      <p
-                        className={`text-sm ${themeStyles.textSecondary} bg-slate-50 dark:bg-slate-800 p-4 rounded-lg`}
-                      >
+                      <p className={`text-sm ${isDarkTheme ? 'text-slate-400 bg-slate-800' : 'text-slate-600 bg-slate-50'} p-4 rounded-lg`}>
                         Not provided
                       </p>
                     )}
                   </div>
+
                   {/* Internships */}
                   <div>
-                    <h4
-                      className={`font-semibold text-lg mb-3 ${themeStyles.textPrimary}`}
-                    >
+                    <h4 className={`font-semibold text-base sm:text-lg mb-3 ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
                       Internships
                     </h4>
-                    {selectedStudent.otherInfo.internships &&
-                    selectedStudent.otherInfo.internships.length > 0 ? (
-                      <div className="space-y-4">
-                        {selectedStudent.otherInfo.internships.map(
-                          (internship, index) => (
-                            <div
-                              key={index}
-                              className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700"
-                            >
-                              <div className="flex items-start justify-between mb-2">
-                                <p
-                                  className={`font-semibold ${themeStyles.textPrimary}`}
-                                >
-                                  {internship.role}
-                                </p>
-                                <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-0 text-xs">
-                                  {internship.duration}
-                                </Badge>
-                              </div>
-                              <p
-                                className={`text-sm font-medium text-blue-600 dark:text-blue-400 mb-2`}
-                              >
-                                {internship.company}
+                    {selectedStudent.otherInfo.internships && selectedStudent.otherInfo.internships.length > 0 ? (
+                      <div className="space-y-3 sm:space-y-4">
+                        {selectedStudent.otherInfo.internships.map((internship, index) => (
+                          <div key={index} className={`${isDarkTheme ? 'bg-slate-800 border-slate-600' : 'bg-white border-slate-300'} p-4 rounded-lg border-2 shadow-sm hover:shadow-md transition-shadow`}>
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
+                              <p className={`font-semibold text-sm sm:text-base ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
+                                {internship.role}
                               </p>
-                              <p
-                                className={`text-sm ${themeStyles.textSecondary}`}
-                              >
-                                {internship.description}
-                              </p>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium self-start ${isDarkTheme ? 'bg-green-900/30 text-green-300' : 'bg-green-100 text-green-700'}`}>
+                                {internship.duration}
+                              </span>
                             </div>
-                          )
-                        )}
+                            <p className={`text-sm font-medium mb-2 ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`}>
+                              {internship.company}
+                            </p>
+                            <p className={`text-xs sm:text-sm ${isDarkTheme ? 'text-slate-400' : 'text-slate-700'}`}>
+                              {internship.description}
+                            </p>
+                          </div>
+                        ))}
                       </div>
                     ) : (
-                      <p
-                        className={`text-sm ${themeStyles.textSecondary} bg-slate-50 dark:bg-slate-800 p-4 rounded-lg`}
-                      >
+                      <p className={`text-sm ${isDarkTheme ? 'text-slate-400 bg-slate-800' : 'text-slate-600 bg-slate-50'} p-4 rounded-lg`}>
                         Not provided
                       </p>
                     )}
                   </div>
+
                   <div>
-                    <h4
-                      className={`font-semibold text-lg mb-3 ${themeStyles.textPrimary}`}
-                    >
+                    <h4 className={`font-semibold text-base sm:text-lg mb-3 ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
                       Technical Achievements
                     </h4>
-                    <p
-                      className={`text-sm ${themeStyles.textSecondary} bg-slate-50 dark:bg-slate-800 p-4 rounded-lg`}
-                    >
-                      {selectedStudent.otherInfo.technicalAchievements ||
-                        "Not provided"}
+                    <p className={`text-xs sm:text-sm ${isDarkTheme ? 'text-slate-400 bg-slate-800' : 'text-slate-700 bg-slate-50'} p-4 rounded-lg`}>
+                      {selectedStudent.otherInfo.technicalAchievements || "Not provided"}
                     </p>
                   </div>
+
                   <div>
-                    <h4
-                      className={`font-semibold text-lg mb-3 ${themeStyles.textPrimary}`}
-                    >
+                    <h4 className={`font-semibold text-base sm:text-lg mb-3 ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
                       Non-Technical Achievements
                     </h4>
-                    <p
-                      className={`text-sm ${themeStyles.textSecondary} bg-slate-50 dark:bg-slate-800 p-4 rounded-lg`}
-                    >
-                      {selectedStudent.otherInfo.nonTechnicalAchievements ||
-                        "Not provided"}
+                    <p className={`text-xs sm:text-sm ${isDarkTheme ? 'text-slate-400 bg-slate-800' : 'text-slate-700 bg-slate-50'} p-4 rounded-lg`}>
+                      {selectedStudent.otherInfo.nonTechnicalAchievements || "Not provided"}
                     </p>
                   </div>
+
                   <div>
-                    <h4
-                      className={`font-semibold text-lg mb-4 ${themeStyles.textPrimary}`}
-                    >
+                    <h4 className={`font-semibold text-base sm:text-lg mb-3 sm:mb-4 ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'}`}>
                       Coding Platforms
                     </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {Object.entries(
-                        selectedStudent.otherInfo.codingPlatforms
-                      ).map(
-                        ([platform, data]) =>
-                          data.profile && (
-                            <div
-                              key={platform}
-                              className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700"
-                            >
-                              <p
-                                className={`text-xs font-semibold ${themeStyles.textTertiary} uppercase mb-1`}
-                              >
-                                {platform}
-                              </p>
-                              <p
-                                className={`text-sm ${themeStyles.textSecondary} mb-1`}
-                              >
-                                {data.profile}
-                              </p>
-                              {data.rating && (
-                                <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-0 text-xs">
-                                  {data.rating}
-                                </Badge>
-                              )}
-                            </div>
-                          )
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      {Object.entries(selectedStudent.otherInfo.codingPlatforms).map(([platform, data]) =>
+                        data.profile && (
+                          <div key={platform} className={`${isDarkTheme ? 'bg-slate-800 border-slate-600' : 'bg-white border-slate-300'} p-4 rounded-lg border-2 shadow-sm`}>
+                            <p className={`text-xs font-semibold uppercase mb-1 ${isDarkTheme ? 'text-slate-500' : 'text-slate-400'}`}>
+                              {platform}
+                            </p>
+                            <p className={`text-xs sm:text-sm ${isDarkTheme ? 'text-slate-400' : 'text-slate-700'} mb-1 break-all`}>
+                              {data.profile}
+                            </p>
+                            {data.rating && (
+                              <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${isDarkTheme ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'}`}>
+                                {data.rating}
+                              </span>
+                            )}
+                          </div>
+                        )
                       )}
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       ) : (
-        <div className="max-w-7xl mx-auto px-6 py-20">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-12 sm:py-20">
           <div className="text-center">
-            <div className="inline-flex p-6 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-6">
-              <Search className="w-16 h-16 text-blue-600 dark:text-blue-400" />
+            <div className={`inline-flex p-4 sm:p-6 ${isDarkTheme ? 'bg-blue-900/30' : 'bg-blue-100'} rounded-full mb-4 sm:mb-6`}>
+              <Search className={`w-12 h-12 sm:w-16 sm:h-16 ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'}`} />
             </div>
-            <h2
-              className={`text-2xl font-bold ${themeStyles.textPrimary} mb-3`}
-            >
+            <h2 className={`text-xl sm:text-2xl font-bold ${isDarkTheme ? 'text-slate-50' : 'text-slate-900'} mb-2 sm:mb-3`}>
               Search for a Student
             </h2>
-            <p
-              className={`text-sm ${themeStyles.textSecondary} max-w-md mx-auto`}
-            >
-              Enter a PRN number or student name in the search box above to view
-              detailed placement records and academic information.
+            <p className={`text-sm ${isDarkTheme ? 'text-slate-400' : 'text-slate-600'} max-w-md mx-auto px-4`}>
+              Enter a PRN number or student name in the search box above to view detailed placement records and academic information.
             </p>
           </div>
         </div>
@@ -1218,13 +880,13 @@ const TrackAndPlacement = () => {
 };
 
 // Helper component for displaying information
-const InfoItem = ({ icon, label, value, themeStyles }) => (
+const InfoItem = ({ icon, label, value, isDark }) => (
   <div className="space-y-1">
     <div className="flex items-center gap-2">
-      {icon && <span className="text-slate-400 w-4 h-4">{icon}</span>}
-      <label className={`text-sm ${themeStyles.textSecondary}`}>{label}</label>
+      {icon && <span className={isDark ? 'text-slate-500' : 'text-slate-400'}>{icon}</span>}
+      <label className={`text-xs sm:text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{label}</label>
     </div>
-    <p className={`text-base font-medium ${themeStyles.textPrimary}`}>
+    <p className={`text-sm sm:text-base font-medium ${isDark ? 'text-slate-50' : 'text-slate-900'} break-words`}>
       {value || "Not provided"}
     </p>
   </div>
