@@ -23,6 +23,7 @@ import Profile from "./components/StudentDashboard/Profile";
 import ProjectManager from "./components/StudentDashboard/Project";
 import StudentCalendar from "./components/StudentDashboard/Calender";
 import ResumeBuilder from "./components/StudentDashboard/ResumeBuilder/ResumeBuilder";
+import VolunteerNotifications from "./components/StudentDashboard/Notification";
 
 import AdminDash from "./Pages/AdminDash/AdminDash";
 import Calendar from "./components/AdminDashboard/Calendar";
@@ -37,6 +38,12 @@ import Addstudent from "./components/AdminDashboard/Student/AddSudent";
 import NotificationAdmin from "./components/AdminDashboard/Notification/Notification";
 
 import CollegeCoordinatorDash from "./Pages/CollegeCoordinatordash/CollegeCoordinatorDash";
+import DrivesListVolunteer from './components/CollegeCoordinator/Volunteer/DrivesListVolunteer';
+import StudentListVolunteer from './components/CollegeCoordinator/Students/StudentListVolunteer';
+import ResultsPageVolunteer from './components/CollegeCoordinator/Results/ResultsPageVolunteer';
+import CoordinatorNotifications from './components/CollegeCoordinator/Notification/Notification';
+import CoordinatorCalendar from "./components/CollegeCoordinator/Calendar/Calendar";
+import SettingsPage from "./components/CollegeCoordinator/Setting/Setting";
 import FirstLogin from "./Pages/FirstTimeLogin";
 
 function App() {
@@ -90,13 +97,18 @@ function App() {
         <Route path="profilesettings" element={<Profile />} />
         <Route path="calender" element={<StudentCalendar />} />
         <Route path="resume" element={<ResumeBuilder />} />
+        <Route path="notifications" element={<VolunteerNotifications />} />
       </Route>
 
-      <Route
-        path="/collegecoordinatordashboard"
-        element={<CollegeCoordinatorDash />}
-      >
+      <Route path="/collegecoordinatordashboard" element={<CollegeCoordinatorDash />}> 
+        <Route path="volunteer" element={<DrivesListVolunteer />} />
+          <Route path="student/details" element={<StudentListVolunteer />} />
+          <Route path="results" element={<ResultsPageVolunteer />} />
+          <Route path="notifications" element={<CoordinatorNotifications />} />
+          <Route path="calender" element={<CoordinatorCalendar />} />
+          <Route path="settings" element={<SettingsPage />} />
       </Route>
+
     </Routes>
   );
 }

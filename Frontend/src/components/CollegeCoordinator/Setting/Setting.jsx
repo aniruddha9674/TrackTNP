@@ -16,7 +16,7 @@ import {
   Key,
   UserCog,
 } from "lucide-react";
-import { useTheme } from "../../Utils/context/ThemeContext";
+import { useTheme } from "../../../Utils/context/ThemeContext";
 
 // Light Theme Function
 const getLightTheme = () => ({

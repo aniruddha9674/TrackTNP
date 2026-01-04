@@ -19,6 +19,7 @@ import {
   ChevronDown,
   Bell,
   NotebookPen,
+  TrendingUp,
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
 
@@ -165,6 +166,11 @@ const Dashboard = () => {
       path: "/collegecoordinatordashboard/volunteer",
     },
     {
+      icon: <TrendingUp className="w-6 h-6" />,
+      name: "Results",
+      path: "/collegecoordinatordashboard/results",
+    },
+    {
       icon: <User className="w-6 h-6" />,
       name: "Students",
       children: [
@@ -188,7 +194,6 @@ const Dashboard = () => {
       name: "Notifications",
       path: "/collegecoordinatordashboard/notifications",
     },
-
     {
       icon: <Calendar className="w-6 h-6" />,
       name: "Calendar",
@@ -227,25 +232,22 @@ const Dashboard = () => {
         <button
           onClick={() => setOpen(!open)}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-base
-            ${
-              activeChild
-                ? themeStyles.sidebarNavItemActive
-                : themeStyles.sidebarNavItem
+            ${activeChild
+              ? themeStyles.sidebarNavItemActive
+              : themeStyles.sidebarNavItem
             }
             ${!sidebarExpanded && themeStyles.sidebarNavItemCollapsed}`}
         >
           {/* Icon */}
           <div
             className={`transition-transform duration-300
-              ${
-                sidebarExpanded
-                  ? themeStyles.sidebarNavItemIconExpanded
-                  : themeStyles.sidebarNavItemIconCollapsed
+              ${sidebarExpanded
+                ? themeStyles.sidebarNavItemIconExpanded
+                : themeStyles.sidebarNavItemIconCollapsed
               }
-              ${
-                activeChild
-                  ? themeStyles.sidebarNavItemIconActive
-                  : themeStyles.sidebarNavItemIcon
+              ${activeChild
+                ? themeStyles.sidebarNavItemIconActive
+                : themeStyles.sidebarNavItemIcon
               }`}
           >
             {item.icon}
@@ -254,9 +256,8 @@ const Dashboard = () => {
           {/* Name */}
           {sidebarExpanded && (
             <span
-              className={`font-medium ${
-                activeChild ? themeStyles.activeText : themeStyles.textPrimary
-              }`}
+              className={`font-medium ${activeChild ? themeStyles.activeText : themeStyles.textPrimary
+                }`}
             >
               {item.name}
             </span>
@@ -265,9 +266,8 @@ const Dashboard = () => {
           {/* Arrow */}
           {sidebarExpanded && (
             <ChevronDown
-              className={`ml-auto w-4 h-4 transition-transform ${
-                open ? "rotate-180" : ""
-              }`}
+              className={`ml-auto w-4 h-4 transition-transform ${open ? "rotate-180" : ""
+                }`}
             />
           )}
         </button>
@@ -280,11 +280,10 @@ const Dashboard = () => {
                 key={child.name}
                 to={child.path}
                 className={`px-2 py-2 text-sm rounded-lg transition-all
-                ${
-                  location.pathname === child.path
+                ${location.pathname === child.path
                     ? "text-blue-500 font-semibold"
                     : themeStyles.textSecondary
-                }
+                  }
                 hover:text-blue-500`}
               >
                 {child.name}
@@ -341,39 +340,33 @@ const Dashboard = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-screen ${themeStyles.surface} ${
-          themeStyles.sidebarBorder
-        } transition-all duration-300
-        ${
-          sidebarExpanded
+        className={`fixed top-0 left-0 z-40 h-screen ${themeStyles.surface} ${themeStyles.sidebarBorder
+          } transition-all duration-300
+        ${sidebarExpanded
             ? themeStyles.sidebarWidth
             : themeStyles.sidebarCollapsedWidth
-        }
-        ${
-          sidebarOpen ? themeStyles.sidebarTranslate : themeStyles.sidebarHidden
-        }
+          }
+        ${sidebarOpen ? themeStyles.sidebarTranslate : themeStyles.sidebarHidden
+          }
         ${themeStyles.sidebarExpanded} group`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div
-            className={`flex items-center h-16 px-6 border-b ${
-              themeStyles.border
-            } ${!sidebarExpanded && "justify-center"}`}
+            className={`flex items-center h-16 px-6 border-b ${themeStyles.border
+              } ${!sidebarExpanded && "justify-center"}`}
           >
             <img
               src={isDarkTheme ? DarkLogo : LightLogo}
               alt="Logo"
-              className={`w-8 h-8 ${
-                !sidebarExpanded ? "block" : "hidden lg:block"
-              }`}
+              className={`w-8 h-8 ${!sidebarExpanded ? "block" : "hidden lg:block"
+                }`}
             />
             <div
-              className={`text-2xl font-bold pl-1 ${
-                sidebarExpanded
-                  ? themeStyles.sidebarLogoText
-                  : themeStyles.sidebarLogoTextCollapsed
-              } ${!sidebarExpanded && "hidden"}`}
+              className={`text-2xl font-bold pl-1 ${sidebarExpanded
+                ? themeStyles.sidebarLogoText
+                : themeStyles.sidebarLogoTextCollapsed
+                } ${!sidebarExpanded && "hidden"}`}
             >
               TRACKTNP
             </div>
@@ -396,36 +389,32 @@ const Dashboard = () => {
                         to={item.path}
                         onClick={() => setSidebarOpen(false)}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-base 
-          ${
-            isActive(item.path)
-              ? themeStyles.sidebarNavItemActive
-              : themeStyles.sidebarNavItem
-          }
+          ${isActive(item.path)
+                            ? themeStyles.sidebarNavItemActive
+                            : themeStyles.sidebarNavItem
+                          }
           ${!sidebarExpanded && themeStyles.sidebarNavItemCollapsed}`}
                       >
                         <div
                           className={`transition-transform duration-300
-              ${
-                sidebarExpanded
-                  ? themeStyles.sidebarNavItemIconExpanded
-                  : themeStyles.sidebarNavItemIconCollapsed
-              }
-              ${
-                isActive(item.path)
-                  ? themeStyles.sidebarNavItemIconActive
-                  : themeStyles.sidebarNavItemIcon
-              }`}
+              ${sidebarExpanded
+                              ? themeStyles.sidebarNavItemIconExpanded
+                              : themeStyles.sidebarNavItemIconCollapsed
+                            }
+              ${isActive(item.path)
+                              ? themeStyles.sidebarNavItemIconActive
+                              : themeStyles.sidebarNavItemIcon
+                            }`}
                         >
                           {item.icon}
                         </div>
 
                         {sidebarExpanded && (
                           <span
-                            className={`font-medium ${
-                              isActive(item.path)
-                                ? themeStyles.activeText
-                                : themeStyles.textPrimary
-                            }`}
+                            className={`font-medium ${isActive(item.path)
+                              ? themeStyles.activeText
+                              : themeStyles.textPrimary
+                              }`}
                           >
                             {item.name}
                           </span>
@@ -442,18 +431,15 @@ const Dashboard = () => {
           <div className={`p-4 border-t ${themeStyles.border}`}>
             <button
               onClick={() => setShowLogoutModal(true)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                themeStyles.sidebarLogout
-              } ${themeStyles.sidebarNavItemInactive} border-transparent ${
-                !sidebarExpanded && themeStyles.sidebarNavItemCollapsed
-              }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${themeStyles.sidebarLogout
+                } ${themeStyles.sidebarNavItemInactive} border-transparent ${!sidebarExpanded && themeStyles.sidebarNavItemCollapsed
+                }`}
             >
               <div
-                className={`transition-transform duration-300 ${
-                  sidebarExpanded
-                    ? themeStyles.sidebarNavItemIconExpanded
-                    : themeStyles.sidebarNavItemIconCollapsed
-                } ${themeStyles.sidebarNavItemIcon}`}
+                className={`transition-transform duration-300 ${sidebarExpanded
+                  ? themeStyles.sidebarNavItemIconExpanded
+                  : themeStyles.sidebarNavItemIconCollapsed
+                  } ${themeStyles.sidebarNavItemIcon}`}
               >
                 <LogOut className="w-6 h-6" />
               </div>
@@ -477,9 +463,8 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <div
-        className={`transition-all duration-300 ${
-          sidebarExpanded ? "lg:ml-62" : "lg:ml-20"
-        }`}
+        className={`transition-all duration-300 ${sidebarExpanded ? "lg:ml-62" : "lg:ml-20"
+          }`}
       >
         {/* Top Bar */}
         <header

@@ -16,6 +16,7 @@ import {
   Sun,
   Moon,
   User,
+  Bell,
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
 
@@ -146,6 +147,11 @@ const Dashboard = () => {
       icon: <Building className="w-6 h-6" />,
       name: "Company Registration",
       path: "/studentdashboard/companyregistration",
+    },
+    {
+      icon: <Bell className="w-6 h-6" />,
+      name: "Notifications",
+      path: "/studentdashboard/notifications",
     },
     {
       icon: <FileText className="w-6 h-6" />,
