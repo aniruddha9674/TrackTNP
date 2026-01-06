@@ -39,9 +39,9 @@ const OfferLetterManager = () => {
     const avgPackage =
       offers.length > 0
         ? offers.reduce(
-            (sum, offer) => sum + (parseFloat(offer.packageValue) || 0),
-            0
-          ) / offers.length
+          (sum, offer) => sum + (parseFloat(offer.packageValue) || 0),
+          0
+        ) / offers.length
         : 0;
     const uniqueCompanies = new Set(offers.map((o) => o.companyName)).size;
     return { totalOffers, finalOffers, avgPackage, uniqueCompanies };
@@ -77,11 +77,11 @@ const OfferLetterManager = () => {
         prev.map((offer) =>
           offer.id === editingId
             ? {
-                ...formData,
-                id: editingId,
-                status: modalType,
-                createdAt: offer.createdAt,
-              }
+              ...formData,
+              id: editingId,
+              status: modalType,
+              createdAt: offer.createdAt,
+            }
             : offer
         )
       );
@@ -262,9 +262,8 @@ const OfferLetterManager = () => {
             {value || "Select an option"}
           </span>
           <ChevronDown
-            className={`h-4 w-4 transition-transform ${
-              isOpen ? "rotate-180" : ""
-            }`}
+            className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""
+              }`}
           />
         </button>
         {isOpen && !disabled && (
@@ -283,11 +282,9 @@ const OfferLetterManager = () => {
                     onChange(option);
                     setIsOpen(false);
                   }}
-                  className={`px-4 py-2 cursor-pointer ${
-                    themeStyles.selectItemHover
-                  } ${themeStyles.textPrimary} ${
-                    value === option ? themeStyles.emptyStateBg : ""
-                  }`}
+                  className={`px-4 py-2 cursor-pointer ${themeStyles.selectItemHover
+                    } ${themeStyles.textPrimary} ${value === option ? themeStyles.emptyStateBg : ""
+                    }`}
                 >
                   {option}
                 </div>
@@ -318,9 +315,6 @@ const OfferLetterManager = () => {
             <h1 className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
               Offer Letter
             </h1>
-            <p className={`${themeStyles.textSecondary} mt-1`}>
-              Manage your job offers and final offer letters
-            </p>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -505,11 +499,10 @@ const OfferLetterManager = () => {
                   className={`rounded-xl border overflow-hidden ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all duration-300`}
                 >
                   <div
-                    className={`h-2 ${
-                      offer.status === "final"
+                    className={`h-2 ${offer.status === "final"
                         ? "bg-gradient-to-r from-green-600 to-green-400"
                         : "bg-gradient-to-r from-blue-600 to-blue-400"
-                    }`}
+                      }`}
                   />
 
                   <div className="p-6">
@@ -520,11 +513,10 @@ const OfferLetterManager = () => {
                         {offer.companyName}
                       </h3>
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${
-                          offer.status === "final"
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${offer.status === "final"
                             ? themeStyles.statusFinalBg
                             : themeStyles.statusOfferBg
-                        }`}
+                          }`}
                       >
                         {offer.status === "final" ? "Final" : "Offer"}
                       </span>
@@ -637,21 +629,18 @@ const OfferLetterManager = () => {
               >
                 <h2 className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
                   {viewMode
-                    ? `${
-                        modalType === "final"
-                          ? "Final Offer Letter"
-                          : "Offer Letter"
-                      } Details`
+                    ? `${modalType === "final"
+                      ? "Final Offer Letter"
+                      : "Offer Letter"
+                    } Details`
                     : editingId
-                    ? `Edit ${
-                        modalType === "final"
-                          ? "Final Offer Letter"
-                          : "Offer Letter"
+                      ? `Edit ${modalType === "final"
+                        ? "Final Offer Letter"
+                        : "Offer Letter"
                       }`
-                    : `Add ${
-                        modalType === "final"
-                          ? "Final Offer Letter"
-                          : "Offer Letter"
+                      : `Add ${modalType === "final"
+                        ? "Final Offer Letter"
+                        : "Offer Letter"
                       }`}
                 </h2>
                 <button

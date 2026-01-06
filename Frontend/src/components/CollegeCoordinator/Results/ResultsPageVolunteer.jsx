@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
 
+
 // Add Urbanist font
 const style = document.createElement("style");
 style.textContent = `
@@ -56,7 +57,10 @@ const ResultsPageVolunteer = () => {
     iconAmber: "text-amber-600",
     tableHeader: "bg-slate-100",
     tableRow: "hover:bg-slate-50",
-    statCard: "from-white to-blue-50",
+    statCard1Gradient: "from-white to-blue-50",
+    statCard2Gradient: "from-white to-green-50",
+    statCard4Gradient: "from-white to-amber-50",
+    statCard3Gradient: "from-white to-purple-50",
     filterBadge: "bg-blue-100 text-blue-700 border-blue-200",
   });
 
@@ -69,7 +73,7 @@ const ResultsPageVolunteer = () => {
     textPrimary: "text-slate-50",
     textSecondary: "text-slate-400",
     textTertiary: "text-slate-500",
-    inputBg: "bg-slate-800",
+    inputBg: "bg-slate-950",
     inputBorder: "border-slate-600",
     inputFocus: "focus:border-blue-400 focus:ring-2 focus:ring-blue-900/30",
     buttonPrimary: "bg-blue-600 hover:bg-blue-700 text-white",
@@ -85,7 +89,10 @@ const ResultsPageVolunteer = () => {
     iconAmber: "text-amber-400",
     tableHeader: "bg-slate-800",
     tableRow: "hover:bg-slate-800/50",
-    statCard: "from-slate-800 to-blue-900/30",
+    statCard1Gradient: "from-slate-800 to-blue-900/30",
+    statCard2Gradient: "from-slate-800 to-green-900/30",
+    statCard4Gradient: "from-slate-800 to-amber-900/30",
+    statCard3Gradient: "from-slate-800 to-purple-900/30",
     filterBadge: "bg-blue-900/30 text-blue-400 border-blue-900/20",
   });
 
@@ -264,8 +271,8 @@ const ResultsPageVolunteer = () => {
   };
 
   const handleDownload = (type) => {
-    const message = type === "selected" 
-      ? "Downloading selected students list..." 
+    const message = type === "selected"
+      ? "Downloading selected students list..."
       : "Downloading full results...";
     alert(message);
   };
@@ -288,13 +295,15 @@ const ResultsPageVolunteer = () => {
     <div className={`min-h-screen ${themeStyles.background} p-6`}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
-            Placement Results
-          </h1>
-          <p className={`mt-2 ${themeStyles.textSecondary}`}>
-            View placement drive results and student outcomes
-          </p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
+              Placement Results
+            </h1>
+            <p className={`mt-2 ${themeStyles.textSecondary}`}>
+              View placement drive results and student outcomes
+            </p>
+          </div>
         </div>
 
         {/* Drive Selection */}
@@ -323,14 +332,14 @@ const ResultsPageVolunteer = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[
-            { icon: CheckCircle2, label: "Selected", value: stats.selected, color: themeStyles.iconGreen, percentage: `${((stats.selected / stats.total) * 100).toFixed(1)}%` },
-            { icon: XCircle, label: "Rejected", value: stats.rejected, color: themeStyles.iconRed, percentage: `${((stats.rejected / stats.total) * 100).toFixed(1)}%` },
-            { icon: Clock, label: "Waiting", value: stats.waiting, color: themeStyles.iconAmber, percentage: `${((stats.waiting / stats.total) * 100).toFixed(1)}%` },
-            { icon: Users, label: "Total", value: stats.total, color: themeStyles.iconBlue, percentage: "100%" },
+            { icon: CheckCircle2, label: "Selected", value: stats.selected, color: themeStyles.iconGreen, percentage: `${((stats.selected / stats.total) * 100).toFixed(1)}%`, gradient: themeStyles.statCard1Gradient },
+            { icon: XCircle, label: "Rejected", value: stats.rejected, color: themeStyles.iconRed, percentage: `${((stats.rejected / stats.total) * 100).toFixed(1)}%`, gradient: themeStyles.statCard2Gradient },
+            { icon: Clock, label: "Waiting", value: stats.waiting, color: themeStyles.iconAmber, percentage: `${((stats.waiting / stats.total) * 100).toFixed(1)}%`, gradient: themeStyles.statCard3Gradient },
+            { icon: Users, label: "Total", value: stats.total, color: themeStyles.iconBlue, percentage: "100%", gradient: themeStyles.statCard4Gradient },
           ].map((stat, idx) => (
             <div
               key={idx}
-              className={`rounded-2xl border ${themeStyles.cardBorder} p-6 ${themeStyles.cardShadow} hover:shadow-xl transition-all duration-300 backdrop-blur-sm bg-gradient-to-br ${themeStyles.statCard}`}
+              className={`rounded-2xl border ${themeStyles.cardBorder} p-6 ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all duration-300 backdrop-blur-sm bg-gradient-to-br ${stat.gradient}`}
             >
               <div className="flex items-center justify-between mb-3">
                 <div className={`h-12 w-12 bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0`}>
@@ -368,7 +377,7 @@ const ResultsPageVolunteer = () => {
                   </span>
                   <div className="flex items-center gap-3">
                     <div className={`h-2 w-24 ${themeStyles.inputBg} rounded-full overflow-hidden`}>
-                      <div 
+                      <div
                         className="h-full bg-blue-500 rounded-full"
                         style={{ width: `${(count / stats.selected) * 100}%` }}
                       />
@@ -398,7 +407,7 @@ const ResultsPageVolunteer = () => {
                   </span>
                   <div className="flex items-center gap-3">
                     <div className={`h-2 w-24 ${themeStyles.inputBg} rounded-full overflow-hidden`}>
-                      <div 
+                      <div
                         className="h-full bg-green-500 rounded-full"
                         style={{ width: `${(count / stats.selected) * 100}%` }}
                       />

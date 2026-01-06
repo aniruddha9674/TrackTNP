@@ -4,7 +4,7 @@ import {
   Mail,
   Phone,
   FileText,
-  Edit,
+  Edit2,
   Eye,
   MessageSquare,
   Search,
@@ -14,21 +14,14 @@ import {
   Clock,
   AlertCircle,
   Download,
-  ChevronDown,
-  Sun,
-  Moon,
+  X,
+  Plus,
+  TrendingUp,
+  Users,
+  UserCheck,
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
-
-// Add Urbanist font
-const style = document.createElement("style");
-style.textContent = `
-  @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap');
-  * {
-    font-family: 'Urbanist', sans-serif;
-  }
-`;
-document.head.appendChild(style);
+//add student list for volunteer
 
 const StudentListVolunteer = () => {
   const { theme, toggleTheme } = useTheme();
@@ -44,21 +37,37 @@ const StudentListVolunteer = () => {
     textPrimary: "text-slate-900",
     textSecondary: "text-slate-600",
     textTertiary: "text-slate-400",
-    headerBg: "bg-white",
-    buttonPrimary: "bg-blue-600 hover:bg-blue-700 text-white",
-    buttonSecondary: "bg-slate-200 hover:bg-slate-300 text-slate-700",
-    buttonDanger: "bg-red-600 hover:bg-red-700 text-white",
     inputBg: "bg-white",
     inputBorder: "border-slate-300",
-    inputFocus: "focus:border-blue-500 focus:ring-blue-500",
-    badgeEligible: "bg-green-100 text-green-600 border-green-200",
-    badgeNotEligible: "bg-red-100 text-red-600 border-red-200",
-    badgePending: "bg-amber-100 text-amber-600 border-amber-200",
-    badgeApproved: "bg-green-100 text-green-600 border-green-200",
-    badgeRejected: "bg-red-100 text-red-600 border-red-200",
-    modalBg: "bg-white",
-    modalOverlay: "bg-black/50",
-    divider: "border-slate-200",
+    inputDisabled: "disabled:bg-slate-100",
+    inputText: "text-slate-900",
+    inputPlaceholder: "placeholder:text-slate-400",
+    modalOverlay: "bg-black/60",
+    modalHeader: "bg-slate-100",
+    modalHeaderBorder: "border-slate-200",
+    emptyStateBg: "bg-slate-100",
+    emptyStateIcon: "text-slate-400",
+    statCard1Gradient: "from-white to-blue-50",
+    statCard2Gradient: "from-white to-green-50",
+    statCard3Gradient: "from-white to-purple-50",
+    statCard4Gradient: "from-white to-amber-50",
+    statIcon1Bg: "bg-blue-100",
+    statIcon1Text: "text-blue-600",
+    statIcon2Bg: "bg-green-100",
+    statIcon2Text: "text-green-600",
+    statIcon3Bg: "bg-purple-100",
+    statIcon3Text: "text-purple-600",
+    statIcon4Bg: "bg-amber-100",
+    statIcon4Text: "text-amber-600",
+    dividerBorder: "border-slate-200",
+    buttonBg: "bg-white",
+    buttonBorder: "border-slate-300",
+    buttonHover: "hover:bg-slate-50",
+    badgeEligible: "bg-green-500",
+    badgeNotEligible: "bg-red-500",
+    badgePending: "bg-amber-500",
+    badgeApproved: "bg-green-500",
+    badgeRejected: "bg-red-500",
   });
 
   const getDarkTheme = () => ({
@@ -70,21 +79,37 @@ const StudentListVolunteer = () => {
     textPrimary: "text-slate-50",
     textSecondary: "text-slate-400",
     textTertiary: "text-slate-500",
-    headerBg: "bg-slate-950",
-    buttonPrimary: "bg-blue-600 hover:bg-blue-700 text-white",
-    buttonSecondary: "bg-slate-700 hover:bg-slate-600 text-slate-200",
-    buttonDanger: "bg-red-600 hover:bg-red-700 text-white",
-    inputBg: "bg-slate-800",
-    inputBorder: "border-slate-700",
-    inputFocus: "focus:border-blue-500 focus:ring-blue-500",
-    badgeEligible: "bg-green-900/30 text-green-400 border-green-900/20",
-    badgeNotEligible: "bg-red-900/30 text-red-400 border-red-900/20",
-    badgePending: "bg-amber-900/30 text-amber-400 border-amber-900/20",
-    badgeApproved: "bg-green-900/30 text-green-400 border-green-900/20",
-    badgeRejected: "bg-red-900/30 text-red-400 border-red-900/20",
-    modalBg: "bg-slate-800",
-    modalOverlay: "bg-black/70",
-    divider: "border-slate-700",
+    inputBg: "bg-slate-950",
+    inputBorder: "border-slate-600",
+    inputDisabled: "disabled:bg-slate-800",
+    inputText: "text-slate-50",
+    inputPlaceholder: "placeholder:text-slate-500",
+    modalOverlay: "bg-black/80",
+    modalHeader: "bg-slate-800",
+    modalHeaderBorder: "border-slate-700",
+    emptyStateBg: "bg-slate-800",
+    emptyStateIcon: "text-slate-500",
+    statCard1Gradient: "from-slate-800 to-blue-900/30",
+    statCard2Gradient: "from-slate-800 to-green-900/30",
+    statCard3Gradient: "from-slate-800 to-purple-900/30",
+    statCard4Gradient: "from-slate-800 to-amber-900/30",
+    statIcon1Bg: "bg-blue-900/30",
+    statIcon1Text: "text-blue-400",
+    statIcon2Bg: "bg-green-900/30",
+    statIcon2Text: "text-green-400",
+    statIcon3Bg: "bg-purple-900/30",
+    statIcon3Text: "text-purple-400",
+    statIcon4Bg: "bg-amber-900/30",
+    statIcon4Text: "text-amber-400",
+    dividerBorder: "border-slate-700",
+    buttonBg: "bg-slate-700",
+    buttonBorder: "border-slate-600",
+    buttonHover: "hover:bg-slate-600",
+    badgeEligible: "bg-green-600",
+    badgeNotEligible: "bg-red-600",
+    badgePending: "bg-amber-600",
+    badgeApproved: "bg-green-600",
+    badgeRejected: "bg-red-600",
   });
 
   const themeStyles = isDarkTheme ? getDarkTheme() : getLightTheme();
@@ -195,6 +220,16 @@ const StudentListVolunteer = () => {
   const branches = [...new Set(students.map((s) => s.branch))];
   const years = [...new Set(students.map((s) => s.year))];
 
+  // Stats calculation
+  const stats = useMemo(() => {
+    const total = students.length;
+    const eligible = students.filter((s) => s.eligible).length;
+    const pending = Object.values(editRequests).filter((r) => r.status === "pending").length;
+    const approved = Object.values(editRequests).filter((r) => r.status === "approved").length;
+
+    return { total, eligible, pending, approved };
+  }, [students, editRequests]);
+
   // Handle edit request
   const handleRequestEdit = (student) => {
     setSelectedStudent(student);
@@ -211,7 +246,6 @@ const StudentListVolunteer = () => {
       status: "pending",
       editType: selectedEditType,
       requestedAt: new Date().toISOString(),
-      expiresAt: null,
     };
 
     setEditRequests({
@@ -237,9 +271,9 @@ const StudentListVolunteer = () => {
       return (
         <button
           onClick={() => handleRequestEdit(student)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg ${themeStyles.buttonSecondary} transition-all text-sm font-medium`}
+          className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
         >
-          <Edit size={16} />
+          <Edit2 className="mr-2 h-4 w-4" />
           Request Edit
         </button>
       );
@@ -249,10 +283,10 @@ const StudentListVolunteer = () => {
       return (
         <button
           disabled
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg ${themeStyles.buttonSecondary} opacity-50 cursor-not-allowed text-sm font-medium`}
+          className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} opacity-50 cursor-not-allowed ${themeStyles.textPrimary}`}
         >
-          <Clock size={16} />
-          Request Sent
+          <Clock className="mr-2 h-4 w-4" />
+          Pending
         </button>
       );
     }
@@ -261,9 +295,9 @@ const StudentListVolunteer = () => {
       return (
         <button
           onClick={() => alert("Edit functionality would open here")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg ${themeStyles.buttonPrimary} transition-all text-sm font-medium`}
+          className="flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
         >
-          <Edit size={16} />
+          <Edit2 className="mr-2 h-4 w-4" />
           Edit Now
         </button>
       );
@@ -273,126 +307,143 @@ const StudentListVolunteer = () => {
       return (
         <button
           onClick={() => handleRequestEdit(student)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg ${themeStyles.buttonSecondary} transition-all text-sm font-medium`}
+          className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
         >
-          <Edit size={16} />
-          Request Again
+          <Edit2 className="mr-2 h-4 w-4" />
+          Retry
         </button>
       );
     }
   };
 
-  // Render status badge
-  const renderStatusBadge = (student) => {
-    const request = getRequestStatus(student.id);
-
-    if (!request) return null;
-
-    const badges = {
-      pending: {
-        text: "Pending Approval",
-        icon: Clock,
-        style: themeStyles.badgePending,
-      },
-      approved: {
-        text: "Approved - Edit Access",
-        icon: CheckCircle,
-        style: themeStyles.badgeApproved,
-      },
-      rejected: {
-        text: "Request Rejected",
-        icon: XCircle,
-        style: themeStyles.badgeRejected,
-      },
-    };
-
-    const badge = badges[request.status];
-    const Icon = badge.icon;
-
-    return (
-      <div
-        className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${badge.style}`}
-      >
-        <Icon size={12} />
-        {badge.text}
-      </div>
-    );
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   return (
-    <div className={`min-h-screen ${themeStyles.background} p-6`}>
-      <div className="max-w-7xl mx-auto">
+    <div
+      style={{ fontFamily: "Urbanist, sans-serif" }}
+      className={`min-h-screen ${themeStyles.background}`}
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap');
+        * {
+          font-family: 'Urbanist', sans-serif;
+        }
+      `}</style>
+
+      <div className="max-w-full mx-auto p-6 space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
               Student Directory
             </h1>
-            <p className={`mt-2 ${themeStyles.textSecondary}`}>
-              View student profiles and request edit permissions
-            </p>
-          </div>
-          
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-          <div
-            className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-xl p-5 ${themeStyles.cardShadow}`}
-          >
-            <p className={`text-sm ${themeStyles.textSecondary} mb-1`}>
-              Total Students
-            </p>
-            <p className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
-              {students.length}
-            </p>
-          </div>
-          <div
-            className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-xl p-5 ${themeStyles.cardShadow}`}
-          >
-            <p className={`text-sm ${themeStyles.textSecondary} mb-1`}>
-              Eligible
-            </p>
-            <p className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
-              {students.filter((s) => s.eligible).length}
-            </p>
-          </div>
-          <div
-            className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-xl p-5 ${themeStyles.cardShadow}`}
-          >
-            <p className={`text-sm ${themeStyles.textSecondary} mb-1`}>
-              Pending Requests
-            </p>
-            <p className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
-              {
-                Object.values(editRequests).filter((r) => r.status === "pending")
-                  .length
-              }
-            </p>
-          </div>
-          <div
-            className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-xl p-5 ${themeStyles.cardShadow}`}
-          >
-            <p className={`text-sm ${themeStyles.textSecondary} mb-1`}>
-              Approved Access
-            </p>
-            <p className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
-              {
-                Object.values(editRequests).filter(
-                  (r) => r.status === "approved"
-                ).length
-              }
-            </p>
           </div>
         </div>
 
-        {/* Search and Filters */}
-        <div
-          className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-xl p-6 mb-6 ${themeStyles.cardShadow}`}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Summary Statistics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard1Gradient} transition-all`}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={`text-sm font-medium ${themeStyles.textSecondary}`}>
+                    Total Students
+                  </p>
+                  <h3 className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}>
+                    {stats.total}
+                  </h3>
+                </div>
+                <div
+                  className={`h-12 w-12 ${themeStyles.statIcon1Bg} rounded-full flex items-center justify-center`}
+                >
+                  <Users className={`h-6 w-6 ${themeStyles.statIcon1Text}`} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard2Gradient} transition-all`}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={`text-sm font-medium ${themeStyles.textSecondary}`}>
+                    Eligible
+                  </p>
+                  <h3 className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}>
+                    {stats.eligible}
+                  </h3>
+                </div>
+                <div
+                  className={`h-12 w-12 ${themeStyles.statIcon2Bg} rounded-full flex items-center justify-center`}
+                >
+                  <UserCheck className={`h-6 w-6 ${themeStyles.statIcon2Text}`} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard3Gradient} transition-all`}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={`text-sm font-medium ${themeStyles.textSecondary}`}>
+                    Pending Requests
+                  </p>
+                  <h3 className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}>
+                    {stats.pending}
+                  </h3>
+                </div>
+                <div
+                  className={`h-12 w-12 ${themeStyles.statIcon3Bg} rounded-full flex items-center justify-center`}
+                >
+                  <Clock className={`h-6 w-6 ${themeStyles.statIcon3Text}`} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard4Gradient} transition-all`}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={`text-sm font-medium ${themeStyles.textSecondary}`}>
+                    Approved Access
+                  </p>
+                  <h3 className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}>
+                    {stats.approved}
+                  </h3>
+                </div>
+                <div
+                  className={`h-12 w-12 ${themeStyles.statIcon4Bg} rounded-full flex items-center justify-center`}
+                >
+                  <CheckCircle className={`h-6 w-6 ${themeStyles.statIcon4Text}`} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Filters Section */}
+        <div className={`rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow} p-6`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             {/* Search */}
-            <div className="md:col-span-2">
+            <div className="lg:col-span-2">
               <div className="relative">
                 <Search
                   className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${themeStyles.textTertiary}`}
@@ -403,7 +454,7 @@ const StudentListVolunteer = () => {
                   placeholder="Search by name, PRN, or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-lg border ${themeStyles.inputBorder} ${themeStyles.inputBg} ${themeStyles.textPrimary} ${themeStyles.inputFocus} focus:ring-2 focus:ring-offset-0 transition-all`}
+                  className={`w-full pl-10 pr-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
                 />
               </div>
             </div>
@@ -412,7 +463,7 @@ const StudentListVolunteer = () => {
             <select
               value={filterBranch}
               onChange={(e) => setFilterBranch(e.target.value)}
-              className={`px-4 py-2.5 rounded-lg border ${themeStyles.inputBorder} ${themeStyles.inputBg} ${themeStyles.textPrimary} ${themeStyles.inputFocus} focus:ring-2 focus:ring-offset-0 transition-all`}
+              className={`px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputText} transition-all`}
             >
               <option value="all">All Branches</option>
               {branches.map((branch) => (
@@ -426,7 +477,7 @@ const StudentListVolunteer = () => {
             <select
               value={filterYear}
               onChange={(e) => setFilterYear(e.target.value)}
-              className={`px-4 py-2.5 rounded-lg border ${themeStyles.inputBorder} ${themeStyles.inputBg} ${themeStyles.textPrimary} ${themeStyles.inputFocus} focus:ring-2 focus:ring-offset-0 transition-all`}
+              className={`px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputText} transition-all`}
             >
               <option value="all">All Years</option>
               {years.map((year) => (
@@ -437,286 +488,289 @@ const StudentListVolunteer = () => {
             </select>
           </div>
 
-          {/* Eligibility Filter */}
-          <div className="flex gap-2 mt-4">
+          {/* Eligibility Filter Pills */}
+          <div className="flex gap-2">
             <button
               onClick={() => setFilterEligibility("all")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                filterEligibility === "all"
-                  ? themeStyles.buttonPrimary
-                  : themeStyles.buttonSecondary
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filterEligibility === "all"
+                ? "bg-blue-600 text-white"
+                : `border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover}`
+                }`}
             >
               All
             </button>
             <button
               onClick={() => setFilterEligibility("eligible")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                filterEligibility === "eligible"
-                  ? themeStyles.buttonPrimary
-                  : themeStyles.buttonSecondary
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filterEligibility === "eligible"
+                ? "bg-blue-600 text-white"
+                : `border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover}`
+                }`}
             >
               Eligible
             </button>
             <button
               onClick={() => setFilterEligibility("not-eligible")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                filterEligibility === "not-eligible"
-                  ? themeStyles.buttonPrimary
-                  : themeStyles.buttonSecondary
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filterEligibility === "not-eligible"
+                ? "bg-blue-600 text-white"
+                : `border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover}`
+                }`}
             >
               Not Eligible
             </button>
           </div>
         </div>
 
-        {/* Students Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredStudents.map((student) => (
+        {/* Student Cards */}
+        <div>
+          <h2 className={`text-xl font-semibold ${themeStyles.textPrimary} mb-4`}>
+            Student Profiles
+          </h2>
+          {filteredStudents.length === 0 ? (
             <div
-              key={student.id}
-              className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-xl p-6 ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all`}
+              className={`rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} shadow-sm`}
             >
-              {/* Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    {student.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h3
-                      className={`font-semibold text-lg ${themeStyles.textPrimary}`}
-                    >
-                      {student.name}
-                    </h3>
-                    <p className={`text-sm ${themeStyles.textSecondary}`}>
-                      {student.prn}
-                    </p>
-                  </div>
-                </div>
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                    student.eligible
-                      ? themeStyles.badgeEligible
-                      : themeStyles.badgeNotEligible
-                  }`}
+              <div className="p-12 text-center">
+                <div
+                  className={`mx-auto w-24 h-24 ${themeStyles.emptyStateBg} rounded-full flex items-center justify-center mb-4`}
                 >
-                  {student.eligible ? "✓ Eligible" : "Not Eligible"}
-                </span>
-              </div>
-
-              {/* Status Badge */}
-              {renderStatusBadge(student)}
-
-              {/* Details */}
-              <div className="space-y-3 my-4">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`h-8 w-8 ${themeStyles.buttonSecondary} rounded-lg flex items-center justify-center`}
-                  >
-                    <User size={16} />
-                  </div>
-                  <div>
-                    <p className={`text-xs ${themeStyles.textTertiary}`}>
-                      Branch & Year
-                    </p>
-                    <p
-                      className={`text-sm font-medium ${themeStyles.textPrimary}`}
-                    >
-                      {student.branch} • {student.year}
-                    </p>
-                  </div>
+                  <Users className={`h-12 w-12 ${themeStyles.emptyStateIcon}`} />
                 </div>
-
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`h-8 w-8 ${themeStyles.buttonSecondary} rounded-lg flex items-center justify-center`}
-                  >
-                    <Mail size={16} />
-                  </div>
-                  <div>
-                    <p className={`text-xs ${themeStyles.textTertiary}`}>
-                      Email
-                    </p>
-                    <p
-                      className={`text-sm font-medium ${themeStyles.textPrimary}`}
-                    >
-                      {student.email}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`h-8 w-8 ${themeStyles.buttonSecondary} rounded-lg flex items-center justify-center`}
-                  >
-                    <Phone size={16} />
-                  </div>
-                  <div>
-                    <p className={`text-xs ${themeStyles.textTertiary}`}>
-                      Phone
-                    </p>
-                    <p
-                      className={`text-sm font-medium ${themeStyles.textPrimary}`}
-                    >
-                      {student.phone}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`h-8 w-8 ${themeStyles.buttonSecondary} rounded-lg flex items-center justify-center`}
-                  >
-                    <FileText size={16} />
-                  </div>
-                  <div className="flex-1">
-                    <p className={`text-xs ${themeStyles.textTertiary}`}>
-                      Resume
-                    </p>
-                    {student.resume ? (
-                      <button
-                        className={`text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1`}
-                      >
-                        {student.resume}
-                        <Download size={14} />
-                      </button>
-                    ) : (
-                      <p
-                        className={`text-sm font-medium ${themeStyles.textTertiary}`}
-                      >
-                        Not uploaded
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div
-                className={`flex gap-3 pt-4 border-t ${themeStyles.divider}`}
-              >
-                <button
-                  onClick={() =>
-                    alert(`Viewing full profile of ${student.name}`)
-                  }
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg ${themeStyles.buttonPrimary} transition-all text-sm font-medium`}
-                >
-                  <Eye size={16} />
-                  View Profile
-                </button>
-                {renderEditButton(student)}
-                <button
-                  onClick={() =>
-                    alert(`Opening message to coordinator about ${student.name}`)
-                  }
-                  className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg ${themeStyles.buttonSecondary} transition-all text-sm font-medium`}
-                  title="Message Coordinator"
-                >
-                  <MessageSquare size={16} />
-                </button>
+                <h3 className={`text-xl font-semibold ${themeStyles.textPrimary} mb-2`}>
+                  No Students Found
+                </h3>
+                <p className={`${themeStyles.textSecondary}`}>
+                  Try adjusting your search or filters
+                </p>
               </div>
             </div>
-          ))}
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredStudents.map((student) => {
+                const request = getRequestStatus(student.id);
+                return (
+                  <div
+                    key={student.id}
+                    className={`rounded-xl border overflow-hidden ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all duration-300`}
+                  >
+                    <div className={`h-2 bg-gradient-to-r ${student.eligible ? 'from-green-600 to-green-400' : 'from-red-600 to-red-400'}`} />
+
+                    <div className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            {student.name.charAt(0)}
+                          </div>
+                          <div>
+                            <h3 className={`text-lg font-bold ${themeStyles.textPrimary}`}>
+                              {student.name}
+                            </h3>
+                            <p className={`text-sm ${themeStyles.textSecondary}`}>
+                              {student.prn}
+                            </p>
+                          </div>
+                        </div>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${student.eligible ? themeStyles.badgeEligible : themeStyles.badgeNotEligible
+                            }`}
+                        >
+                          {student.eligible ? "Eligible" : "Not Eligible"}
+                        </span>
+                      </div>
+
+                      {/* Request Status Badge */}
+                      {request && (
+                        <div className="mb-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium text-white ${request.status === "pending"
+                              ? themeStyles.badgePending
+                              : request.status === "approved"
+                                ? themeStyles.badgeApproved
+                                : themeStyles.badgeRejected
+                              }`}
+                          >
+                            {request.status === "pending" && <Clock className="mr-1 h-3 w-3" />}
+                            {request.status === "approved" && <CheckCircle className="mr-1 h-3 w-3" />}
+                            {request.status === "rejected" && <XCircle className="mr-1 h-3 w-3" />}
+                            {request.status === "pending" && "Pending Approval"}
+                            {request.status === "approved" && "Approved - Edit Access"}
+                            {request.status === "rejected" && "Request Rejected"}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="space-y-3 mb-6">
+                        <div className={`flex items-center justify-between py-2 border-b ${themeStyles.dividerBorder}`}>
+                          <span className={`text-sm ${themeStyles.textSecondary}`}>
+                            Branch
+                          </span>
+                          <span className={`font-semibold ${themeStyles.textPrimary}`}>
+                            {student.branch}
+                          </span>
+                        </div>
+
+                        <div className={`flex items-center justify-between py-2 border-b ${themeStyles.dividerBorder}`}>
+                          <span className={`text-sm ${themeStyles.textSecondary}`}>
+                            Year
+                          </span>
+                          <span className={`font-semibold ${themeStyles.textPrimary}`}>
+                            {student.year}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm pt-2">
+                          <Mail className={`h-4 w-4 ${themeStyles.textSecondary}`} />
+                          <span className={`${themeStyles.textSecondary} truncate`}>
+                            {student.email}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm">
+                          <Phone className={`h-4 w-4 ${themeStyles.textSecondary}`} />
+                          <span className={`${themeStyles.textSecondary}`}>
+                            {student.phone}
+                          </span>
+                        </div>
+
+                        {student.resume ? (
+                          <div className="flex items-center gap-2 text-sm pt-2">
+                            <div className="h-2 w-2 rounded-full bg-green-500" />
+                            <span className="text-green-600 font-medium">
+                              Resume attached
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 text-sm pt-2">
+                            <div className={`h-2 w-2 rounded-full ${themeStyles.emptyStateBg}`} />
+                            <span className={themeStyles.textTertiary}>
+                              No resume
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => alert(`Viewing full profile of ${student.name}`)}
+                          className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          View
+                        </button>
+                        {renderEditButton(student)}
+                        <button
+                          onClick={() => alert(`Opening message to coordinator about ${student.name}`)}
+                          className={`inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* No Results */}
-        {filteredStudents.length === 0 && (
+        {/* Request Edit Modal */}
+        {showRequestModal && (
           <div
-            className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-xl p-12 text-center ${themeStyles.cardShadow}`}
+            className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
           >
-            <AlertCircle
-              size={48}
-              className={`mx-auto mb-4 ${themeStyles.textTertiary}`}
-            />
-            <h3 className={`text-lg font-semibold ${themeStyles.textPrimary}`}>
-              No students found
-            </h3>
-            <p className={`mt-2 ${themeStyles.textSecondary}`}>
-              Try adjusting your search or filters
-            </p>
+            <div
+              className={`w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder}`}
+            >
+              <div
+                className={`sticky top-0 ${themeStyles.modalHeader} ${themeStyles.modalHeaderBorder} border-b px-6 py-4 flex justify-between items-center`}
+              >
+                <h2 className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
+                  Request Edit Permission
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowRequestModal(false);
+                    setSelectedStudent(null);
+                    setSelectedEditType("");
+                  }}
+                  className={`p-2 rounded-lg ${themeStyles.buttonHover} transition-colors`}
+                >
+                  <X className={`h-5 w-5 ${themeStyles.textPrimary}`} />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                {/* Student Info */}
+                <div className={`p-4 rounded-lg border ${themeStyles.cardBorder} ${themeStyles.emptyStateBg}`}>
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                      {selectedStudent?.name.charAt(0)}
+                    </div>
+                    <div>
+                      <h3 className={`font-semibold ${themeStyles.textPrimary}`}>
+                        {selectedStudent?.name}
+                      </h3>
+                      <p className={`text-sm ${themeStyles.textSecondary}`}>
+                        {selectedStudent?.prn} • {selectedStudent?.branch}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Info Alert */}
+                <div className={`p-4 rounded-lg border ${themeStyles.cardBorder} ${themeStyles.emptyStateBg}`}>
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className={`h-5 w-5 ${themeStyles.textSecondary} mt-0.5`} />
+                    <p className={`text-sm ${themeStyles.textSecondary}`}>
+                      You need approval from the Co-ordinator to edit this student's details.
+                      Please select what you'd like to edit and submit your request.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Edit Type Selection */}
+                <div className="space-y-2">
+                  <label className={`block text-sm font-medium ${themeStyles.textPrimary}`}>
+                    What would you like to edit? <span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    value={selectedEditType}
+                    onChange={(e) => setSelectedEditType(e.target.value)}
+                    className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
+                  >
+                    <option value="">Select edit type...</option>
+                    <option value="contact">Contact Information (Email/Phone)</option>
+                    <option value="resume">Resume/Documents</option>
+                    <option value="academic">Academic Details (Branch/Year)</option>
+                    <option value="profile">General Profile Information</option>
+                    <option value="eligibility">Eligibility Status</option>
+                    <option value="other">Other Information</option>
+                  </select>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => {
+                      setShowRequestModal(false);
+                      setSelectedStudent(null);
+                      setSelectedEditType("");
+                    }}
+                    className={`flex-1 px-4 py-2 rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={sendEditRequest}
+                    className="flex-1 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                  >
+                    Send Request
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
-
-      {/* Request Edit Modal */}
-      {showRequestModal && (
-        <div
-          className={`fixed inset-0 ${themeStyles.modalOverlay} flex items-center justify-center p-4 z-50`}
-          onClick={() => setShowRequestModal(false)}
-        >
-          <div
-            className={`${themeStyles.modalBg} rounded-2xl p-6 max-w-md w-full ${themeStyles.cardShadow}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                <Edit size={20} className="text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <h3 className={`text-lg font-semibold ${themeStyles.textPrimary}`}>
-                  Request Edit Permission
-                </h3>
-                <p className={`text-sm ${themeStyles.textSecondary}`}>
-                  {selectedStudent?.name}
-                </p>
-              </div>
-            </div>
-
-            <div
-              className={`p-4 rounded-lg ${themeStyles.cardBg} border ${themeStyles.cardBorder} mb-4`}
-            >
-              <div className="flex items-start gap-2">
-                <AlertCircle
-                  size={20}
-                  className={`${themeStyles.textSecondary} mt-0.5`}
-                />
-                <p className={`text-sm ${themeStyles.textSecondary}`}>
-                  You need approval from the Co-ordinator to edit this student's
-                  details. Please select what you'd like to edit.
-                </p>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <label
-                className={`block text-sm font-medium ${themeStyles.textPrimary} mb-2`}
-              >
-                What would you like to edit?
-              </label>
-              <select
-                value={selectedEditType}
-                onChange={(e) => setSelectedEditType(e.target.value)}
-                className={`w-full px-4 py-2.5 rounded-lg border ${themeStyles.inputBorder} ${themeStyles.inputBg} ${themeStyles.textPrimary} ${themeStyles.inputFocus} focus:ring-2`}
-              >
-                <option value="">Select edit type...</option>
-                <option value="contact">Contact Information (Email/Phone)</option>
-                <option value="resume">Resume/Documents</option>
-                <option value="address">Address Details</option>
-                <option value="profile">General Profile Information</option>
-                <option value="other">Other Information</option>
-              </select>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowRequestModal(false)}
-                className={`flex-1 px-4 py-2.5 rounded-lg ${themeStyles.buttonSecondary} transition-all font-medium`}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={sendEditRequest}
-                className={`flex-1 px-4 py-2.5 rounded-lg ${themeStyles.buttonPrimary} transition-all font-medium`}
-              >
-                Send Request
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

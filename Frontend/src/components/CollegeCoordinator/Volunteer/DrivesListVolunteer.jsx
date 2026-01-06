@@ -33,7 +33,7 @@ const DrivesListVolunteer = () => {
   const { theme, toggleTheme } = useTheme();
   const isDarkTheme = theme === "dark";
 
-  // Theme styles
+  // Light Theme Function (matching InternshipManager)
   const getLightTheme = () => ({
     background: "bg-gradient-to-br from-slate-50 to-slate-100",
     cardBg: "bg-white",
@@ -56,11 +56,18 @@ const DrivesListVolunteer = () => {
     iconGreen: "text-green-600",
     iconPurple: "text-purple-600",
     iconAmber: "text-amber-600",
-    modalOverlay: "bg-black/50",
-    statCard: "from-white to-blue-50",
+    modalOverlay: "bg-black/60",
+    modalHeader: "bg-slate-100",
+    statCard1: "from-white to-blue-50",
+    statCard2: "from-white to-green-50",
+    statCard3: "from-white to-purple-50",
+    statCard4: "from-white to-amber-50",
     filterBadge: "bg-blue-100 text-blue-700 border-blue-200",
+    emptyStateBg: "bg-slate-100",
+    emptyStateIcon: "text-slate-400",
   });
 
+  // Dark Theme Function (matching InternshipManager)
   const getDarkTheme = () => ({
     background: "bg-gradient-to-br from-slate-950 to-slate-900",
     cardBg: "bg-slate-900",
@@ -70,7 +77,7 @@ const DrivesListVolunteer = () => {
     textPrimary: "text-slate-50",
     textSecondary: "text-slate-400",
     textTertiary: "text-slate-500",
-    inputBg: "bg-slate-800",
+    inputBg: "bg-slate-950",
     inputBorder: "border-slate-600",
     inputFocus: "focus:border-blue-400 focus:ring-2 focus:ring-blue-900/30",
     buttonPrimary: "bg-blue-600 hover:bg-blue-700 text-white",
@@ -83,9 +90,15 @@ const DrivesListVolunteer = () => {
     iconGreen: "text-green-400",
     iconPurple: "text-purple-400",
     iconAmber: "text-amber-400",
-    modalOverlay: "bg-black/70",
-    statCard: "from-slate-800 to-blue-900/30",
+    modalOverlay: "bg-black/80",
+    modalHeader: "bg-slate-800",
+    statCard1: "from-slate-800 to-blue-900/30",
+    statCard2: "from-slate-800 to-green-900/30",
+    statCard3: "from-slate-800 to-purple-900/30",
+    statCard4: "from-slate-800 to-amber-900/30",
     filterBadge: "bg-blue-900/30 text-blue-400 border-blue-900/20",
+    emptyStateBg: "bg-slate-800",
+    emptyStateIcon: "text-slate-500",
   });
 
   const themeStyles = isDarkTheme ? getDarkTheme() : getLightTheme();
@@ -183,7 +196,7 @@ const DrivesListVolunteer = () => {
   const filteredDrives = useMemo(() => {
     return drives.filter(drive => {
       const matchesSearch = drive.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          drive.jobRole.toLowerCase().includes(searchTerm.toLowerCase());
+        drive.jobRole.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = filterStatus === "all" || drive.status === filterStatus;
       const matchesDate = !dateFilter || drive.driveDate === dateFilter;
       return matchesSearch && matchesStatus && matchesDate;
@@ -241,14 +254,14 @@ const DrivesListVolunteer = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[
-            { icon: Clock, label: "Upcoming", value: stats.upcoming, color: themeStyles.iconBlue },
-            { icon: AlertCircle, label: "Ongoing", value: stats.ongoing, color: themeStyles.iconGreen },
-            { icon: CheckCircle2, label: "Completed", value: stats.completed, color: themeStyles.iconPurple },
-            { icon: Users, label: "Total Students", value: stats.totalStudents, color: themeStyles.iconAmber },
+            { icon: Clock, label: "Upcoming", value: stats.upcoming, gradient: themeStyles.statCard1, iconBg: "bg-blue-100", iconColor: themeStyles.iconBlue },
+            { icon: AlertCircle, label: "Ongoing", value: stats.ongoing, gradient: themeStyles.statCard2, iconBg: "bg-green-100", iconColor: themeStyles.iconGreen },
+            { icon: CheckCircle2, label: "Completed", value: stats.completed, gradient: themeStyles.statCard3, iconBg: "bg-purple-100", iconColor: themeStyles.iconPurple },
+            { icon: Users, label: "Total Students", value: stats.totalStudents, gradient: themeStyles.statCard4, iconBg: "bg-amber-100", iconColor: themeStyles.iconAmber },
           ].map((stat, idx) => (
             <div
               key={idx}
-              className={`rounded-2xl border ${themeStyles.cardBorder} p-6 ${themeStyles.cardShadow} hover:shadow-xl transition-all duration-300 backdrop-blur-sm bg-gradient-to-br ${themeStyles.statCard}`}
+              className={`rounded-xl border ${themeStyles.cardBorder} p-6 ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all duration-300 bg-gradient-to-br ${stat.gradient}`}
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -259,8 +272,8 @@ const DrivesListVolunteer = () => {
                     {stat.value}
                   </h3>
                 </div>
-                <div className={`h-12 w-12 bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0`}>
-                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                <div className={`h-12 w-12 ${isDarkTheme ? stat.iconBg.replace('100', '900/30') : stat.iconBg} rounded-full flex items-center justify-center flex-shrink-0`}>
+                  <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
                 </div>
               </div>
             </div>
@@ -268,7 +281,7 @@ const DrivesListVolunteer = () => {
         </div>
 
         {/* Search and Filters */}
-        <div className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-2xl p-6 ${themeStyles.cardShadow} mb-6`}>
+        <div className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-xl p-6 ${themeStyles.cardShadow} mb-6`}>
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
@@ -349,8 +362,10 @@ const DrivesListVolunteer = () => {
         {/* Drives List */}
         <div className="space-y-4">
           {filteredDrives.length === 0 ? (
-            <div className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-2xl p-12 text-center ${themeStyles.cardShadow}`}>
-              <Building2 className={`mx-auto h-16 w-16 ${themeStyles.textTertiary} mb-4`} />
+            <div className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-xl p-12 text-center ${themeStyles.cardShadow}`}>
+              <div className={`mx-auto w-24 h-24 ${themeStyles.emptyStateBg} rounded-full flex items-center justify-center mb-4`}>
+                <Building2 className={`h-12 w-12 ${themeStyles.emptyStateIcon}`} />
+              </div>
               <h3 className={`text-xl font-semibold ${themeStyles.textPrimary} mb-2`}>
                 No drives found
               </h3>
@@ -362,13 +377,13 @@ const DrivesListVolunteer = () => {
             filteredDrives.map((drive) => (
               <div
                 key={drive.id}
-                className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-2xl p-6 ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all`}
+                className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-xl p-6 ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all`}
               >
                 {/* Drive Header */}
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
                   <div className="flex-1">
                     <div className="flex items-start gap-3 mb-3">
-                      <div className={`h-12 w-12 bg-opacity-10 ${themeStyles.iconBlue} bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                      <div className={`h-12 w-12 ${isDarkTheme ? 'bg-blue-900/30' : 'bg-blue-100'} rounded-lg flex items-center justify-center flex-shrink-0`}>
                         <Building2 size={24} className={themeStyles.iconBlue} />
                       </div>
                       <div>
@@ -403,10 +418,10 @@ const DrivesListVolunteer = () => {
                     <div>
                       <p className={`text-xs ${themeStyles.textTertiary}`}>Drive Date</p>
                       <p className={`font-semibold ${themeStyles.textPrimary}`}>
-                        {new Date(drive.driveDate).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric', 
-                          year: 'numeric' 
+                        {new Date(drive.driveDate).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
                         })}
                       </p>
                     </div>
@@ -520,8 +535,8 @@ const DrivesListVolunteer = () => {
       {/* Student List Modal */}
       {selectedDrive && (
         <div className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center z-50 p-4`}>
-          <div className={`${themeStyles.cardBg} rounded-2xl ${themeStyles.cardShadow} max-w-2xl w-full max-h-[80vh] overflow-hidden`}>
-            <div className={`p-6 border-b ${themeStyles.divider}`}>
+          <div className={`${themeStyles.cardBg} rounded-xl ${themeStyles.cardShadow} max-w-2xl w-full max-h-[80vh] overflow-hidden border ${themeStyles.cardBorder}`}>
+            <div className={`${themeStyles.modalHeader} p-6 border-b ${themeStyles.divider}`}>
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className={`text-xl font-bold ${themeStyles.textPrimary}`}>

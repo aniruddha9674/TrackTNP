@@ -12,7 +12,7 @@ const Pricing = () => {
     if (theme === "dark") {
       root.classList.add("dark");
     } else {
-      root.classList.remove("dark");a
+      root.classList.remove("dark");
     }
   }, [theme]);
 
