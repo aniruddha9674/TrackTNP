@@ -36,8 +36,10 @@ import Overview from "./components/AdminDashboard/Overview/Overview";
 import StudentDetails from "./components/AdminDashboard/Student/StudentDetails";
 import Addstudent from "./components/AdminDashboard/Student/AddSudent";
 import NotificationAdmin from "./components/AdminDashboard/Notification/Notification";
+import VolunteerManager from "./components/AdminDashboard/Volunteer/VolunteerDetails";
 
 import CollegeCoordinatorDash from "./Pages/CollegeCoordinatordash/CollegeCoordinatorDash";
+import CoordinatorOverview from "./components/CollegeCoordinator/Overview/Overview";
 import DrivesListVolunteer from './components/CollegeCoordinator/Volunteer/DrivesListVolunteer';
 import StudentListVolunteer from './components/CollegeCoordinator/Students/StudentListVolunteer';
 import ResultsPageVolunteer from './components/CollegeCoordinator/Results/ResultsPageVolunteer';
@@ -45,6 +47,15 @@ import CoordinatorNotifications from './components/CollegeCoordinator/Notificati
 import CoordinatorCalendar from "./components/CollegeCoordinator/Calendar/Calendar";
 import SettingsPage from "./components/CollegeCoordinator/Setting/Setting";
 import FirstLogin from "./Pages/FirstTimeLogin";
+
+import DepartmentDashboard from "./Pages/DeptCoordinatorDash/DeptCoordinatordash"; 
+import DepartmentCalendar from "./components/DeptcoordinatorDash/Calendar/Calendar";
+import DepartmentSettings from "./components/DeptcoordinatorDash/Settings/Setting";
+import DepartmentResult from "./components/DeptcoordinatorDash/Results/Results";
+import DepartmentNotification from "./components/DeptcoordinatorDash/Notification/Notification";
+import DepartmentOverview from "./components/DeptcoordinatorDash/Overview/Overview";
+
+import VolunteerDashboard from "./Pages/VounteerDash/VolunteerDash";
 
 function App() {
   useEffect(() => {
@@ -75,6 +86,7 @@ function App() {
         <Route path="settings" element={<Settings />} />
         <Route path="calender" element={<Calendar />} />
         <Route path="staff" element={<StaffDetailsManager />} />
+        <Route path="volunteerdetails" element={<VolunteerManager />} />
         <Route path="company/add" element={<AddCompany />} />
         <Route path="company/drive" element={<CompanyDrivesManager />} />
         <Route path="results" element={<PlacementResultsManager />} />
@@ -100,14 +112,28 @@ function App() {
         <Route path="notifications" element={<VolunteerNotifications />} />
       </Route>
 
-      <Route path="/collegecoordinatordashboard" element={<CollegeCoordinatorDash />}> 
+      <Route path="/collegecoordinatordashboard" element={<CollegeCoordinatorDash />}>
+        <Route path="" element={<CoordinatorOverview />} />
         <Route path="volunteer" element={<DrivesListVolunteer />} />
-          <Route path="student/details" element={<StudentListVolunteer />} />
-          <Route path="results" element={<ResultsPageVolunteer />} />
-          <Route path="notifications" element={<CoordinatorNotifications />} />
-          <Route path="calender" element={<CoordinatorCalendar />} />
-          <Route path="settings" element={<SettingsPage />} />
+        <Route path="student/details" element={<StudentListVolunteer />} />
+        <Route path="results" element={<ResultsPageVolunteer />} />
+        <Route path="notifications" element={<CoordinatorNotifications />} />
+        <Route path="calender" element={<CoordinatorCalendar />} />
+        <Route path="settings" element={<SettingsPage />} />
       </Route>
+
+      <Route path="/departmentcoordinatordashboard" element={<DepartmentDashboard />}>
+        <Route path="" element={<DepartmentOverview />} />
+        <Route path="calender" element={<DepartmentCalendar />} />
+        <Route path="settings" element={<DepartmentSettings />} />
+        <Route path="results" element={<DepartmentResult />} />
+        <Route path="notifications" element={<DepartmentNotification />} />
+      </Route>
+
+      <Route path="/volunteerdashboard" element={<VolunteerDashboard />}>
+      
+      </Route>
+
 
     </Routes>
   );
