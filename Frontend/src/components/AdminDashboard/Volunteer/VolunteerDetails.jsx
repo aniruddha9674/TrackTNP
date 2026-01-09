@@ -9,10 +9,7 @@ import {
     Calendar,
     TrendingUp,
     Clock,
-    Moon,
-    Sun,
     Heart,
-    Shield,
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
 
@@ -29,23 +26,9 @@ const VolunteerManager = () => {
         driveName: "",
         driveSpan: "",
         createdDate: "",
-        permissions: [],
     });
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
-
-    const permissionOptions = [
-        "View Data",
-        "Edit Data",
-        "Delete Records",
-        "Manage Users",
-        "Export Reports",
-        "Send Communications",
-    ];
-
-    const toggleTheme = () => {
-        setTheme((prev) => (prev === "light" ? "dark" : "light"));
-    };
 
     const stats = useMemo(() => {
         const total = volunteers.length;
@@ -91,7 +74,6 @@ const VolunteerManager = () => {
             driveName: "",
             driveSpan: "",
             createdDate: "",
-            permissions: [],
         });
         setEditingId(null);
         setViewMode(false);
@@ -100,15 +82,6 @@ const VolunteerManager = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handlePermissionToggle = (permission) => {
-        setFormData((prev) => ({
-            ...prev,
-            permissions: prev.permissions.includes(permission)
-                ? prev.permissions.filter((p) => p !== permission)
-                : [...prev.permissions, permission],
-        }));
     };
 
     const handleSubmit = () => {
@@ -138,7 +111,6 @@ const VolunteerManager = () => {
             driveName: volunteer.driveName,
             driveSpan: volunteer.driveSpan,
             createdDate: volunteer.createdDate,
-            permissions: volunteer.permissions,
         });
         setEditingId(volunteer.id);
         setViewMode(false);
@@ -153,7 +125,6 @@ const VolunteerManager = () => {
             driveName: volunteer.driveName,
             driveSpan: volunteer.driveSpan,
             createdDate: volunteer.createdDate,
-            permissions: volunteer.permissions,
         });
         setViewMode(true);
         setShowModal(true);
@@ -176,8 +147,8 @@ const VolunteerManager = () => {
         const endDate = new Date(created);
         endDate.setDate(endDate.getDate() + spanDays);
 
-        if (today > endDate) return "completed";
-        return "active";
+        if (today > endDate) return "Completed";
+        return "Active";
     };
 
     const getDaysRemaining = (createdDate, driveSpan) => {
@@ -192,7 +163,6 @@ const VolunteerManager = () => {
         return diffDays > 0 ? diffDays : 0;
     };
 
-    // Light Theme Function
     const getLightTheme = () => ({
         background: "bg-gradient-to-br from-slate-50 to-slate-100",
         cardBg: "bg-white",
@@ -228,18 +198,15 @@ const VolunteerManager = () => {
         buttonBg: "bg-white",
         buttonBorder: "border-slate-300",
         buttonHover: "hover:bg-slate-50",
-        calendarIcon: "text-slate-500",
-        permissionBg: "bg-purple-100",
-        permissionText: "text-purple-700",
-        statusActiveBg: "bg-green-500",
+        tableHeader: "bg-slate-50",
+        tableRow: "hover:bg-slate-50",
+        tableBorder: "border-slate-200",
+        statusActiveBg: "bg-green-100",
+        statusActiveText: "text-green-700",
         statusCompletedBg: "bg-slate-200",
         statusCompletedText: "text-slate-700",
-        checkboxBorder: "border-slate-300",
-        checkboxBg: "bg-white",
-        checkboxChecked: "bg-purple-600 border-purple-600",
     });
 
-    // Dark Theme Function
     const getDarkTheme = () => ({
         background: "bg-gradient-to-br from-slate-950 to-slate-900",
         cardBg: "bg-slate-900",
@@ -275,15 +242,13 @@ const VolunteerManager = () => {
         buttonBg: "bg-slate-700",
         buttonBorder: "border-slate-600",
         buttonHover: "hover:bg-slate-600",
-        calendarIcon: "text-slate-400",
-        permissionBg: "bg-purple-900/30",
-        permissionText: "text-purple-300",
-        statusActiveBg: "bg-green-600",
+        tableHeader: "bg-slate-800",
+        tableRow: "hover:bg-slate-800/50",
+        tableBorder: "border-slate-700",
+        statusActiveBg: "bg-green-900/30",
+        statusActiveText: "text-green-400",
         statusCompletedBg: "bg-slate-700",
         statusCompletedText: "text-slate-300",
-        checkboxBorder: "border-slate-600",
-        checkboxBg: "bg-slate-950",
-        checkboxChecked: "bg-purple-600 border-purple-600",
     });
 
     const themeStyles = theme === "dark" ? getDarkTheme() : getLightTheme();
@@ -317,7 +282,7 @@ const VolunteerManager = () => {
                                 resetForm();
                                 setShowModal(true);
                             }}
-                            className="inline-flex items-center px-4 py-2 rounded-lg  bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-lg"
+                            className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-lg"
                         >
                             <Plus className="mr-2 h-4 w-4" />
                             Add Volunteer
@@ -333,20 +298,14 @@ const VolunteerManager = () => {
                         <div className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p
-                                        className={`text-sm font-medium ${themeStyles.textSecondary}`}
-                                    >
+                                    <p className={`text-sm font-medium ${themeStyles.textSecondary}`}>
                                         Total Volunteers
                                     </p>
-                                    <h3
-                                        className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
-                                    >
+                                    <h3 className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}>
                                         {stats.total}
                                     </h3>
                                 </div>
-                                <div
-                                    className={`h-12 w-12 ${themeStyles.statIcon1Bg} rounded-full flex items-center justify-center`}
-                                >
+                                <div className={`h-12 w-12 ${themeStyles.statIcon1Bg} rounded-full flex items-center justify-center`}>
                                     <Users className={`h-6 w-6 ${themeStyles.statIcon1Text}`} />
                                 </div>
                             </div>
@@ -359,23 +318,15 @@ const VolunteerManager = () => {
                         <div className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p
-                                        className={`text-sm font-medium ${themeStyles.textSecondary}`}
-                                    >
+                                    <p className={`text-sm font-medium ${themeStyles.textSecondary}`}>
                                         Active Now
                                     </p>
-                                    <h3
-                                        className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
-                                    >
+                                    <h3 className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}>
                                         {stats.active}
                                     </h3>
                                 </div>
-                                <div
-                                    className={`h-12 w-12 ${themeStyles.statIcon2Bg} rounded-full flex items-center justify-center`}
-                                >
-                                    <TrendingUp
-                                        className={`h-6 w-6 ${themeStyles.statIcon2Text}`}
-                                    />
+                                <div className={`h-12 w-12 ${themeStyles.statIcon2Bg} rounded-full flex items-center justify-center`}>
+                                    <TrendingUp className={`h-6 w-6 ${themeStyles.statIcon2Text}`} />
                                 </div>
                             </div>
                         </div>
@@ -387,20 +338,14 @@ const VolunteerManager = () => {
                         <div className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p
-                                        className={`text-sm font-medium ${themeStyles.textSecondary}`}
-                                    >
+                                    <p className={`text-sm font-medium ${themeStyles.textSecondary}`}>
                                         Total Drives
                                     </p>
-                                    <h3
-                                        className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
-                                    >
+                                    <h3 className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}>
                                         {stats.totalDrives}
                                     </h3>
                                 </div>
-                                <div
-                                    className={`h-12 w-12 ${themeStyles.statIcon3Bg} rounded-full flex items-center justify-center`}
-                                >
+                                <div className={`h-12 w-12 ${themeStyles.statIcon3Bg} rounded-full flex items-center justify-center`}>
                                     <Heart className={`h-6 w-6 ${themeStyles.statIcon3Text}`} />
                                 </div>
                             </div>
@@ -413,25 +358,17 @@ const VolunteerManager = () => {
                         <div className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p
-                                        className={`text-sm font-medium ${themeStyles.textSecondary}`}
-                                    >
+                                    <p className={`text-sm font-medium ${themeStyles.textSecondary}`}>
                                         Avg Drive Span
                                     </p>
-                                    <h3
-                                        className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
-                                    >
+                                    <h3 className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}>
                                         {stats.avgSpan.toFixed(0)}
-                                        <span
-                                            className={`text-lg ${themeStyles.textSecondary} ml-1`}
-                                        >
+                                        <span className={`text-lg ${themeStyles.textSecondary} ml-1`}>
                                             days
                                         </span>
                                     </h3>
                                 </div>
-                                <div
-                                    className={`h-12 w-12 ${themeStyles.statIcon4Bg} rounded-full flex items-center justify-center`}
-                                >
+                                <div className={`h-12 w-12 ${themeStyles.statIcon4Bg} rounded-full flex items-center justify-center`}>
                                     <Clock className={`h-6 w-6 ${themeStyles.statIcon4Text}`} />
                                 </div>
                             </div>
@@ -439,28 +376,18 @@ const VolunteerManager = () => {
                     </div>
                 </div>
 
-                {/* Volunteer Cards */}
+                {/* Volunteer Table */}
                 <div>
-                    <h2
-                        className={`text-xl font-semibold ${themeStyles.textPrimary} mb-4`}
-                    >
+                    <h2 className={`text-xl font-semibold ${themeStyles.textPrimary} mb-4`}>
                         Your Volunteers
                     </h2>
                     {volunteers.length === 0 ? (
-                        <div
-                            className={`rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} shadow-sm`}
-                        >
+                        <div className={`rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} shadow-sm`}>
                             <div className="p-12 text-center">
-                                <div
-                                    className={`mx-auto w-24 h-24 ${themeStyles.emptyStateBg} rounded-full flex items-center justify-center mb-4`}
-                                >
-                                    <Users
-                                        className={`h-12 w-12 ${themeStyles.emptyStateIcon}`}
-                                    />
+                                <div className={`mx-auto w-24 h-24 ${themeStyles.emptyStateBg} rounded-full flex items-center justify-center mb-4`}>
+                                    <Users className={`h-12 w-12 ${themeStyles.emptyStateIcon}`} />
                                 </div>
-                                <h3
-                                    className={`text-xl font-semibold ${themeStyles.textPrimary} mb-2`}
-                                >
+                                <h3 className={`text-xl font-semibold ${themeStyles.textPrimary} mb-2`}>
                                     No Volunteers Yet
                                 </h3>
                                 <p className={`${themeStyles.textSecondary} mb-6`}>
@@ -479,168 +406,114 @@ const VolunteerManager = () => {
                             </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {volunteers.map((volunteer) => {
-                                const status = getStatus(
-                                    volunteer.createdDate,
-                                    volunteer.driveSpan
-                                );
-                                const daysRemaining = getDaysRemaining(
-                                    volunteer.createdDate,
-                                    volunteer.driveSpan
-                                );
-                                return (
-                                    <div
-                                        key={volunteer.id}
-                                        className={`rounded-xl border overflow-hidden ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all duration-300`}
-                                    >
-                                        <div className="h-2 bg-gradient-to-r from-purple-600 to-purple-400" />
-
-                                        <div className="p-6">
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="flex-1 pr-2">
-                                                    <h3
-                                                        className={`text-xl font-bold ${themeStyles.textPrimary} truncate`}
-                                                    >
+                        <div className={`rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow} overflow-hidden`}>
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className={themeStyles.tableHeader}>
+                                        <tr>
+                                            <th className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}>
+                                                Sr No
+                                            </th>
+                                            <th className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}>
+                                                Name
+                                            </th>
+                                            <th className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}>
+                                                Email
+                                            </th>
+                                            <th className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}>
+                                                Phone
+                                            </th>
+                                            <th className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}>
+                                                Drive Name
+                                            </th>
+                                            <th className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}>
+                                                Status
+                                            </th>
+                                            <th className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}>
+                                                Created Date
+                                            </th>
+                                            <th className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}>
+                                                Drive Span
+                                            </th>
+                                            <th className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}>
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className={`divide-y ${themeStyles.tableBorder}`}>
+                                        {volunteers.map((volunteer, index) => {
+                                            const status = getStatus(volunteer.createdDate, volunteer.driveSpan);
+                                            return (
+                                                <tr key={volunteer.id} className={`${themeStyles.tableRow} transition-colors`}>
+                                                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${themeStyles.textPrimary}`}>
+                                                        {index + 1}
+                                                    </td>
+                                                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${themeStyles.textPrimary}`}>
                                                         {volunteer.volunteerName}
-                                                    </h3>
-                                                    <p
-                                                        className={`text-sm ${themeStyles.textSecondary} mt-1`}
-                                                    >
+                                                    </td>
+                                                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${themeStyles.textSecondary}`}>
+                                                        {volunteer.email}
+                                                    </td>
+                                                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${themeStyles.textSecondary}`}>
+                                                        {volunteer.phone}
+                                                    </td>
+                                                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${themeStyles.textSecondary}`}>
                                                         {volunteer.driveName}
-                                                    </p>
-                                                </div>
-                                                <span
-                                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${status === "active"
-                                                        ? themeStyles.statusActiveBg
-                                                        : `${themeStyles.statusCompletedBg} ${themeStyles.statusCompletedText}`
-                                                        }`}
-                                                >
-                                                    {status}
-                                                </span>
-                                            </div>
-
-                                            <div className="space-y-3 mb-6">
-                                                <div
-                                                    className={`flex items-center justify-between py-2 border-b ${themeStyles.dividerBorder}`}
-                                                >
-                                                    <span
-                                                        className={`text-sm ${themeStyles.textSecondary}`}
-                                                    >
-                                                        Drive Span
-                                                    </span>
-                                                    <span
-                                                        className={`font-semibold ${themeStyles.textPrimary}`}
-                                                    >
-                                                        {volunteer.driveSpan} days
-                                                    </span>
-                                                </div>
-
-                                                {status === "active" && (
-                                                    <div
-                                                        className={`flex items-center justify-between py-2 border-b ${themeStyles.dividerBorder}`}
-                                                    >
-                                                        <span
-                                                            className={`text-sm ${themeStyles.textSecondary}`}
-                                                        >
-                                                            Days Remaining
+                                                    </td>
+                                                    <td className={`px-6 py-4 whitespace-nowrap`}>
+                                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${status === "Active"
+                                                            ? `${themeStyles.statusActiveBg} ${themeStyles.statusActiveText}`
+                                                            : `${themeStyles.statusCompletedBg} ${themeStyles.statusCompletedText}`
+                                                            }`}>
+                                                            {status}
                                                         </span>
-                                                        <span
-                                                            className={`font-semibold ${themeStyles.textPrimary}`}
-                                                        >
-                                                            {daysRemaining} days
-                                                        </span>
-                                                    </div>
-                                                )}
-
-                                                <div className="flex items-center gap-2 text-sm">
-                                                    <Calendar
-                                                        className={`h-4 w-4 ${themeStyles.calendarIcon}`}
-                                                    />
-                                                    <span className={themeStyles.textSecondary}>
-                                                        Created:
-                                                    </span>
-                                                    <span
-                                                        className={`font-medium ${themeStyles.textPrimary}`}
-                                                    >
+                                                    </td>
+                                                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${themeStyles.textSecondary}`}>
                                                         {formatDate(volunteer.createdDate)}
-                                                    </span>
-                                                </div>
-
-                                                {volunteer.permissions.length > 0 && (
-                                                    <div className="pt-2">
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <Shield
-                                                                className={`h-4 w-4 ${themeStyles.textSecondary}`}
-                                                            />
-                                                            <span
-                                                                className={`text-sm font-medium ${themeStyles.textSecondary}`}
+                                                    </td>
+                                                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${themeStyles.textSecondary}`}>
+                                                        {volunteer.driveSpan} days
+                                                    </td>
+                                                    <td className={`px-6 py-4 whitespace-nowrap text-center`}>
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            <button
+                                                                onClick={() => handleView(volunteer)}
+                                                                className={`p-2 rounded-lg ${themeStyles.buttonHover} ${themeStyles.textPrimary} transition-colors`}
+                                                                title="View"
                                                             >
-                                                                Permissions ({volunteer.permissions.length})
-                                                            </span>
+                                                                <Eye className="h-4 w-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleEdit(volunteer)}
+                                                                className={`p-2 rounded-lg ${themeStyles.buttonHover} ${themeStyles.textPrimary} transition-colors`}
+                                                                title="Edit"
+                                                            >
+                                                                <Edit2 className="h-4 w-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDelete(volunteer.id)}
+                                                                className={`p-2 rounded-lg hover:bg-red-100 text-red-600 transition-colors`}
+                                                                title="Delete"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </button>
                                                         </div>
-                                                        <div className="flex flex-wrap gap-2">
-                                                            {volunteer.permissions.slice(0, 2).map((perm) => (
-                                                                <span
-                                                                    key={perm}
-                                                                    className={`text-xs px-2 py-1 rounded-full ${themeStyles.permissionBg} ${themeStyles.permissionText} font-medium`}
-                                                                >
-                                                                    {perm}
-                                                                </span>
-                                                            ))}
-                                                            {volunteer.permissions.length > 2 && (
-                                                                <span
-                                                                    className={`text-xs px-2 py-1 rounded-full ${themeStyles.permissionBg} ${themeStyles.permissionText} font-medium`}
-                                                                >
-                                                                    +{volunteer.permissions.length - 2} more
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => handleView(volunteer)}
-                                                    className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
-                                                >
-                                                    <Eye className="mr-2 h-4 w-4" />
-                                                    View
-                                                </button>
-                                                <button
-                                                    onClick={() => handleEdit(volunteer)}
-                                                    className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
-                                                >
-                                                    <Edit2 className="mr-2 h-4 w-4" />
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(volunteer.id)}
-                                                    className={`inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} text-red-600 hover:bg-red-600 hover:text-white transition-colors`}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     )}
                 </div>
 
                 {/* Modal */}
                 {showModal && (
-                    <div
-                        className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
-                    >
-                        <div
-                            className={`w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder}`}
-                        >
-                            <div
-                                className={`sticky top-0 ${themeStyles.modalHeader} ${themeStyles.modalHeaderBorder} border-b px-6 py-4 flex justify-between items-center`}
-                            >
+                    <div className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
+                        <div className={`w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder}`}>
+                            <div className={`sticky top-0 ${themeStyles.modalHeader} ${themeStyles.modalHeaderBorder} border-b px-6 py-4 flex justify-between items-center`}>
                                 <h2 className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
                                     {viewMode
                                         ? "Volunteer Details"
@@ -661,9 +534,7 @@ const VolunteerManager = () => {
 
                             <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-120px)]">
                                 <div className="space-y-2">
-                                    <label
-                                        className={`block text-sm font-medium ${themeStyles.textPrimary}`}
-                                    >
+                                    <label className={`block text-sm font-medium ${themeStyles.textPrimary}`}>
                                         Volunteer Name <span className="text-red-600">*</span>
                                     </label>
                                     <input
@@ -680,9 +551,7 @@ const VolunteerManager = () => {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <label
-                                            className={`block text-sm font-medium ${themeStyles.textPrimary}`}
-                                        >
+                                        <label className={`block text-sm font-medium ${themeStyles.textPrimary}`}>
                                             Email <span className="text-red-600">*</span>
                                         </label>
                                         <input
@@ -698,9 +567,7 @@ const VolunteerManager = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label
-                                            className={`block text-sm font-medium ${themeStyles.textPrimary}`}
-                                        >
+                                        <label className={`block text-sm font-medium ${themeStyles.textPrimary}`}>
                                             Phone Number <span className="text-red-600">*</span>
                                         </label>
                                         <input
@@ -717,9 +584,7 @@ const VolunteerManager = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label
-                                        className={`block text-sm font-medium ${themeStyles.textPrimary}`}
-                                    >
+                                    <label className={`block text-sm font-medium ${themeStyles.textPrimary}`}>
                                         Drive Name <span className="text-red-600">*</span>
                                     </label>
                                     <input
@@ -736,9 +601,7 @@ const VolunteerManager = () => {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <label
-                                            className={`block text-sm font-medium ${themeStyles.textPrimary}`}
-                                        >
+                                        <label className={`block text-sm font-medium ${themeStyles.textPrimary}`}>
                                             Drive Span (Days) <span className="text-red-600">*</span>
                                         </label>
                                         <input
@@ -755,9 +618,7 @@ const VolunteerManager = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label
-                                            className={`block text-sm font-medium ${themeStyles.textPrimary}`}
-                                        >
+                                        <label className={`block text-sm font-medium ${themeStyles.textPrimary}`}>
                                             Created Date <span className="text-red-600">*</span>
                                         </label>
                                         <input
@@ -770,43 +631,6 @@ const VolunteerManager = () => {
                                             className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${themeStyles.inputDisabled} disabled:cursor-not-allowed ${themeStyles.inputText} transition-all`}
                                         />
                                     </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label
-                                        className={`block text-sm font-medium ${themeStyles.textPrimary} mb-3`}
-                                    >
-                                        Permissions <span className="text-red-600">*</span>
-                                    </label>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        {permissionOptions.map((permission) => (
-                                            <label
-                                                key={permission}
-                                                className={`flex items-center p-3 rounded-lg border ${themeStyles.inputBorder} ${viewMode
-                                                    ? "cursor-not-allowed opacity-60"
-                                                    : "cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-900/10"
-                                                    } transition-all`}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.permissions.includes(permission)}
-                                                    onChange={() => handlePermissionToggle(permission)}
-                                                    disabled={viewMode}
-                                                    className={`h-4 w-4 rounded border ${themeStyles.checkboxBorder} ${themeStyles.checkboxBg} text-purple-600 focus:ring-2 focus:ring-purple-500 disabled:cursor-not-allowed`}
-                                                />
-                                                <span
-                                                    className={`ml-3 text-sm font-medium ${themeStyles.textPrimary}`}
-                                                >
-                                                    {permission}
-                                                </span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                    {formData.permissions.length === 0 && !viewMode && (
-                                        <p className={`text-sm ${themeStyles.textSecondary} mt-2`}>
-                                            Please select at least one permission
-                                        </p>
-                                    )}
                                 </div>
 
                                 {!viewMode && (
@@ -828,10 +652,9 @@ const VolunteerManager = () => {
                                                 !formData.phone ||
                                                 !formData.driveName ||
                                                 !formData.driveSpan ||
-                                                !formData.createdDate ||
-                                                formData.permissions.length === 0
+                                                !formData.createdDate
                                             }
-                                            className="flex-1 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="flex-1 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {editingId ? "Update Volunteer" : "Add Volunteer"}
                                         </button>
@@ -844,12 +667,8 @@ const VolunteerManager = () => {
 
                 {/* Delete Confirmation Modal */}
                 {showDeleteConfirm && (
-                    <div
-                        className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
-                    >
-                        <div
-                            className={`w-full max-w-md rounded-2xl shadow-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} p-6`}
-                        >
+                    <div className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
+                        <div className={`w-full max-w-md rounded-2xl shadow-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} p-6`}>
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className={`text-xl font-bold ${themeStyles.textPrimary}`}>
                                     Confirm Deletion
@@ -865,8 +684,7 @@ const VolunteerManager = () => {
                                 </button>
                             </div>
                             <p className={`${themeStyles.textSecondary} mb-6`}>
-                                Are you sure you want to delete this volunteer? This action
-                                cannot be undone.
+                                Are you sure you want to delete this volunteer? This action cannot be undone.
                             </p>
                             <div className="flex gap-3 justify-end">
                                 <button

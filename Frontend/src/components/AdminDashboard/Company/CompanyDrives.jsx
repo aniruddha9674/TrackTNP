@@ -6,19 +6,15 @@ import {
   Calendar,
   X,
   Download,
-  Trash2,
   Search,
   ChevronRight,
-  Moon,
-  Sun,
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
+
 
 const CompanyDrivesManager = () => {
   const { theme } = useTheme();
   const [selectedCompany, setSelectedCompany] = useState(null);
-  const [selectedStudentDetail, setSelectedStudentDetail] = useState(null);
-  const [selectedStudents, setSelectedStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [filterStep, setFilterStep] = useState(1);
@@ -63,10 +59,6 @@ const CompanyDrivesManager = () => {
   const colors = getThemeColors();
   const isDark = theme === "dark";
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
-
   // Sample data
   const [companies] = useState([
     {
@@ -80,6 +72,7 @@ const CompanyDrivesManager = () => {
       venue: "Seminar Hall",
       type: "Placement",
       color: "#465FFF",
+      totalRounds: 5,
     },
     {
       id: 2,
@@ -92,6 +85,7 @@ const CompanyDrivesManager = () => {
       venue: "Main Auditorium",
       type: "Placement",
       color: "#32D583",
+      totalRounds: 3,
     },
     {
       id: 3,
@@ -104,6 +98,7 @@ const CompanyDrivesManager = () => {
       venue: "Conference Hall",
       type: "Internship",
       color: "#0BA5EC",
+      totalRounds: 4,
     },
     {
       id: 4,
@@ -116,6 +111,7 @@ const CompanyDrivesManager = () => {
       venue: "Lab Complex",
       type: "Placement",
       color: "#F97066",
+      totalRounds: 3,
     },
   ]);
 
@@ -139,14 +135,13 @@ const CompanyDrivesManager = () => {
     { id: 2, name: "Fourth Year", value: "4th" },
   ];
 
-  const [students, setStudents] = useState([
+  const [students] = useState([
     {
       id: 1,
       fullName: "Soham Pachpute",
       mobile: "9876543210",
       email: "soham@example.com",
-      studentId: "ST001",
-      present: true,
+      studentId: "PRN001",
       round1: "Pass",
       round2: "Pass",
       round3: "Pass",
@@ -155,24 +150,16 @@ const CompanyDrivesManager = () => {
       placementSelected: true,
       internshipSelected: false,
       company: "Incorbis",
-      aggCGPA: "8.5",
-      sscPercentage: "85%",
-      hscPercentage: "82%",
       collegeName: "ABC Engineering College",
       branch: "Computer Science",
       year: "4th",
-      yearCompletion: "2025",
-      resume: "resume_soham.pdf",
-      count: 1,
-      salary: "6.5 LPA",
     },
     {
       id: 2,
       fullName: "Rahul Sharma",
       mobile: "9876543211",
       email: "rahul@example.com",
-      studentId: "ST002",
-      present: true,
+      studentId: "PRN002",
       round1: "Pass",
       round2: "Pass",
       round3: "Fail",
@@ -181,50 +168,34 @@ const CompanyDrivesManager = () => {
       placementSelected: false,
       internshipSelected: true,
       company: "Incorbis",
-      aggCGPA: "7.8",
-      sscPercentage: "78%",
-      hscPercentage: "75%",
       collegeName: "ABC Engineering College",
       branch: "Computer Science",
       year: "3rd",
-      yearCompletion: "2026",
-      resume: "resume_rahul.pdf",
-      count: 2,
-      salary: "5.0 LPA",
     },
     {
       id: 3,
       fullName: "Priya Patel",
       mobile: "9876543212",
       email: "priya@example.com",
-      studentId: "ST003",
-      present: false,
-      round1: "-",
-      round2: "-",
-      round3: "-",
-      round4: "-",
-      round5: "-",
+      studentId: "PRN003",
+      round1: "Pass",
+      round2: "Pass",
+      round3: "Pass",
+      round4: "Pass",
+      round5: "Pass",
       placementSelected: false,
-      internshipSelected: false,
+      internshipSelected: true,
       company: "Incorbis",
-      aggCGPA: "8.2",
-      sscPercentage: "88%",
-      hscPercentage: "84%",
       collegeName: "ABC Engineering College",
       branch: "Information Technology",
       year: "4th",
-      yearCompletion: "2025",
-      resume: "resume_priya.pdf",
-      count: 0,
-      salary: "-",
     },
     {
       id: 4,
       fullName: "Amit Kumar",
       mobile: "9876543213",
       email: "amit@example.com",
-      studentId: "ST004",
-      present: true,
+      studentId: "PRN004",
       round1: "Pass",
       round2: "Pass",
       round3: "Pass",
@@ -233,24 +204,16 @@ const CompanyDrivesManager = () => {
       placementSelected: true,
       internshipSelected: false,
       company: "TCS",
-      aggCGPA: "7.5",
-      sscPercentage: "80%",
-      hscPercentage: "78%",
       collegeName: "XYZ Institute of Technology",
       branch: "Mechanical",
       year: "4th",
-      yearCompletion: "2025",
-      resume: "resume_amit.pdf",
-      count: 1,
-      salary: "4.5 LPA",
     },
     {
       id: 5,
       fullName: "Sneha Desai",
       mobile: "9876543214",
       email: "sneha@example.com",
-      studentId: "ST005",
-      present: true,
+      studentId: "PRN005",
       round1: "Pass",
       round2: "Fail",
       round3: "-",
@@ -259,16 +222,27 @@ const CompanyDrivesManager = () => {
       placementSelected: false,
       internshipSelected: false,
       company: "Infosys",
-      aggCGPA: "8.7",
-      sscPercentage: "92%",
-      hscPercentage: "89%",
       collegeName: "ABC Engineering College",
       branch: "Electronics & Telecommunication",
       year: "3rd",
-      yearCompletion: "2026",
-      resume: "resume_sneha.pdf",
-      count: 0,
-      salary: "-",
+    },
+    {
+      id: 6,
+      fullName: "Vikram Singh",
+      mobile: "9876543215",
+      email: "vikram@example.com",
+      studentId: "PRN006",
+      round1: "Pass",
+      round2: "Pass",
+      round3: "Pass",
+      round4: "Pass",
+      round5: "-",
+      placementSelected: true,
+      internshipSelected: false,
+      company: "Incorbis",
+      collegeName: "ABC Engineering College",
+      branch: "Computer Science",
+      year: "4th",
     },
   ]);
 
@@ -286,8 +260,6 @@ const CompanyDrivesManager = () => {
     setSelectedCollege(null);
     setSelectedDepartment(null);
     setSelectedYear(null);
-    setSelectedStudents([]);
-    setSelectedStudentDetail(null);
   };
 
   const handleCollegeSelect = (college) => {
@@ -314,100 +286,40 @@ const CompanyDrivesManager = () => {
     setSelectedYear(null);
   };
 
-  const handleStudentNameClick = (student) => {
-    setSelectedStudentDetail(student);
-  };
-
-  const handleSelectStudent = (studentId) => {
-    if (selectedStudents.includes(studentId)) {
-      setSelectedStudents(selectedStudents.filter((id) => id !== studentId));
-    } else {
-      setSelectedStudents([...selectedStudents, studentId]);
-    }
-  };
-
-  const handleSelectAll = () => {
-    if (selectedStudents.length === filteredStudents.length) {
-      setSelectedStudents([]);
-    } else {
-      setSelectedStudents(filteredStudents.map((s) => s.id));
-    }
-  };
-
-  const handleDeleteSelected = () => {
-    if (
-      window.confirm(`Delete ${selectedStudents.length} selected student(s)?`)
-    ) {
-      setStudents(students.filter((s) => !selectedStudents.includes(s.id)));
-      setSelectedStudents([]);
-    }
-  };
-
-  const toggleStudentField = (studentId, field) => {
-    setStudents(
-      students.map((s) => {
-        if (s.id === studentId) {
-          if (field === "present") {
-            return { ...s, present: !s.present };
-          } else if (field === "placementSelected") {
-            return { ...s, placementSelected: !s.placementSelected };
-          } else if (field === "internshipSelected") {
-            return { ...s, internshipSelected: !s.internshipSelected };
-          } else if (field.startsWith("round")) {
-            const currentValue = s[field];
-            const newValue =
-              currentValue === "Pass"
-                ? "Fail"
-                : currentValue === "Fail"
-                ? "-"
-                : "Pass";
-            return { ...s, [field]: newValue };
-          }
-        }
-        return s;
-      })
-    );
+  const handleBackToList = () => {
+    setSelectedCompany(null);
+    setSelectedCollege(null);
+    setSelectedDepartment(null);
+    setSelectedYear(null);
   };
 
   const exportToExcel = () => {
     alert("Exporting students to Excel...");
   };
 
-  const handleSave = () => {
-    alert("Changes saved!");
-  };
-
-  const handleSaveAndAnother = () => {
-    alert("Saved! Ready for another student.");
-    setSelectedStudentDetail(null);
-  };
-
-  const handleSaveAndKeepEditing = () => {
-    alert("Saved! Continue editing.");
-  };
-
-  const handleDeleteStudent = () => {
-    if (window.confirm(`Delete ${selectedStudentDetail.fullName}?`)) {
-      setStudents(students.filter((s) => s.id !== selectedStudentDetail.id));
-      setSelectedStudentDetail(null);
+  // Check if student passed all rounds up to the company's total rounds
+  const passedAllRounds = (student, company) => {
+    const totalRounds = company.totalRounds;
+    for (let i = 1; i <= totalRounds; i++) {
+      const roundKey = `round${i}`;
+      if (student[roundKey] !== "Pass") {
+        return false;
+      }
     }
+    return true;
   };
 
-  const handleBackToList = () => {
-    setSelectedCompany(null);
-    setSelectedCollege(null);
-    setSelectedDepartment(null);
-    setSelectedYear(null);
-    setSelectedStudentDetail(null);
-  };
-
+  // Filter students who made it to the final round
   const filteredStudents = students.filter(
     (s) =>
       s.company === selectedCompany?.name &&
       s.collegeName === selectedCollege?.name &&
       s.branch === selectedDepartment?.name &&
       s.year === selectedYear?.value &&
-      s.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+      passedAllRounds(s, selectedCompany) &&
+      (s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.studentId.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -436,7 +348,6 @@ const CompanyDrivesManager = () => {
                 </p>
               </div>
             </div>
-        
           </div>
 
           {/* Stats Cards */}
@@ -559,8 +470,8 @@ const CompanyDrivesManager = () => {
                       {filterStep === 1
                         ? "College"
                         : filterStep === 2
-                        ? "Department"
-                        : "Year"}
+                          ? "Department"
+                          : "Year"}
                     </p>
                   </div>
                   <button
@@ -845,532 +756,8 @@ const CompanyDrivesManager = () => {
                 ))}
               </div>
             </div>
-          ) : selectedStudentDetail ? (
-            /* Student Detail View */
-            <div
-              className="rounded-xl shadow-sm border"
-              style={{
-                backgroundColor: colors.cardBg,
-                borderColor: colors.border,
-              }}
-            >
-              <div
-                className="p-6 border-b"
-                style={{ borderColor: colors.border }}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setSelectedStudentDetail(null)}
-                      className="p-2 rounded-lg transition-all hover:scale-105"
-                      style={{
-                        backgroundColor: colors.hoverBg,
-                        color: colors.text,
-                      }}
-                    >
-                      ←
-                    </button>
-                    <div>
-                      <h2
-                        className="text-2xl font-bold"
-                        style={{ color: colors.text }}
-                      >
-                        Change {selectedCompany.name}_Drive
-                      </h2>
-                      <p
-                        className="text-sm"
-                        style={{ color: colors.textSecondary }}
-                      >
-                        {selectedCompany.name}_Drive object (1)
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <button
-                    className="text-sm font-semibold flex items-center gap-2"
-                    style={{ color: "#0BA5EC" }}
-                  >
-                    History
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Student ID:
-                    </label>
-                    <input
-                      type="text"
-                      value={selectedStudentDetail.studentId}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Full Name:
-                    </label>
-                    <input
-                      type="text"
-                      value={selectedStudentDetail.fullName}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Present:
-                    </label>
-                    <select
-                      value={selectedStudentDetail.present}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    >
-                      <option value={true}>Present</option>
-                      <option value={false}>Absent</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Round 1:
-                    </label>
-                    <select
-                      value={selectedStudentDetail.round1}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    >
-                      <option value="Pass">Pass</option>
-                      <option value="Fail">Fail</option>
-                      <option value="-">-</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Round 2:
-                    </label>
-                    <select
-                      value={selectedStudentDetail.round2}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    >
-                      <option value="Pass">Pass</option>
-                      <option value="Fail">Fail</option>
-                      <option value="-">-</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Round 3:
-                    </label>
-                    <select
-                      value={selectedStudentDetail.round3}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    >
-                      <option value="Pass">Pass</option>
-                      <option value="Fail">Fail</option>
-                      <option value="-">-</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Round 4:
-                    </label>
-                    <select
-                      value={selectedStudentDetail.round4}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    >
-                      <option value="Pass">Pass</option>
-                      <option value="Fail">Fail</option>
-                      <option value="-">-</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Round 5:
-                    </label>
-                    <select
-                      value={selectedStudentDetail.round5}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    >
-                      <option value="Pass">Pass</option>
-                      <option value="Fail">Fail</option>
-                      <option value="-">-</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Placement Selected:
-                    </label>
-                    <select
-                      value={selectedStudentDetail.placementSelected}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    >
-                      <option value={true}>Yes</option>
-                      <option value={false}>No</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Internship Selected:
-                    </label>
-                    <select
-                      value={selectedStudentDetail.internshipSelected}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    >
-                      <option value={true}>Yes</option>
-                      <option value={false}>No</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Student Email:
-                    </label>
-                    <input
-                      type="email"
-                      value={selectedStudentDetail.email}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Student Mobile No:
-                    </label>
-                    <input
-                      type="tel"
-                      value={selectedStudentDetail.mobile}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Agg CGPA:
-                    </label>
-                    <input
-                      type="text"
-                      value={selectedStudentDetail.aggCGPA}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      SSC Percentage:
-                    </label>
-                    <input
-                      type="text"
-                      value={selectedStudentDetail.sscPercentage}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      HSC/Dip Percentage:
-                    </label>
-                    <input
-                      type="text"
-                      value={selectedStudentDetail.hscPercentage}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      College Name:
-                    </label>
-                    <input
-                      type="text"
-                      value={selectedStudentDetail.collegeName}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Branch:
-                    </label>
-                    <input
-                      type="text"
-                      value={selectedStudentDetail.branch}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Yr Completion Current Degree:
-                    </label>
-                    <input
-                      type="text"
-                      value={selectedStudentDetail.yearCompletion}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Resume:
-                    </label>
-                    <input
-                      type="text"
-                      value={selectedStudentDetail.resume}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Count:
-                    </label>
-                    <input
-                      type="number"
-                      value={selectedStudentDetail.count}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: colors.text }}
-                    >
-                      Salary:
-                    </label>
-                    <input
-                      type="text"
-                      value={selectedStudentDetail.salary}
-                      className="w-full px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: colors.inputBg,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className="p-6 border-t flex gap-3"
-                style={{ borderColor: colors.border }}
-              >
-                <button
-                  onClick={handleDeleteStudent}
-                  className="px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105"
-                  style={{
-                    backgroundColor: "#F04438",
-                    color: "#ffffff",
-                  }}
-                >
-                  Delete
-                </button>
-                <div className="flex-1"></div>
-                <button
-                  onClick={handleSave}
-                  className="px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105"
-                  style={{
-                    backgroundColor: colors.hoverBg,
-                    color: colors.text,
-                    border: `1px solid ${colors.border}`,
-                  }}
-                >
-                  Save
-                </button>
-                <button
-                  onClick={handleSaveAndAnother}
-                  className="px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105"
-                  style={{
-                    backgroundColor: "#0BA5EC",
-                    color: "#ffffff",
-                  }}
-                >
-                  Save and Add Another
-                </button>
-                <button
-                  onClick={handleSaveAndKeepEditing}
-                  className="px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105"
-                  style={{
-                    backgroundColor: "#465FFF",
-                    color: "#ffffff",
-                  }}
-                >
-                  Save and Keep Editing
-                </button>
-              </div>
-            </div>
           ) : (
-            /* Student Management View */
+            /* Final Round Students View */
             <div
               className="rounded-xl shadow-sm border"
               style={{
@@ -1400,7 +787,7 @@ const CompanyDrivesManager = () => {
                         className="text-2xl font-bold"
                         style={{ color: colors.text }}
                       >
-                        {selectedCompany.name} Drive
+                        {selectedCompany.name} Drive - Final Round Students
                       </h2>
                       <p
                         className="text-sm"
@@ -1414,42 +801,30 @@ const CompanyDrivesManager = () => {
                 </div>
 
                 {/* Actions */}
-                <div>
-                  <label
-                    className="block text-sm font-semibold mb-2"
-                    style={{ color: colors.text }}
-                  >
-                    Action
-                  </label>
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      onClick={handleDeleteSelected}
-                      disabled={selectedStudents.length === 0}
-                      className="px-4 py-2 rounded-lg font-semibold transition-all hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{
-                        backgroundColor: "#F04438",
-                        color: "#ffffff",
-                      }}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: colors.textSecondary }}
                     >
-                      <Trash2 size={16} />
-                      Delete Selected
-                    </button>
-                    <button
-                      onClick={exportToExcel}
-                      className="px-4 py-2 rounded-lg font-semibold transition-all hover:scale-105 flex items-center gap-2"
-                      style={{
-                        backgroundColor: "#32D583",
-                        color: "#ffffff",
-                      }}
-                    >
-                      <Download size={16} />
-                      Export Students
-                    </button>
+                      Students who cleared all {selectedCompany.totalRounds} rounds
+                    </p>
                   </div>
+                  <button
+                    onClick={exportToExcel}
+                    className="px-4 py-2 rounded-lg font-semibold transition-all hover:scale-105 flex items-center gap-2"
+                    style={{
+                      backgroundColor: "#32D583",
+                      color: "#ffffff",
+                    }}
+                  >
+                    <Download size={16} />
+                    Export Students
+                  </button>
                 </div>
               </div>
 
-              {/* Search and Filter */}
+              {/* Search */}
               <div
                 className="p-4 border-b"
                 style={{ borderColor: colors.border }}
@@ -1463,7 +838,7 @@ const CompanyDrivesManager = () => {
                     />
                     <input
                       type="text"
-                      placeholder="Search students..."
+                      placeholder="Search by name, email, or PRN..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-10 pr-4 py-2 rounded-lg border transition-all"
@@ -1478,8 +853,7 @@ const CompanyDrivesManager = () => {
                     className="text-sm font-medium px-4 py-2"
                     style={{ color: colors.text }}
                   >
-                    {selectedStudents.length} of {filteredStudents.length}{" "}
-                    selected
+                    {filteredStudents.length} students
                   </div>
                 </div>
               </div>
@@ -1494,100 +868,61 @@ const CompanyDrivesManager = () => {
                     }}
                   >
                     <tr>
-                      <th className="p-4 text-left">
-                        <input
-                          type="checkbox"
-                          checked={
-                            selectedStudents.length ===
-                              filteredStudents.length &&
-                            filteredStudents.length > 0
-                          }
-                          onChange={handleSelectAll}
-                          className="w-4 h-4 rounded"
-                        />
+                      <th
+                        className="p-4 text-left text-sm font-semibold"
+                        style={{ color: colors.text, width: "80px" }}
+                      >
+                        Sr No.
                       </th>
                       <th
                         className="p-4 text-left text-sm font-semibold"
                         style={{ color: colors.text }}
                       >
-                        Full Name
+                        Name
                       </th>
                       <th
                         className="p-4 text-left text-sm font-semibold"
                         style={{ color: colors.text }}
                       >
-                        Mobile
+                        Email
+                      </th>
+                      <th
+                        className="p-4 text-left text-sm font-semibold"
+                        style={{ color: colors.text }}
+                      >
+                        PRN No.
+                      </th>
+                      <th
+                        className="p-4 text-left text-sm font-semibold"
+                        style={{ color: colors.text }}
+                      >
+                        College Name
                       </th>
                       <th
                         className="p-4 text-center text-sm font-semibold"
                         style={{ color: colors.text }}
                       >
-                        Present
-                      </th>
-                      <th
-                        className="p-4 text-center text-sm font-semibold"
-                        style={{ color: colors.text }}
-                      >
-                        Round 1
-                      </th>
-                      <th
-                        className="p-4 text-center text-sm font-semibold"
-                        style={{ color: colors.text }}
-                      >
-                        Round 2
-                      </th>
-                      <th
-                        className="p-4 text-center text-sm font-semibold"
-                        style={{ color: colors.text }}
-                      >
-                        Round 3
-                      </th>
-                      <th
-                        className="p-4 text-center text-sm font-semibold"
-                        style={{ color: colors.text }}
-                      >
-                        Round 4
-                      </th>
-                      <th
-                        className="p-4 text-center text-sm font-semibold"
-                        style={{ color: colors.text }}
-                      >
-                        Round 5
-                      </th>
-                      <th
-                        className="p-4 text-center text-sm font-semibold"
-                        style={{ color: colors.text }}
-                      >
-                        Placement
-                      </th>
-                      <th
-                        className="p-4 text-center text-sm font-semibold"
-                        style={{ color: colors.text }}
-                      >
-                        Internship
+                        Selected For
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredStudents.map((student) => (
+                    {filteredStudents.map((student, index) => (
                       <tr
                         key={student.id}
                         style={{
                           borderBottom: `1px solid ${colors.border}`,
                         }}
                       >
-                        <td className="p-4">
-                          <input
-                            type="checkbox"
-                            checked={selectedStudents.includes(student.id)}
-                            onChange={() => handleSelectStudent(student.id)}
-                            className="w-4 h-4 rounded"
-                          />
+                        <td
+                          className="p-4 font-medium"
+                          style={{ color: colors.text }}
+                        >
+                          {index + 1}
                         </td>
                         <td
-                          className="p-4 font-medium cursor-pointer hover:underline"
-                          style={{ color: "#465FFF" }}
-                          onClick={() => handleStudentNameClick(student)}
+                          className="p-4 font-medium"
+                          style={{ color: colors.text }}
                         >
                           {student.fullName}
                         </td>
@@ -1595,175 +930,40 @@ const CompanyDrivesManager = () => {
                           className="p-4"
                           style={{ color: colors.textSecondary }}
                         >
-                          {student.mobile}
+                          {student.email}
+                        </td>
+                        <td
+                          className="p-4 font-medium"
+                          style={{ color: colors.text }}
+                        >
+                          {student.studentId}
+                        </td>
+                        <td
+                          className="p-4"
+                          style={{ color: colors.textSecondary }}
+                        >
+                          {student.collegeName}
                         </td>
                         <td className="p-4 text-center">
-                          <button
-                            onClick={() =>
-                              toggleStudentField(student.id, "present")
-                            }
-                            className="px-2 py-1 rounded text-xs font-semibold cursor-pointer transition-all hover:scale-105"
-                            style={{
-                              backgroundColor: student.present
-                                ? "#32D583"
-                                : "#F04438",
-                              color: "#ffffff",
-                            }}
-                          >
-                            {student.present ? "✓" : "✗"}
-                          </button>
-                        </td>
-                        <td className="p-4 text-center">
-                          <button
-                            onClick={() =>
-                              toggleStudentField(student.id, "round1")
-                            }
-                            className="px-2 py-1 rounded text-xs font-semibold cursor-pointer transition-all hover:scale-105"
-                            style={{
-                              backgroundColor:
-                                student.round1 === "Pass"
-                                  ? "#32D583"
-                                  : student.round1 === "Fail"
-                                  ? "#F04438"
-                                  : colors.border,
-                              color:
-                                student.round1 === "-"
-                                  ? colors.textSecondary
-                                  : "#ffffff",
-                            }}
-                          >
-                            {student.round1}
-                          </button>
-                        </td>
-                        <td className="p-4 text-center">
-                          <button
-                            onClick={() =>
-                              toggleStudentField(student.id, "round2")
-                            }
-                            className="px-2 py-1 rounded text-xs font-semibold cursor-pointer transition-all hover:scale-105"
-                            style={{
-                              backgroundColor:
-                                student.round2 === "Pass"
-                                  ? "#32D583"
-                                  : student.round2 === "Fail"
-                                  ? "#F04438"
-                                  : colors.border,
-                              color:
-                                student.round2 === "-"
-                                  ? colors.textSecondary
-                                  : "#ffffff",
-                            }}
-                          >
-                            {student.round2}
-                          </button>
-                        </td>
-                        <td className="p-4 text-center">
-                          <button
-                            onClick={() =>
-                              toggleStudentField(student.id, "round3")
-                            }
-                            className="px-2 py-1 rounded text-xs font-semibold cursor-pointer transition-all hover:scale-105"
-                            style={{
-                              backgroundColor:
-                                student.round3 === "Pass"
-                                  ? "#32D583"
-                                  : student.round3 === "Fail"
-                                  ? "#F04438"
-                                  : colors.border,
-                              color:
-                                student.round3 === "-"
-                                  ? colors.textSecondary
-                                  : "#ffffff",
-                            }}
-                          >
-                            {student.round3}
-                          </button>
-                        </td>
-                        <td className="p-4 text-center">
-                          <button
-                            onClick={() =>
-                              toggleStudentField(student.id, "round4")
-                            }
-                            className="px-2 py-1 rounded text-xs font-semibold cursor-pointer transition-all hover:scale-105"
-                            style={{
-                              backgroundColor:
-                                student.round4 === "Pass"
-                                  ? "#32D583"
-                                  : student.round4 === "Fail"
-                                  ? "#F04438"
-                                  : colors.border,
-                              color:
-                                student.round4 === "-"
-                                  ? colors.textSecondary
-                                  : "#ffffff",
-                            }}
-                          >
-                            {student.round4}
-                          </button>
-                        </td>
-                        <td className="p-4 text-center">
-                          <button
-                            onClick={() =>
-                              toggleStudentField(student.id, "round5")
-                            }
-                            className="px-2 py-1 rounded text-xs font-semibold cursor-pointer transition-all hover:scale-105"
-                            style={{
-                              backgroundColor:
-                                student.round5 === "Pass"
-                                  ? "#32D583"
-                                  : student.round5 === "Fail"
-                                  ? "#F04438"
-                                  : colors.border,
-                              color:
-                                student.round5 === "-"
-                                  ? colors.textSecondary
-                                  : "#ffffff",
-                            }}
-                          >
-                            {student.round5}
-                          </button>
-                        </td>
-                        <td className="p-4 text-center">
-                          <button
-                            onClick={() =>
-                              toggleStudentField(
-                                student.id,
-                                "placementSelected"
-                              )
-                            }
-                            className="px-2 py-1 rounded text-xs font-semibold cursor-pointer transition-all hover:scale-105"
+                          <span
+                            className="px-3 py-1 rounded-full text-xs font-semibold inline-block"
                             style={{
                               backgroundColor: student.placementSelected
                                 ? "#32D583"
-                                : colors.border,
-                              color: student.placementSelected
+                                : student.internshipSelected
+                                  ? "#0BA5EC"
+                                  : colors.border,
+                              color: student.placementSelected || student.internshipSelected
                                 ? "#ffffff"
                                 : colors.textSecondary,
                             }}
                           >
-                            {student.placementSelected ? "✓" : "✗"}
-                          </button>
-                        </td>
-                        <td className="p-4 text-center">
-                          <button
-                            onClick={() =>
-                              toggleStudentField(
-                                student.id,
-                                "internshipSelected"
-                              )
-                            }
-                            className="px-2 py-1 rounded text-xs font-semibold cursor-pointer transition-all hover:scale-105"
-                            style={{
-                              backgroundColor: student.internshipSelected
-                                ? "#0BA5EC"
-                                : colors.border,
-                              color: student.internshipSelected
-                                ? "#ffffff"
-                                : colors.textSecondary,
-                            }}
-                          >
-                            {student.internshipSelected ? "✓" : "✗"}
-                          </button>
+                            {student.placementSelected
+                              ? "Placement"
+                              : student.internshipSelected
+                                ? "Internship"
+                                : "Not Selected"}
+                          </span>
                         </td>
                       </tr>
                     ))}
@@ -1777,33 +977,16 @@ const CompanyDrivesManager = () => {
                     className="text-lg font-medium"
                     style={{ color: colors.textSecondary }}
                   >
-                    No students found for the selected filters
+                    No students found who cleared all rounds
                   </p>
                   <p
                     className="text-sm mt-2"
                     style={{ color: colors.textTertiary }}
                   >
-                    Try selecting different college, department, or year
+                    Try selecting different filters or check back later
                   </p>
                 </div>
               )}
-
-              {/* Save Button */}
-              <div
-                className="p-6 border-t"
-                style={{ borderColor: colors.border }}
-              >
-                <button
-                  onClick={handleSave}
-                  className="w-full py-3 rounded-lg font-semibold transition-all hover:scale-105"
-                  style={{
-                    backgroundColor: "#465FFF",
-                    color: "#ffffff",
-                  }}
-                >
-                  Save Changes
-                </button>
-              </div>
             </div>
           )}
         </div>

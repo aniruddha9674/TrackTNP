@@ -149,21 +149,7 @@ const Dashboard = () => {
     {
       icon: <Building className="w-6 h-6" />,
       name: "Company",
-      children: [
-        {
-          name: "Company Details",
-          path: "/collegecoordinatordashboard/company/add",
-        },
-        {
-          name: "Company Drive",
-          path: "/collegecoordinatordashboard/company/drive",
-        },
-      ],
-    },
-    {
-      icon: <User className="w-6 h-6" />,
-      name: "Volunteer Details",
-      path: "/collegecoordinatordashboard/volunteer",
+      path: "/collegecoordinatordashboard/company",
     },
     {
       icon: <TrendingUp className="w-6 h-6" />,
@@ -172,22 +158,8 @@ const Dashboard = () => {
     },
     {
       icon: <User className="w-6 h-6" />,
-      name: "Students",
-      children: [
-        {
-          name: "Add Students",
-          path: "/collegecoordinatordashboard/student/add",
-        },
-        {
-          name: "Student Details",
-          path: "/collegecoordinatordashboard/student/details",
-        },
-      ],
-    },
-    {
-      icon: <NotebookPen className="w-6 h-6" />,
-      name: "Offer Letters",
-      path: "/collegecoordinatordashboard/offerletters",
+      name: "Student Details",
+      path: "/collegecoordinatordashboard/studentdetails"
     },
     {
       icon: <Bell className="w-6 h-6" />,

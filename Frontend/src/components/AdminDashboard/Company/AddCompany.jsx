@@ -28,8 +28,8 @@ const CompanyManager = () => {
   ]);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split("T")[0],
-    month: new Date().getMonth() + 1,
-    year: new Date().getFullYear(),
+    month: String( new Date().getMonth() + 1),
+    year: String( new Date().getFullYear()),
     companyName: "",
     companyRelatedInfo: "",
     regEndDate: "",
@@ -208,8 +208,8 @@ const CompanyManager = () => {
   const resetForm = () => {
     setFormData({
       date: new Date().toISOString().split("T")[0],
-      month: new Date().getMonth() + 1,
-      year: new Date().getFullYear(),
+      month: String( new Date().getMonth() + 1),
+      year: String(new Date().getFullYear()),
       companyName: "",
       companyRelatedInfo: "",
       regEndDate: "",
@@ -285,20 +285,22 @@ const CompanyManager = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    if (type === "checkbox") {
-      if (name === "eligibleBatchYears" || name === "eligibleBranches") {
-        setFormData((prev) => ({
-          ...prev,
-          [name]: checked
-            ? [...prev[name], value]
-            : prev[name].filter((item) => item !== value),
-        }));
-      }
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+
+  const { name, value, type, checked } = e.target;
+  
+  if (type === "checkbox") {
+    if (name === "eligibleBatchYears" || name === "eligibleBranches") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: checked
+          ? [...prev[name], value]
+          : prev[name].filter((item) => item !== value),
+      }));
     }
-  };
+  } else {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }
+};
 
   const handleSubmit = (action = "save") => {
     if (editingId !== null) {
@@ -383,7 +385,7 @@ const CompanyManager = () => {
       {type === "textarea" ? (
         <textarea
           name={name}
-          value={formData[name] || ""}
+          value={formData[name] ?? ""}
           onChange={handleInputChange}
           placeholder={placeholder}
           disabled={viewMode}
@@ -395,7 +397,7 @@ const CompanyManager = () => {
         <input
           type={type}
           name={name}
-          value={formData[name] || ""}
+          value={formData[name] ?? ""}
           onChange={handleInputChange}
           placeholder={placeholder}
           disabled={viewMode}
@@ -419,7 +421,7 @@ const CompanyManager = () => {
       </label>
       <select
         name={name}
-        value={formData[name] || ""}
+        value={formData[name] ?? ""}
         onChange={handleInputChange}
         disabled={viewMode}
         className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} transition-all`}
@@ -777,7 +779,7 @@ const CompanyManager = () => {
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+              <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)] scroll-smooth">
                 <FormSection title="Basic Information">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <InputField label="Date" name="date" type="date" required />
@@ -980,270 +982,8 @@ const CompanyManager = () => {
                     name="venue"
                     placeholder="Interview venue"
                   />
-                </FormSection>
-                <FormSection title="Compensation & Terms">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField
-                      label="Internship Stipend"
-                      name="internshipStipend"
-                      placeholder="e.g., 15000/month"
-                    />
-                    <InputField
-                      label="Salary Offered"
-                      name="salaryOffered"
-                      placeholder="e.g., 4.5,6.5 LPA"
-                    />
-                  </div>
-                  <InputField
-                    label="Company Bond"
-                    name="companyBond"
-                    placeholder="Bond details if any"
-                  />
-                </FormSection>
-                <FormSection title="Registration Statistics">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <InputField
-                      label="Total Registered"
-                      name="totalRegistered"
-                      type="number"
-                    />
-                    <InputField
-                      label="Candidates Present"
-                      name="candidatesPresent"
-                      type="number"
-                    />
-                    <InputField
-                      label="PCCOE Present"
-                      name="pccoePresent"
-                      type="number"
-                    />
-                    <InputField
-                      label="PCCOER Present"
-                      name="pccoerPresent"
-                      type="number"
-                    />
-                    <InputField
-                      label="NMIET Present"
-                      name="nmietPresent"
-                      type="number"
-                    />
-                    <InputField
-                      label="NCER Present"
-                      name="ncerPresent"
-                      type="number"
-                    />
-                  </div>
-                </FormSection>
-                <FormSection title="Overall Selection">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <InputField
-                      label="Total Selected"
-                      name="totalSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="PCCOE Selected"
-                      name="totalSelectedPCCOE"
-                      type="number"
-                    />
-                    <InputField
-                      label="PCCOER Selected"
-                      name="totalSelectedPCCOER"
-                      type="number"
-                    />
-                    <InputField
-                      label="NMIET Selected"
-                      name="totalSelectedNMIET"
-                      type="number"
-                    />
-                    <InputField
-                      label="NCER Selected"
-                      name="totalSelectedNCER"
-                      type="number"
-                    />
-                  </div>
-                </FormSection>
-                <FormSection title="PCCOER Branch-wise Selection">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <InputField
-                      label="Computer"
-                      name="pccoerComputerSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="Mechanical"
-                      name="pccoerMechanicalSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="IT"
-                      name="pccoerITSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="EnTC"
-                      name="pccoerEnTCSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="Civil"
-                      name="pccoerCivilSelected"
-                      type="number"
-                    />
-                  </div>
-                </FormSection>
-                <FormSection title="PCCOE Branch-wise Selection">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <InputField
-                      label="Computer"
-                      name="pccoeComputerSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="AI & ML"
-                      name="pccoeAIMLSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="Computer Regional"
-                      name="pccoeComputerRegionalSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="IT"
-                      name="pccoeITSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="EnTC"
-                      name="pccoeEnTCSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="Mechanical"
-                      name="pccoeMechanicalSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="Civil"
-                      name="pccoeCivilSelected"
-                      type="number"
-                    />
-                  </div>
-                </FormSection>
-                <FormSection title="NMIET Branch-wise Selection">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField
-                      label="Computer"
-                      name="nmietComputerSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="IT"
-                      name="nmietITSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="EnTC"
-                      name="nmietEnTCSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="Mechanical"
-                      name="nmietMechanicalSelected"
-                      type="number"
-                    />
-                  </div>
-                </FormSection>
-                <FormSection title="NCER Branch-wise Selection">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <InputField
-                      label="Computer"
-                      name="ncerComputerSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="AI & ML"
-                      name="ncerAIMLSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="EnTC"
-                      name="ncerEnTCSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="Mechanical"
-                      name="ncerMechanicalSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="Automobile"
-                      name="ncerAutomobileSelected"
-                      type="number"
-                    />
-                  </div>
-                </FormSection>
-                <FormSection title="Internship Selection">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <InputField
-                      label="Total Internship"
-                      name="totalInternshipSelected"
-                      type="number"
-                    />
-                    <InputField
-                      label="PCCOE Internship"
-                      name="totalInternshipSelectedPCCOE"
-                      type="number"
-                    />
-                    <InputField
-                      label="PCCOER Internship"
-                      name="totalInternshipSelectedPCCOER"
-                      type="number"
-                    />
-                    <InputField
-                      label="NMIET Internship"
-                      name="totalInternshipSelectedNMIET"
-                      type="number"
-                    />
-                    <InputField
-                      label="NCER Internship"
-                      name="totalInternshipSelectedNCER"
-                      type="number"
-                    />
-                  </div>
-                </FormSection>
-                <FormSection title="Student PRN Details">
-                  <InputField
-                    label="Internship Selected PRN"
-                    name="internshipSelectedPRN"
-                    type="textarea"
-                    placeholder="Comma-separated PRN numbers"
-                  />
-                  <InputField
-                    label="Placed Student PRN"
-                    name="placedStudentPRN"
-                    type="textarea"
-                    placeholder="Comma-separated PRN numbers"
-                  />
-                </FormSection>
-                <FormSection title="Financial Details">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField
-                      label="Approved Expenditure"
-                      name="approvedExpenditure"
-                      type="number"
-                      placeholder="Amount in ₹"
-                    />
-                    <InputField
-                      label="Actual Expenditure"
-                      name="actualExpenditure"
-                      type="number"
-                      placeholder="Amount in ₹"
-                    />
-                  </div>
-                </FormSection>
-                <FormSection title="Drive Status">
+                </FormSection>     
+              <FormSection title="Drive Status">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <SelectField
                       label="Resume Required"

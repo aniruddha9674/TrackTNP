@@ -59,11 +59,16 @@ const NotificationAdmin = () => {
     title: "",
     message: "",
     recipientType: "students",
-    targetGroup: "all",
+    college: "",
+    department: "",
+    year: "",
     category: "general",
-    priority: "normal",
-    scheduledFor: "",
   });
+
+  // Sample data
+  const colleges = ["College of Engineering", "College of Arts", "College of Science", "College of Commerce"];
+  const departments = ["Computer Science", "Information Technology", "Electronics", "Mechanical", "Civil", "Electrical"];
+  const years = ["First Year", "Second Year", "Third Year", "Final Year"];
 
   // Sample notifications data
   const [notifications, setNotifications] = useState([
@@ -72,9 +77,8 @@ const NotificationAdmin = () => {
       title: "Complete Your Profile - Urgent",
       message: "Please update your profile with latest CGPA, skills, and resume before the placement season begins.",
       recipientType: "students",
-      targetGroup: "final-year",
+      targetGroup: "College of Engineering - Computer Science - Final Year",
       category: "profile",
-      priority: "high",
       status: "sent",
       sentAt: "2024-11-20T10:30:00",
       recipientCount: 245,
@@ -85,9 +89,8 @@ const NotificationAdmin = () => {
       title: "Google Drive Scheduled - Dec 5th",
       message: "Google is visiting campus for SDE roles. Package: 45 LPA. Eligibility: CGPA 7.5+. Register before Nov 30th.",
       recipientType: "students",
-      targetGroup: "pre-final,final-year",
+      targetGroup: "College of Engineering - All Departments - Final Year",
       category: "placement",
-      priority: "high",
       status: "sent",
       sentAt: "2024-11-19T14:20:00",
       recipientCount: 312,
@@ -98,9 +101,8 @@ const NotificationAdmin = () => {
       title: "Upload Offer Letters",
       message: "Students who received job offers must upload their offer letters to the placement portal by this Friday.",
       recipientType: "students",
-      targetGroup: "final-year",
+      targetGroup: "All Colleges - All Departments - Final Year",
       category: "documents",
-      priority: "normal",
       status: "sent",
       sentAt: "2024-11-18T09:15:00",
       recipientCount: 87,
@@ -108,68 +110,39 @@ const NotificationAdmin = () => {
     },
     {
       id: 4,
-      title: "Internship Details Required",
-      message: "Pre-final year students must submit internship details including company name, duration, and stipend.",
-      recipientType: "students",
-      targetGroup: "pre-final",
-      category: "internship",
-      priority: "normal",
+      title: "Coordinator Meeting - December",
+      message: "Monthly coordinator meeting scheduled for discussion on upcoming placement activities.",
+      recipientType: "college coordinators",
+      targetGroup: "College of Engineering",
+      category: "meeting",
       status: "sent",
       sentAt: "2024-11-17T11:45:00",
-      recipientCount: 198,
-      readCount: 156,
+      recipientCount: 5,
+      readCount: 5,
     },
     {
       id: 5,
-      title: "Staff Meeting - Placement Preparation",
-      message: "Faculty meeting scheduled for Nov 25th to discuss upcoming placement drives and student preparation.",
-      recipientType: "staff",
-      targetGroup: "coordinators",
+      title: "Department Review Meeting",
+      message: "Review of department placement statistics and upcoming drives.",
+      recipientType: "department coordinators",
+      targetGroup: "College of Engineering - Computer Science",
       category: "meeting",
-      priority: "high",
       status: "sent",
       sentAt: "2024-11-16T16:00:00",
-      recipientCount: 15,
-      readCount: 15,
+      recipientCount: 3,
+      readCount: 3,
     },
     {
       id: 6,
-      title: "Student Attendance Alert",
-      message: "Low attendance reported for placement training sessions. Please encourage students to attend regularly.",
-      recipientType: "staff",
-      targetGroup: "all",
-      category: "attendance",
-      priority: "normal",
+      title: "Volunteer Training Session",
+      message: "Training session for placement drive volunteers on Dec 1st.",
+      recipientType: "volunteers",
+      targetGroup: "All Volunteers",
+      category: "general",
       status: "sent",
       sentAt: "2024-11-15T10:00:00",
       recipientCount: 28,
       readCount: 24,
-    },
-    {
-      id: 7,
-      title: "Feedback Form - Amazon Drive",
-      message: "Please fill the feedback form for Amazon placement drive held last week. Your input is valuable.",
-      recipientType: "students",
-      targetGroup: "final-year",
-      category: "feedback",
-      priority: "normal",
-      status: "sent",
-      sentAt: "2024-11-14T13:30:00",
-      recipientCount: 156,
-      readCount: 98,
-    },
-    {
-      id: 8,
-      title: "Volunteer Registration Open",
-      message: "Looking for volunteers to assist with upcoming placement drives. Register through the portal.",
-      recipientType: "volunteers",
-      targetGroup: "all",
-      category: "general",
-      priority: "normal",
-      status: "scheduled",
-      sentAt: "2024-11-25T09:00:00",
-      recipientCount: 50,
-      readCount: 0,
     },
   ]);
 
@@ -292,17 +265,77 @@ const NotificationAdmin = () => {
     });
   }, [notifications, searchQuery, filterStatus, filterRecipient]);
 
+  const handleRecipientTypeChange = (type) => {
+    setNotificationForm({
+      ...notificationForm,
+      recipientType: type,
+      college: "",
+      department: "",
+      year: "",
+    });
+  };
+
+  const buildTargetGroup = () => {
+    const { recipientType, college, department, year } = notificationForm;
+
+    if (recipientType === "students") {
+      const parts = [];
+      if (college) parts.push(college);
+      else parts.push("All Colleges");
+
+      if (department) parts.push(department);
+      else parts.push("All Departments");
+
+      if (year) parts.push(year);
+      else parts.push("All Years");
+
+      return parts.join(" - ");
+    } else if (recipientType === "college coordinators") {
+      return college || "All Colleges";
+    } else if (recipientType === "department coordinators") {
+      const parts = [];
+      if (college) parts.push(college);
+      if (department) parts.push(department);
+      return parts.join(" - ") || "All";
+    } else if (recipientType === "volunteers") {
+      return "All Volunteers";
+    }
+    return "All";
+  };
+
   const handleCreateNotification = () => {
     if (!notificationForm.title || !notificationForm.message) {
       alert("Please fill in all required fields");
       return;
     }
 
+    // Validate based on recipient type
+    if (notificationForm.recipientType === "students") {
+      if (!notificationForm.college && !notificationForm.department && !notificationForm.year) {
+        alert("Please select at least one target criterion (College, Department, or Year)");
+        return;
+      }
+    } else if (notificationForm.recipientType === "college coordinators") {
+      if (!notificationForm.college) {
+        alert("Please select a college");
+        return;
+      }
+    } else if (notificationForm.recipientType === "department coordinators") {
+      if (!notificationForm.college || !notificationForm.department) {
+        alert("Please select both college and department");
+        return;
+      }
+    }
+
     const newNotification = {
       id: notifications.length + 1,
-      ...notificationForm,
-      status: notificationForm.scheduledFor ? "scheduled" : "sent",
-      sentAt: notificationForm.scheduledFor || new Date().toISOString(),
+      title: notificationForm.title,
+      message: notificationForm.message,
+      recipientType: notificationForm.recipientType,
+      targetGroup: buildTargetGroup(),
+      category: notificationForm.category,
+      status: "sent",
+      sentAt: new Date().toISOString(),
       recipientCount: Math.floor(Math.random() * 300) + 50,
       readCount: 0,
     };
@@ -313,12 +346,12 @@ const NotificationAdmin = () => {
       title: "",
       message: "",
       recipientType: "students",
-      targetGroup: "all",
+      college: "",
+      department: "",
+      year: "",
       category: "general",
-      priority: "normal",
-      scheduledFor: "",
     });
-    alert("Notification created successfully!");
+    alert("Notification sent successfully!");
   };
 
   const handleDeleteNotification = (id) => {
@@ -355,9 +388,9 @@ const NotificationAdmin = () => {
   const getRecipientIcon = (recipientType) => {
     const iconMap = {
       students: GraduationCap,
-      staff: Users,
+      "college coordinators": Building2,
+      "department coordinators": Award,
       volunteers: UserCheck,
-      coordinators: Award,
     };
     return iconMap[recipientType] || Users;
   };
@@ -500,7 +533,8 @@ const NotificationAdmin = () => {
                 >
                   <option value="all">All Recipients</option>
                   <option value="students">Students</option>
-                  <option value="staff">Staff</option>
+                  <option value="college coordinators">College Coordinators</option>
+                  <option value="department coordinators">Department Coordinators</option>
                   <option value="volunteers">Volunteers</option>
                 </select>
               </div>
@@ -524,7 +558,7 @@ const NotificationAdmin = () => {
               {filteredNotifications.map((notification) => {
                 const CategoryIcon = getCategoryIcon(notification.category);
                 const RecipientIcon = getRecipientIcon(notification.recipientType);
-                const readPercentage = notification.status === "sent" 
+                const readPercentage = notification.status === "sent"
                   ? Math.round((notification.readCount / notification.recipientCount) * 100)
                   : 0;
 
@@ -565,15 +599,12 @@ const NotificationAdmin = () => {
                           >
                             {notification.status === "sent" ? "✓ Sent" : "⏰ Scheduled"}
                           </Badge>
-                          <Badge
-                            variant={notification.priority === "high" ? "error" : "info"}
-                            className="text-xs"
-                          >
-                            {notification.priority === "high" ? "🔴 High Priority" : "📌 Normal"}
-                          </Badge>
                           <Badge variant="default" className="text-xs flex items-center gap-1">
                             <RecipientIcon className="h-3 w-3" />
                             {notification.recipientType}
+                          </Badge>
+                          <Badge variant="info" className="text-xs">
+                            {notification.targetGroup}
                           </Badge>
                         </div>
 
@@ -667,103 +698,156 @@ const NotificationAdmin = () => {
               </div>
 
               {/* Recipient Type */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
-                    Recipient Type *
-                  </label>
-                  <select
-                    value={notificationForm.recipientType}
-                    onChange={(e) => setNotificationForm({ ...notificationForm, recipientType: e.target.value })}
-                    className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
-                  >
-                    <option value="students">Students</option>
-                    <option value="staff">Staff</option>
-                    <option value="volunteers">Volunteers</option>
-                    <option value="coordinators">Coordinators</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
-                    Target Group
-                  </label>
-                  <select
-                    value={notificationForm.targetGroup}
-                    onChange={(e) => setNotificationForm({ ...notificationForm, targetGroup: e.target.value })}
-                    className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
-                  >
-                    <option value="all">All</option>
-                    {notificationForm.recipientType === "students" && (
-                      <>
-                        <option value="final-year">Final Year</option>
-                        <option value="pre-final">Pre-Final Year</option>
-                        <option value="third-year">Third Year</option>
-                        <option value="second-year">Second Year</option>
-                      </>
-                    )}
-                    {notificationForm.recipientType === "staff" && (
-                      <>
-                        <option value="faculty">Faculty</option>
-                        <option value="coordinators">Coordinators</option>
-                        <option value="hod">HODs</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              {/* Category and Priority */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
-                    Category
-                  </label>
-                  <select
-                    value={notificationForm.category}
-                    onChange={(e) => setNotificationForm({ ...notificationForm, category: e.target.value })}
-                    className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
-                  >
-                    <option value="general">General</option>
-                    <option value="placement">Placement Drive</option>
-                    <option value="profile">Profile Update</option>
-                    <option value="documents">Document Upload</option>
-                    <option value="internship">Internship</option>
-                    <option value="feedback">Feedback</option>
-                    <option value="meeting">Meeting</option>
-                    <option value="attendance">Attendance</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
-                    Priority
-                  </label>
-                  <select
-                    value={notificationForm.priority}
-                    onChange={(e) => setNotificationForm({ ...notificationForm, priority: e.target.value })}
-                    className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
-                  >
-                    <option value="normal">Normal</option>
-                    <option value="high">High Priority</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Schedule */}
               <div>
                 <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
-                  Schedule For (Optional)
+                  Recipient Type *
                 </label>
-                <input
-                  type="datetime-local"
-                  value={notificationForm.scheduledFor}
-                  onChange={(e) => setNotificationForm({ ...notificationForm, scheduledFor: e.target.value })}
+                <select
+                  value={notificationForm.recipientType}
+                  onChange={(e) => handleRecipientTypeChange(e.target.value)}
                   className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
-                />
-                <p className={`text-xs ${themeStyles.textSecondary} mt-2`}>
-                  Leave empty to send immediately
-                </p>
+                >
+                  <option value="students">Students</option>
+                  <option value="volunteers">Volunteers</option>
+                  <option value="college coordinators">College Coordinators</option>
+                  <option value="department coordinators">Department Coordinators</option>
+                </select>
+              </div>
+
+              {/* Target Group based on Recipient Type */}
+              {notificationForm.recipientType === "students" && (
+                <div className="space-y-4">
+                  <div>
+                    <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                      College (Optional)
+                    </label>
+                    <select
+                      value={notificationForm.college}
+                      onChange={(e) => setNotificationForm({ ...notificationForm, college: e.target.value })}
+                      className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                    >
+                      <option value="">All Colleges</option>
+                      {colleges.map((college) => (
+                        <option key={college} value={college}>{college}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                      Department (Optional)
+                    </label>
+                    <select
+                      value={notificationForm.department}
+                      onChange={(e) => setNotificationForm({ ...notificationForm, department: e.target.value })}
+                      className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                    >
+                      <option value="">All Departments</option>
+                      {departments.map((dept) => (
+                        <option key={dept} value={dept}>{dept}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                      Year (Optional)
+                    </label>
+                    <select
+                      value={notificationForm.year}
+                      onChange={(e) => setNotificationForm({ ...notificationForm, year: e.target.value })}
+                      className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                    >
+                      <option value="">All Years</option>
+                      {years.map((year) => (
+                        <option key={year} value={year}>{year}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {notificationForm.recipientType === "college coordinators" && (
+                <div>
+                  <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                    College *
+                  </label>
+                  <select
+                    value={notificationForm.college}
+                    onChange={(e) => setNotificationForm({ ...notificationForm, college: e.target.value })}
+                    className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                  >
+                    <option value="">Select College</option>
+                    {colleges.map((college) => (
+                      <option key={college} value={college}>{college}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {notificationForm.recipientType === "department coordinators" && (
+                <div className="space-y-4">
+                  <div>
+                    <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                      College *
+                    </label>
+                    <select
+                      value={notificationForm.college}
+                      onChange={(e) => setNotificationForm({ ...notificationForm, college: e.target.value })}
+                      className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                    >
+                      <option value="">Select College</option>
+                      {colleges.map((college) => (
+                        <option key={college} value={college}>{college}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                      Department *
+                    </label>
+                    <select
+                      value={notificationForm.department}
+                      onChange={(e) => setNotificationForm({ ...notificationForm, department: e.target.value })}
+                      className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                    >
+                      <option value="">Select Department</option>
+                      {departments.map((dept) => (
+                        <option key={dept} value={dept}>{dept}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {notificationForm.recipientType === "volunteers" && (
+                <div className={`p-4 rounded-xl ${themeStyles.emptyStateBg}`}>
+                  <p className={`text-sm ${themeStyles.textSecondary}`}>
+                    This notification will be sent to all registered volunteers.
+                  </p>
+                </div>
+              )}
+
+              {/* Category */}
+              <div>
+                <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                  Category
+                </label>
+                <select
+                  value={notificationForm.category}
+                  onChange={(e) => setNotificationForm({ ...notificationForm, category: e.target.value })}
+                  className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                >
+                  <option value="general">General</option>
+                  <option value="placement">Placement Drive</option>
+                  <option value="profile">Profile Update</option>
+                  <option value="documents">Document Upload</option>
+                  <option value="internship">Internship</option>
+                  <option value="feedback">Feedback</option>
+                  <option value="meeting">Meeting</option>
+                  <option value="attendance">Attendance</option>
+                </select>
               </div>
 
               {/* Action Buttons */}
@@ -779,7 +863,7 @@ const NotificationAdmin = () => {
                   className="flex-1 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                 >
                   <Send className="h-4 w-4" />
-                  {notificationForm.scheduledFor ? "Schedule Notification" : "Send Now"}
+                  Send Notification
                 </button>
               </div>
             </div>

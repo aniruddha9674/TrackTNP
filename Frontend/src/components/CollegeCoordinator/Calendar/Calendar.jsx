@@ -1,29 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ChevronLeft,
   ChevronRight,
-  Plus,
-  X,
-  Moon,
-  Sun,
+  Calendar,
+  Eye,
   Clock,
-  AlignLeft,
+  X,
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
 
-const Calendar = () => {
+const CollgeCoordinatorCalendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [events, setEvents] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [selectedDateEvents, setSelectedDateEvents] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [eventTitle, setEventTitle] = useState("");
-  const [eventDescription, setEventDescription] = useState("");
-  const [startTime, setStartTime] = useState("09:00");
-  const [endTime, setEndTime] = useState("10:00");
-  const [eventColor, setEventColor] = useState("#465FFF");
+  const [loading, setLoading] = useState(true);
   const { theme } = useTheme();
-  const isDark = theme === "dark";
 
   const months = [
     "January",
@@ -42,37 +36,39 @@ const Calendar = () => {
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  const years = Array.from({ length: 20 }, (_, i) => currentYear - 10 + i);
+  // Load Events
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        setLoading(true);
+        const result = await window.storage.get("calendar-events", true);
+        if (result?.value) {
+          setEvents(JSON.parse(result.value));
+        }
+      } catch {
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const eventColors = [
-    { color: "#465FFF", name: "Brand" },
-    { color: "#3641F5", name: "Hover" },
-    { color: "#0BA5EC", name: "Blue Light" },
-    { color: "#32D583", name: "Success" },
-    { color: "#F04438", name: "Error" },
-    { color: "#F97066", name: "Error Light" },
-  ];
+    loadEvents();
+    const interval = setInterval(loadEvents, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const getDaysInMonth = (month, year) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
+  const getDaysInMonth = (month, year) =>
+    new Date(year, month + 1, 0).getDate();
 
-  const getFirstDayOfMonth = (month, year) => {
-    return new Date(year, month, 1).getDay();
-  };
+  const getFirstDayOfMonth = (month, year) => new Date(year, month, 1).getDay();
 
   const generateCalendarDays = () => {
+    const days = [];
     const daysInMonth = getDaysInMonth(currentMonth, currentYear);
     const firstDay = getFirstDayOfMonth(currentMonth, currentYear);
-    const days = [];
 
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null);
-    }
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      days.push(day);
-    }
+    for (let i = 0; i < firstDay; i++) days.push(null);
+    for (let day = 1; day <= daysInMonth; day++) days.push(day);
 
     return days;
   };
@@ -80,57 +76,21 @@ const Calendar = () => {
   const handlePrevMonth = () => {
     if (currentMonth === 0) {
       setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
-    } else {
-      setCurrentMonth(currentMonth - 1);
-    }
+      setCurrentYear((prev) => prev - 1);
+    } else setCurrentMonth((prev) => prev - 1);
   };
 
   const handleNextMonth = () => {
     if (currentMonth === 11) {
       setCurrentMonth(0);
-      setCurrentYear(currentYear + 1);
-    } else {
-      setCurrentMonth(currentMonth + 1);
-    }
-  };
-
-  const handleDateClick = (day) => {
-    if (day) {
-      setSelectedDate(new Date(currentYear, currentMonth, day));
-      setShowModal(true);
-      setEventTitle("");
-      setEventDescription("");
-      setStartTime("09:00");
-      setEndTime("10:00");
-      setEventColor("#465FFF");
-    }
-  };
-
-  const handleAddEvent = () => {
-    if (eventTitle && selectedDate) {
-      const newEvent = {
-        id: Date.now(),
-        date: selectedDate.toDateString(),
-        title: eventTitle,
-        description: eventDescription,
-        startTime,
-        endTime,
-        color: eventColor,
-      };
-      setEvents([...events, newEvent]);
-      setShowModal(false);
-    }
-  };
-
-  const handleDeleteEvent = (id) => {
-    setEvents(events.filter((event) => event.id !== id));
+      setCurrentYear((prev) => prev + 1);
+    } else setCurrentMonth((prev) => prev + 1);
   };
 
   const getEventsForDate = (day) => {
     if (!day) return [];
     const dateStr = new Date(currentYear, currentMonth, day).toDateString();
-    return events.filter((event) => event.date === dateStr);
+    return events.filter((e) => e.date === dateStr);
   };
 
   const isToday = (day) => {
@@ -142,7 +102,18 @@ const Calendar = () => {
     );
   };
 
-  const calendarDays = generateCalendarDays();
+  const isDark = theme === "dark";
+
+  const themeStyles = {
+    background: isDark
+      ? "from-slate-950 to-slate-900"
+      : "from-slate-50 to-slate-100",
+    cardBg: isDark ? "bg-slate-900" : "bg-white",
+    cardBorder: isDark ? "border-slate-700" : "border-slate-200",
+    textPrimary: isDark ? "text-white" : "text-slate-900",
+    textSecondary: isDark ? "text-slate-400" : "text-slate-600",
+    dayBg: isDark ? "bg-slate-800" : "bg-white",
+  };
 
   return (
     <div style={{ fontFamily: "Urbanist, sans-serif" }}>
@@ -151,105 +122,53 @@ const Calendar = () => {
       </style>
 
       <div
-        className="min-h-screen transition-colors duration-300"
-        style={{ backgroundColor: isDark ? "#020617" : "#ffffff" }}
+        className={`min-h-screen bg-gradient-to-br ${themeStyles.background} overflow-x-hidden`}
       >
-        <div className="max-w-full mx-auto p-4 sm:p-6 lg:p-8">
-          <div
-            className="rounded-xl shadow-sm  p-6 mb-6"
-            style={{
-              backgroundColor: isDark ? "#020617" : "#ffffff",
-              borderColor: isDark ? "#1D2939" : "#e5e7eb",
-            }}
+        <div className="max-w-full mx-auto p-4 sm:p-6 space-y-6">
+          {/* Header */}
+          <h1
+            className={`text-2xl sm:text-3xl font-bold ${themeStyles.textPrimary}`}
           >
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div
-                  className="p-3 rounded-lg"
-                  style={{ backgroundColor: "#465FFF" }}
-                >
-                  <svg
-                    className="text-white"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect
-                      x="3"
-                      y="4"
-                      width="18"
-                      height="18"
-                      rx="2"
-                      ry="2"
-                    ></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                  </svg>
-                </div>
-                <div>
-                  <h1
-                    className="text-3xl font-bold"
-                    style={{ color: isDark ? "#F9FAFB" : "#101828" }}
-                  >
-                    Calendar
-                  </h1>
-                  <p
-                    className="text-sm"
-                    style={{ color: isDark ? "#98A2B3" : "#667085" }}
-                  >
-                    Manage your events and schedule
-                  </p>
-                </div>
-              </div>
-            </div>
+            College Coordinator Calendar
+          </h1>
+          <p className={`${themeStyles.textSecondary} text-sm sm:text-base`}>
+            View your events and schedule
+          </p>
 
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-              <div className="flex items-center gap-2">
+          {/* Controls */}
+          <div
+            className={`rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} shadow-md p-4`}
+          >
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
                 <button
                   onClick={handlePrevMonth}
-                  className="p-2 rounded-lg transition-all hover:scale-105"
-                  style={{
-                    backgroundColor: isDark ? "#1D2939" : "#F2F4F7",
-                    color: isDark ? "#F9FAFB" : "#101828",
-                  }}
+                  className="p-2 rounded-lg border hover:bg-slate-100 dark:hover:bg-slate-400 transition"
                 >
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={18} />
                 </button>
 
                 <select
                   value={currentMonth}
-                  onChange={(e) => setCurrentMonth(parseInt(e.target.value))}
-                  className="px-4 py-2 rounded-lg border font-medium transition-colors cursor-pointer"
-                  style={{
-                    backgroundColor: isDark ? "#1D2939" : "#ffffff",
-                    borderColor: isDark ? "#344054" : "#E4E7EC",
-                    color: isDark ? "#F9FAFB" : "#101828",
-                  }}
+                  onChange={(e) => setCurrentMonth(Number(e.target.value))}
+                  className="px-3 py-2 rounded-lg border bg-transparent font-semibold"
                 >
-                  {months.map((month, index) => (
-                    <option key={month} value={index}>
-                      {month}
+                  {months.map((m, i) => (
+                    <option key={m} value={i}>
+                      {m.substring(0, 3)}
                     </option>
                   ))}
                 </select>
 
                 <select
                   value={currentYear}
-                  onChange={(e) => setCurrentYear(parseInt(e.target.value))}
-                  className="px-4 py-2 rounded-lg border font-medium transition-colors cursor-pointer"
-                  style={{
-                    backgroundColor: isDark ? "#1D2939" : "#ffffff",
-                    borderColor: isDark ? "#344054" : "#E4E7EC",
-                    color: isDark ? "#F9FAFB" : "#101828",
-                  }}
+                  onChange={(e) => setCurrentYear(Number(e.target.value))}
+                  className="px-3 py-2 rounded-lg border bg-transparent font-semibold"
                 >
-                  {years.map((year) => (
+                  {Array.from(
+                    { length: 20 },
+                    (_, i) => currentYear - 10 + i
+                  ).map((year) => (
                     <option key={year} value={year}>
                       {year}
                     </option>
@@ -258,13 +177,9 @@ const Calendar = () => {
 
                 <button
                   onClick={handleNextMonth}
-                  className="p-2 rounded-lg transition-all hover:scale-105"
-                  style={{
-                    backgroundColor: isDark ? "#1D2939" : "#F2F4F7",
-                    color: isDark ? "#F9FAFB" : "#101828",
-                  }}
+                  className="p-2 rounded-lg border hover:bg-slate-100 dark:hover:bg-slate-400 transition"
                 >
-                  <ChevronRight size={20} />
+                  <ChevronRight size={18} />
                 </button>
               </div>
 
@@ -273,94 +188,96 @@ const Calendar = () => {
                   setCurrentMonth(new Date().getMonth());
                   setCurrentYear(new Date().getFullYear());
                 }}
-                className="px-5 py-2 rounded-lg font-semibold transition-all hover:scale-105"
-                style={{
-                  backgroundColor: "#465FFF",
-                  color: "#ffffff",
-                }}
+                className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-md transition"
               >
                 Today
               </button>
             </div>
           </div>
 
+          {/* Calendar */}
           <div
-            className="rounded-xl shadow-sm border overflow-hidden"
-            style={{
-              backgroundColor: isDark ? "#1D2939" : "#ffffff",
-              borderColor: isDark ? "#1D2939" : "#e5e7eb",
-            }}
+            className={`rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} shadow-md overflow-hidden`}
           >
-            <div className="p-6">
-              <div className="grid grid-cols-7 gap-3">
-                {daysOfWeek.map((day) => (
+            <div className="p-3 sm:p-6 overflow-x-hidden">
+              {/* Days Row */}
+              <div className="grid grid-cols-7 gap-[2px] sm:gap-3 mb-3">
+                {daysOfWeek.map((d) => (
                   <div
-                    key={day}
-                    className="text-center font-semibold py-3 text-sm"
-                    style={{ color: isDark ? "#98A2B3" : "#667085" }}
+                    key={d}
+                    className={`text-center font-semibold text-xs sm:text-sm ${themeStyles.textSecondary}`}
                   >
-                    {day}
+                    {d[0]}
                   </div>
                 ))}
+              </div>
 
-                {calendarDays.map((day, index) => {
-                  const dayEvents = getEventsForDate(day);
+              {/* Dates Grid */}
+              <div className="grid grid-cols-7 gap-[2px] sm:gap-3 overflow-x-hidden">
+                {generateCalendarDays().map((day, i) => {
                   const isTodayDate = isToday(day);
+                  const dayEvents = getEventsForDate(day);
 
                   return (
                     <div
-                      key={index}
-                      onClick={() => handleDateClick(day)}
-                      className="min-h-28 p-2 rounded-lg cursor-pointer transition-all border hover:scale-105"
-                      style={{
-                        backgroundColor: day
-                          ? isDark
-                            ? "#1D2939"
-                            : "#F2F4F7"
-                          : "transparent",
-                        borderColor: isTodayDate
-                          ? "#465FFF"
-                          : day
-                          ? isDark
-                            ? "#344054"
-                            : "#E4E7EC"
-                          : "transparent",
-                        borderWidth: isTodayDate ? "2px" : "1px",
+                      key={i}
+                      onClick={() => {
+                        if (!day) return;
+                        const eventsForDay = getEventsForDate(day);
+                        if (eventsForDay.length > 0) {
+                          setSelectedDate(
+                            new Date(currentYear, currentMonth, day)
+                          );
+                          setSelectedDateEvents(eventsForDay);
+                          setShowEventModal(true);
+                        }
                       }}
+                      className={`
+                        aspect-square min-h-12 sm:min-h-24 p-1 sm:p-3 rounded-lg border 
+                        transition-all cursor-pointer 
+                        ${day ? themeStyles.dayBg : "border-transparent"}
+                        ${
+                          dayEvents.length > 0
+                            ? "hover:shadow-md hover:scale-[1.03]"
+                            : ""
+                        }
+                        ${
+                          isTodayDate
+                            ? "bg-gradient-to-br from-blue-500 to-blue-700 text-white border-blue-700 shadow-[0_0_10px_rgba(59,130,246,0.7)] scale-[1.02]"
+                            : ""
+                        }
+                      `}
                     >
                       {day && (
                         <>
                           <div
-                            className="text-sm font-semibold mb-1.5"
-                            style={{
-                              color: isTodayDate
-                                ? "#465FFF"
-                                : isDark
-                                ? "#F9FAFB"
-                                : "#101828",
-                            }}
+                            className={`font-semibold text-right ${
+                              isTodayDate
+                                ? "text-white"
+                                : themeStyles.textPrimary
+                            }`}
                           >
                             {day}
                           </div>
-                          <div className="space-y-1">
-                            {dayEvents.slice(0, 2).map((event) => (
+
+                          <div className="mt-1 space-y-1">
+                            {dayEvents.slice(0, 2).map((event, idx) => (
                               <div
                                 key={event.id}
-                                className="text-xs px-2 py-1 rounded truncate text-white font-medium"
+                                className="px-2 py-1 rounded text-white text-[9px] sm:text-xs truncate"
                                 style={{ backgroundColor: event.color }}
                               >
-                                {event.title}
+                                {idx === 0
+                                  ? event.title.substring(0, 10) +
+                                    (event.title.length > 10 ? "..." : "")
+                                  : "..."}
                               </div>
                             ))}
+
                             {dayEvents.length > 2 && (
-                              <div
-                                className="text-xs font-medium"
-                                style={{
-                                  color: isDark ? "#98A2B3" : "#667085",
-                                }}
-                              >
-                                +{dayEvents.length - 2} more
-                              </div>
+                              <p className="text-[9px] sm:text-xs text-center text-slate-400">
+                                +{dayEvents.length - 2}
+                              </p>
                             )}
                           </div>
                         </>
@@ -372,363 +289,83 @@ const Calendar = () => {
             </div>
           </div>
 
-          {events.length > 0 && (
+          {/* Modal */}
+          {showEventModal && (
             <div
-              className="rounded-xl shadow-sm border p-6 mt-6"
-              style={{
-                backgroundColor: isDark ? "#1D2939" : "#ffffff",
-                borderColor: isDark ? "#1D2939" : "#e5e7eb",
-              }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+              onClick={() => setShowEventModal(false)}
             >
-              <h2
-                className="text-xl font-bold mb-4"
-                style={{ color: isDark ? "#F9FAFB" : "#101828" }}
+              <div
+                className={`w-full max-w-lg rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} shadow-2xl`}
+                onClick={(e) => e.stopPropagation()}
               >
-                Upcoming Events
-              </h2>
-              <div className="space-y-3">
-                {events
-                  .sort((a, b) => new Date(a.date) - new Date(b.date))
-                  .map((event) => (
+                <div className={`p-4 border-b ${themeStyles.cardBorder}`}>
+                  <div className="flex justify-between items-center">
+                    <h2
+                      className={`text-xl font-bold ${themeStyles.textPrimary}`}
+                    >
+                      Events on{" "}
+                      {selectedDate?.toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </h2>
+
+                    <button
+                      onClick={() => setShowEventModal(false)}
+                      className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-4 max-h-96 overflow-y-auto space-y-3">
+                  {selectedDateEvents.map((event) => (
                     <div
                       key={event.id}
-                      className="p-4 rounded-lg border flex justify-between items-start transition-all hover:scale-102"
-                      style={{
-                        backgroundColor: isDark ? "#1D2939" : "#F2F4F7",
-                        borderColor: isDark ? "#344054" : "#E4E7EC",
-                      }}
+                      className={`p-4 rounded-lg border ${themeStyles.cardBorder} ${themeStyles.dayBg}`}
                     >
-                      <div className="flex gap-3 flex-1">
-                        <div
-                          className="w-1 rounded-full"
-                          style={{ backgroundColor: event.color }}
-                        />
-                        <div className="flex-1">
-                          <h3
-                            className="font-semibold"
-                            style={{ color: isDark ? "#F9FAFB" : "#101828" }}
-                          >
-                            {event.title}
-                          </h3>
-                          <div className="flex items-center gap-3 mt-1">
-                            <p
-                              className="text-sm flex items-center gap-1"
-                              style={{ color: isDark ? "#98A2B3" : "#667085" }}
-                            >
-                              <svg
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <rect
-                                  x="3"
-                                  y="4"
-                                  width="18"
-                                  height="18"
-                                  rx="2"
-                                  ry="2"
-                                ></rect>
-                                <line x1="16" y1="2" x2="16" y2="6"></line>
-                                <line x1="8" y1="2" x2="8" y2="6"></line>
-                                <line x1="3" y1="10" x2="21" y2="10"></line>
-                              </svg>
-                              {event.date}
-                            </p>
-                            <p
-                              className="text-sm flex items-center gap-1"
-                              style={{ color: isDark ? "#98A2B3" : "#667085" }}
-                            >
-                              <Clock size={14} />
-                              {event.startTime} - {event.endTime}
-                            </p>
-                          </div>
-                          {event.description && (
-                            <p
-                              className="text-sm mt-2"
-                              style={{ color: isDark ? "#98A2B3" : "#667085" }}
-                            >
-                              {event.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleDeleteEvent(event.id)}
-                        className="p-2 rounded-lg transition-all hover:scale-110"
-                        style={{
-                          color: isDark ? "#98A2B3" : "#667085",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = "#F04438";
-                          e.currentTarget.style.color = "#ffffff";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = "transparent";
-                          e.currentTarget.style.color = isDark
-                            ? "#98A2B3"
-                            : "#667085";
-                        }}
+                      <h3
+                        className={`font-semibold text-lg ${themeStyles.textPrimary}`}
                       >
-                        <X size={18} />
-                      </button>
+                        {event.title}
+                      </h3>
+
+                      <p
+                        className={`flex items-center gap-2 mt-2 ${themeStyles.textSecondary}`}
+                      >
+                        <Clock size={14} />
+                        {event.startTime} - {event.endTime}
+                      </p>
+
+                      {event.description && (
+                        <p
+                          className={`mt-2 text-sm ${themeStyles.textSecondary}`}
+                        >
+                          {event.description}
+                        </p>
+                      )}
                     </div>
                   ))}
+                </div>
+
+                <div className={`p-4 border-t ${themeStyles.cardBorder}`}>
+                  <button
+                    onClick={() => setShowEventModal(false)}
+                    className="w-full py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-md transition"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
           )}
         </div>
-
-        {showModal && (
-          <div className="fixed inset-0 bg-black/80 bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-            <div
-              className="rounded-xl shadow-2xl max-w-lg w-full border transform transition-all"
-              style={{
-                backgroundColor: isDark ? "#1D2939" : "#ffffff",
-                borderColor: isDark ? "#344054" : "#e5e7eb",
-              }}
-            >
-              <div
-                className="p-6 border-b"
-                style={{ borderColor: isDark ? "#344054" : "#E4E7EC" }}
-              >
-                <div className="flex justify-between items-center">
-                  <h2
-                    className="text-2xl font-bold"
-                    style={{ color: isDark ? "#F9FAFB" : "#101828" }}
-                  >
-                    Add Event
-                  </h2>
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="p-2 rounded-lg transition-all hover:scale-110"
-                    style={{
-                      color: isDark ? "#98A2B3" : "#667085",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = isDark
-                        ? "#344054"
-                        : "#F2F4F7";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }}
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-6 space-y-5">
-                <div>
-                  <label
-                    className="block text-sm font-semibold mb-2"
-                    style={{ color: isDark ? "#F9FAFB" : "#101828" }}
-                  >
-                    Event Title *
-                  </label>
-                  <input
-                    type="text"
-                    value={eventTitle}
-                    onChange={(e) => setEventTitle(e.target.value)}
-                    placeholder="Enter event title"
-                    className="w-full px-4 py-3 rounded-lg border transition-all"
-                    style={{
-                      backgroundColor: isDark ? "#1D2939" : "#ffffff",
-                      borderColor: isDark ? "#344054" : "#E4E7EC",
-                      color: isDark ? "#F9FAFB" : "#101828",
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    className="block text-sm font-semibold mb-2"
-                    style={{ color: isDark ? "#F9FAFB" : "#101828" }}
-                  >
-                    Description
-                  </label>
-                  <textarea
-                    value={eventDescription}
-                    onChange={(e) => setEventDescription(e.target.value)}
-                    placeholder="Enter event description"
-                    rows="3"
-                    className="w-full px-4 py-3 rounded-lg border transition-all"
-                    style={{
-                      backgroundColor: isDark ? "#1D2939" : "#ffffff",
-                      borderColor: isDark ? "#344054" : "#E4E7EC",
-                      color: isDark ? "#F9FAFB" : "#101828",
-                    }}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: isDark ? "#F9FAFB" : "#101828" }}
-                    >
-                      Start Date *
-                    </label>
-                    <div
-                      className="px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: isDark ? "#1D2939" : "#F2F4F7",
-                        borderColor: isDark ? "#344054" : "#E4E7EC",
-                        color: isDark ? "#F9FAFB" : "#101828",
-                      }}
-                    >
-                      {selectedDate?.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: isDark ? "#F9FAFB" : "#101828" }}
-                    >
-                      End Date *
-                    </label>
-                    <div
-                      className="px-4 py-3 rounded-lg border"
-                      style={{
-                        backgroundColor: isDark ? "#1D2939" : "#F2F4F7",
-                        borderColor: isDark ? "#344054" : "#E4E7EC",
-                        color: isDark ? "#F9FAFB" : "#101828",
-                      }}
-                    >
-                      {selectedDate?.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: isDark ? "#F9FAFB" : "#101828" }}
-                    >
-                      Start Time
-                    </label>
-                    <input
-                      type="time"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border transition-all"
-                      style={{
-                        backgroundColor: isDark ? "#1D2939" : "#ffffff",
-                        borderColor: isDark ? "#344054" : "#E4E7EC",
-                        color: isDark ? "#F9FAFB" : "#101828",
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{ color: isDark ? "#F9FAFB" : "#101828" }}
-                    >
-                      End Time
-                    </label>
-                    <input
-                      type="time"
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border transition-all"
-                      style={{
-                        backgroundColor: isDark ? "#1D2939" : "#ffffff",
-                        borderColor: isDark ? "#344054" : "#E4E7EC",
-                        color: isDark ? "#F9FAFB" : "#101828",
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    className="block text-sm font-semibold mb-3"
-                    style={{ color: isDark ? "#F9FAFB" : "#101828" }}
-                  >
-                    Event Color
-                  </label>
-                  <div className="flex gap-3">
-                    {eventColors.map((color) => (
-                      <button
-                        key={color.color}
-                        onClick={() => setEventColor(color.color)}
-                        className="w-10 h-10 rounded-lg transition-all hover:scale-110"
-                        style={{
-                          backgroundColor: color.color,
-                          border:
-                            eventColor === color.color
-                              ? "2px solid #465FFF"
-                              : "none",
-                          transform:
-                            eventColor === color.color
-                              ? "scale(1.1)"
-                              : "scale(1)",
-                        }}
-                        title={color.name}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className="p-6 border-t flex gap-3"
-                style={{ borderColor: isDark ? "#344054" : "#E4E7EC" }}
-              >
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105"
-                  style={{
-                    backgroundColor: isDark ? "#1D2939" : "#F2F4F7",
-                    color: isDark ? "#F9FAFB" : "#101828",
-                    border: isDark ? "1px solid #344054" : "none",
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddEvent}
-                  disabled={!eventTitle}
-                  className="flex-1 px-6 py-3 rounded-lg font-semibold transition-all"
-                  style={{
-                    backgroundColor: eventTitle ? "#465FFF" : "#E4E7EC",
-                    color: eventTitle ? "#ffffff" : "#98A2B3",
-                    cursor: eventTitle ? "pointer" : "not-allowed",
-                    transform: eventTitle ? "scale(1)" : "scale(1)",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (eventTitle)
-                      e.currentTarget.style.transform = "scale(1.05)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "scale(1)";
-                  }}
-                >
-                  Create
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
-export default Calendar;
+export default CollgeCoordinatorCalendar;

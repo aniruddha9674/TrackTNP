@@ -20,6 +20,7 @@ import {
     Bell,
     NotebookPen,
     TrendingUp,
+    History,
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
 
@@ -149,21 +150,17 @@ const Dashboard = () => {
         {
             icon: <Building className="w-6 h-6" />,
             name: "Company",
-            children: [
-                {
-                    name: "Company Details",
-                    path: "/volunteerdashboard/company/add",
-                },
-                {
-                    name: "Company Drive",
-                    path: "/volunteerdashboard/company/drive",
-                },
-            ],
+            path: "/volunteerdashboard/company",
+        },
+        {
+            icon: <History className="w-6 h-6" />,
+            name: "History",
+            path: "/volunteerdashboard/history",
         },
         {
             icon: <Bell className="w-6 h-6" />,
             name: "Notifications",
-            path: "/volunteerdashboard/notifications",
+            path: "/volunteerdashboard/notification",
         },
         {
             icon: <Calendar className="w-6 h-6" />,

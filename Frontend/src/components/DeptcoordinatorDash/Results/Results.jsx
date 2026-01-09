@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
 
-
 // Add Urbanist font
 const style = document.createElement("style");
 style.textContent = `
@@ -28,7 +27,7 @@ style.textContent = `
 document.head.appendChild(style);
 
 const ResultsPageVolunteer = () => {
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const isDarkTheme = theme === "dark";
 
   // Theme styles
@@ -145,7 +144,7 @@ const ResultsPageVolunteer = () => {
       branch: "CS",
       year: "2025",
       company: "TCS",
-      result: "Waiting",
+      result: "Selected",
       offerLocation: "-",
       package: "-",
     },
@@ -185,7 +184,7 @@ const ResultsPageVolunteer = () => {
       branch: "ECE",
       year: "2025",
       company: "Wipro",
-      result: "Waiting",
+      result: "Selected",
       offerLocation: "-",
       package: "-",
     },
@@ -235,6 +234,14 @@ const ResultsPageVolunteer = () => {
     const rejected = data.filter(r => r.result === "Rejected").length;
     const waiting = data.filter(r => r.result === "Waiting").length;
     const total = data.length;
+    
+    // Calculate average package
+    const packagesWithValues = data
+      .filter(r => r.result === "Selected" && r.package !== "-")
+      .map(r => parseFloat(r.package));
+    const avgPackage = packagesWithValues.length > 0
+      ? (packagesWithValues.reduce((sum, val) => sum + val, 0) / packagesWithValues.length).toFixed(2)
+      : "0.00";
 
     // Branch-wise selections
     const branchWise = data
@@ -252,7 +259,7 @@ const ResultsPageVolunteer = () => {
         return acc;
       }, {});
 
-    return { selected, rejected, waiting, total, branchWise, yearWise };
+    return { selected, rejected, waiting, total, avgPackage, branchWise, yearWise };
   }, [resultsData, filteredResults, selectedDrive]);
 
   const getResultBadge = (result) => {
@@ -306,36 +313,14 @@ const ResultsPageVolunteer = () => {
           </div>
         </div>
 
-        {/* Drive Selection */}
-        <div className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-2xl p-6 ${themeStyles.cardShadow} mb-6`}>
-          <label className={`block text-sm font-medium ${themeStyles.textSecondary} mb-3`}>
-            Select Company Drive
-          </label>
-          <div className="relative">
-            <Building2 className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${themeStyles.textTertiary}`} size={20} />
-            <select
-              value={selectedDrive}
-              onChange={(e) => setSelectedDrive(e.target.value)}
-              className={`w-full pl-10 pr-10 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} ${themeStyles.inputFocus} rounded-lg ${themeStyles.textPrimary} outline-none appearance-none cursor-pointer font-medium`}
-            >
-              <option value="">All Drives</option>
-              {drives.map((drive) => (
-                <option key={drive.id} value={drive.id}>
-                  {drive.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${themeStyles.textTertiary} pointer-events-none`} size={20} />
-          </div>
-        </div>
-
+  
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[
             { icon: CheckCircle2, label: "Selected", value: stats.selected, color: themeStyles.iconGreen, percentage: `${((stats.selected / stats.total) * 100).toFixed(1)}%`, gradient: themeStyles.statCard1Gradient },
             { icon: XCircle, label: "Rejected", value: stats.rejected, color: themeStyles.iconRed, percentage: `${((stats.rejected / stats.total) * 100).toFixed(1)}%`, gradient: themeStyles.statCard2Gradient },
-            { icon: Clock, label: "Waiting", value: stats.waiting, color: themeStyles.iconAmber, percentage: `${((stats.waiting / stats.total) * 100).toFixed(1)}%`, gradient: themeStyles.statCard3Gradient },
             { icon: Users, label: "Total", value: stats.total, color: themeStyles.iconBlue, percentage: "100%", gradient: themeStyles.statCard4Gradient },
+            { icon: Award, label: "Avg Package", value: `₹${stats.avgPackage}`, color: themeStyles.iconAmber, percentage: "LPA", gradient: themeStyles.statCard3Gradient },
           ].map((stat, idx) => (
             <div
               key={idx}
@@ -359,68 +344,7 @@ const ResultsPageVolunteer = () => {
           ))}
         </div>
 
-        {/* Branch & Year-wise Stats */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Branch-wise */}
-          <div className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-2xl p-6 ${themeStyles.cardShadow}`}>
-            <div className="flex items-center gap-2 mb-4">
-              <Award size={20} className={themeStyles.iconBlue} />
-              <h3 className={`text-lg font-semibold ${themeStyles.textPrimary}`}>
-                Branch-wise Selections
-              </h3>
-            </div>
-            <div className="space-y-3">
-              {Object.entries(stats.branchWise).map(([branch, count]) => (
-                <div key={branch} className="flex items-center justify-between">
-                  <span className={`font-medium ${themeStyles.textSecondary}`}>
-                    {branch}
-                  </span>
-                  <div className="flex items-center gap-3">
-                    <div className={`h-2 w-24 ${themeStyles.inputBg} rounded-full overflow-hidden`}>
-                      <div
-                        className="h-full bg-blue-500 rounded-full"
-                        style={{ width: `${(count / stats.selected) * 100}%` }}
-                      />
-                    </div>
-                    <span className={`font-bold ${themeStyles.textPrimary} w-8 text-right`}>
-                      {count}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Year-wise */}
-          <div className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-2xl p-6 ${themeStyles.cardShadow}`}>
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp size={20} className={themeStyles.iconGreen} />
-              <h3 className={`text-lg font-semibold ${themeStyles.textPrimary}`}>
-                Year-wise Selections
-              </h3>
-            </div>
-            <div className="space-y-3">
-              {Object.entries(stats.yearWise).map(([year, count]) => (
-                <div key={year} className="flex items-center justify-between">
-                  <span className={`font-medium ${themeStyles.textSecondary}`}>
-                    Batch {year}
-                  </span>
-                  <div className="flex items-center gap-3">
-                    <div className={`h-2 w-24 ${themeStyles.inputBg} rounded-full overflow-hidden`}>
-                      <div
-                        className="h-full bg-green-500 rounded-full"
-                        style={{ width: `${(count / stats.selected) * 100}%` }}
-                      />
-                    </div>
-                    <span className={`font-bold ${themeStyles.textPrimary} w-8 text-right`}>
-                      {count}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+       
 
         {/* Search and Filters */}
         <div className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-2xl p-6 ${themeStyles.cardShadow} mb-6`}>
@@ -506,7 +430,7 @@ const ResultsPageVolunteer = () => {
                     <option value="all">All Results</option>
                     <option value="Selected">Selected</option>
                     <option value="Rejected">Rejected</option>
-                    <option value="Waiting">Waiting</option>
+                   
                   </select>
                 </div>
 
@@ -609,8 +533,7 @@ const ResultsPageVolunteer = () => {
               </p>
               <div className={`text-sm ${themeStyles.textSecondary}`}>
                 <span className="font-medium">{stats.selected}</span> Selected •{" "}
-                <span className="font-medium">{stats.rejected}</span> Rejected •{" "}
-                <span className="font-medium">{stats.waiting}</span> Waiting
+                <span className="font-medium">{stats.rejected}</span> Rejected
               </div>
             </div>
           )}

@@ -40,13 +40,13 @@ import VolunteerManager from "./components/AdminDashboard/Volunteer/VolunteerDet
 
 import CollegeCoordinatorDash from "./Pages/CollegeCoordinatordash/CollegeCoordinatorDash";
 import CoordinatorOverview from "./components/CollegeCoordinator/Overview/Overview";
-import DrivesListVolunteer from "./components/CollegeCoordinator/Volunteer/DrivesListVolunteer";
 import StudentListVolunteer from "./components/CollegeCoordinator/Students/StudentListVolunteer";
 import ResultsPageVolunteer from "./components/CollegeCoordinator/Results/ResultsPageVolunteer";
 import CoordinatorNotifications from "./components/CollegeCoordinator/Notification/Notification";
 import CoordinatorCalendar from "./components/CollegeCoordinator/Calendar/Calendar";
 import SettingsPage from "./components/CollegeCoordinator/Setting/Setting";
-
+import CoordinatorCompany from "./components/CollegeCoordinator/Company/Company";
+ 
 import FirstLogin from "./Pages/FirstTimeLogin";
 
 import DepartmentDashboard from "./Pages/DeptCoordinatorDash/DeptCoordinatordash";
@@ -55,8 +55,15 @@ import DepartmentSettings from "./components/DeptcoordinatorDash/Settings/Settin
 import DepartmentResult from "./components/DeptcoordinatorDash/Results/Results";
 import DepartmentNotification from "./components/DeptcoordinatorDash/Notification/Notification";
 import DepartmentOverview from "./components/DeptcoordinatorDash/Overview/Overview";
+import DepartmentStudentDetails from "./components/DeptcoordinatorDash/Student/StudentDetails";
+import DepartmentOfferLetter from "./components/DeptcoordinatorDash/Offer Letter/OfferLetter";
 
 import VolunteerDashboard from "./Pages/VounteerDash/VolunteerDash";
+import VolunteerCalendar from "./components/VolunteerDashboard/Callendar/Calendar";
+import VolunteerSetting from "./components/VolunteerDashboard/Setting/Setting";
+import Notification from "./components/VolunteerDashboard/Notification/Notification";
+import HistoryPageVolunteer from "./components/VolunteerDashboard/History/History";
+
 
 function App() {
   useEffect(() => {
@@ -87,10 +94,12 @@ function App() {
 
       <Route path="/firstlogin" element={<FirstLogin />} />
 
-      <Route
-        path="/volunteerdashboard"
-        element={<VolunteerDashboard />}
-      ></Route>
+      <Route path="/volunteerdashboard" element={<VolunteerDashboard />}>
+        <Route path="settings" element={<VolunteerSetting />} />
+        <Route path="history" element={<HistoryPageVolunteer />} />
+        <Route path="calender" element={<VolunteerCalendar />} />
+        <Route path="notification" element={<Notification/>} />
+      </Route>
 
       <Route path="/admindashboard" element={<AdminDash />}>
         <Route path="" element={<Overview />} />
@@ -111,9 +120,10 @@ function App() {
         element={<CollegeCoordinatorDash />}
       >
         <Route path="" element={<CoordinatorOverview />} />
-        <Route path="volunteer" element={<DrivesListVolunteer />} />
-        <Route path="student/details" element={<StudentListVolunteer />} />
+
+        <Route path="studentdetails" element={<StudentListVolunteer />} />
         <Route path="results" element={<ResultsPageVolunteer />} />
+        <Route path="company" element={<CoordinatorCompany />} />
         <Route path="notifications" element={<CoordinatorNotifications />} />
         <Route path="calender" element={<CoordinatorCalendar />} />
         <Route path="settings" element={<SettingsPage />} />
@@ -127,11 +137,15 @@ function App() {
         <Route path="calender" element={<DepartmentCalendar />} />
         <Route path="settings" element={<DepartmentSettings />} />
         <Route path="results" element={<DepartmentResult />} />
+        <Route path="offerletters" element={<DepartmentOfferLetter />} />
+        <Route path="studentdetails" element={<DepartmentStudentDetails />} />
         <Route path="notifications" element={<DepartmentNotification />} />
       </Route>
 
       <Route path="/studentdashboard" element={<StudentDash />}>
         <Route path="" element={<StudentOverview />} />
+
+
         <Route
           path="companyregistration"
           element={<CompanyRegistrationfrom />}
@@ -147,6 +161,8 @@ function App() {
         <Route path="notifications" element={<VolunteerNotifications />} />
       </Route>
     </Routes>
+
+
   );
 }
 

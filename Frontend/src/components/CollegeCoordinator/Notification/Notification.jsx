@@ -1,356 +1,763 @@
-import { useState } from 'react';
-import { Bell, Send, Users, User, UserCheck, Calendar, X } from 'lucide-react';
-import { useTheme } from '../../../Utils/context/ThemeContext'; // Adjust path as needed
+import React, { useState, useMemo } from "react";
+import {
+  Bell,
+  Send,
+  Users,
+  UserCheck,
+  GraduationCap,
+  Building2,
+  FileText,
+  Award,
+  Briefcase,
+  MessageSquare,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  X,
+  Search,
+  Filter,
+  ChevronDown,
+  Eye,
+  Trash2,
+} from "lucide-react";
+import { useTheme } from "../../../Utils/context/ThemeContext";
 
+// Custom Badge Component
+const Badge = ({ children, variant = "default", className = "", ...props }) => {
+  const baseStyles =
+    "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold transition-colors shadow-sm";
 
+  const variants = {
+    default: "bg-gray-100 text-gray-700",
+    success: "bg-green-100 text-green-700",
+    error: "bg-red-100 text-red-700",
+    warning: "bg-amber-100 text-amber-700",
+    info: "bg-blue-100 text-blue-700",
+    purple: "bg-purple-100 text-purple-700",
+  };
 
-export default function CoordinatorNotifications() {
-    const { theme: themeMode } = useTheme();
-    const isDarkTheme = themeMode === 'dark';
+  return (
+    <span
+      className={`${baseStyles} ${variants[variant]} ${className}`}
+      {...props}
+    >
+      {children}
+    </span>
+  );
+};
 
-    // Define theme styles inside the component
-    const theme = isDarkTheme ? {
-        background: "bg-gradient-to-br from-slate-950 to-slate-900",
-        cardBg: "bg-slate-900",
-        cardBorder: "border-slate-700",
-        cardShadow: "shadow-lg",
-        cardHoverShadow: "hover:shadow-xl",
-        textPrimary: "text-slate-50",
-        textSecondary: "text-slate-400",
-        textTertiary: "text-slate-500",
-        modalHeader: "bg-slate-800",
-        modalHeaderBorder: "border-slate-700",
-        modalOverlay: "bg-black/80",
-        buttonBg: "bg-slate-800",
-        buttonHover: "hover:bg-slate-700",
-        buttonBorder: "border-slate-700",
-        inputBg: "bg-slate-800",
-        inputBorder: "border-slate-700",
-        inputText: "text-slate-50",
-        inputPlaceholder: "placeholder:text-slate-500",
-    } : {
-        background: "bg-gradient-to-br from-slate-50 to-slate-100",
-        cardBg: "bg-white",
-        cardBorder: "border-slate-200",
-        cardShadow: "shadow-md",
-        cardHoverShadow: "hover:shadow-xl",
-        textPrimary: "text-slate-900",
-        textSecondary: "text-slate-600",
-        textTertiary: "text-slate-400",
-        modalHeader: "bg-slate-50",
-        modalHeaderBorder: "border-slate-200",
-        modalOverlay: "bg-black/50",
-        buttonBg: "bg-slate-100",
-        buttonHover: "hover:bg-slate-200",
-        buttonBorder: "border-slate-200",
-        inputBg: "bg-white",
-        inputBorder: "border-slate-300",
-        inputText: "text-slate-900",
-        inputPlaceholder: "placeholder:text-slate-400",
-    };
-    const [notifications, setNotifications] = useState([
-        {
-            id: '1',
-            title: 'Campus Drive - TechCorp',
-            message: 'TechCorp campus drive scheduled for next week. Please prepare your resumes and register by Friday.',
-            recipient_type: 'students',
-            created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            created_by: 'coordinator',
-        },
-        {
-            id: '2',
-            title: 'Volunteer Meeting',
-            message: 'Monthly volunteer coordination meeting on Saturday at 10 AM in Conference Room A.',
-            recipient_type: 'volunteers',
-            created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-            created_by: 'coordinator',
-        },
-        {
-            id: '3',
-            title: 'Important: Document Submission',
-            message: 'All students and volunteers must submit updated documents by end of this month.',
-            recipient_type: 'both',
-            created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-            created_by: 'coordinator',
-        },
-    ]);
+const CoordinatorNotifications = () => {
+  const { theme } = useTheme();
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterRecipient, setFilterRecipient] = useState("all");
 
-    const [showCreateModal, setShowCreateModal] = useState(false);
-    const [formData, setFormData] = useState({
-        title: '',
-        message: '',
-        recipientType: 'students',
+  // Notification Form State
+  const [notificationForm, setNotificationForm] = useState({
+    title: "",
+    message: "",
+    recipientType: "students",
+    department: "",
+    year: "",
+    category: "general",
+  });
+
+  // Sample data
+  const departments = ["Computer Science", "Information Technology", "Electronics", "Mechanical", "Civil", "Electrical"];
+  const years = ["Third Year", "Final Year"];
+
+  // Sample notifications data
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      title: "Complete Your Profile - Urgent",
+      message: "Please update your profile with latest CGPA, skills, and resume before the placement season begins.",
+      recipientType: "students",
+      targetGroup: "Computer Science - Final Year",
+      category: "profile",
+      status: "sent",
+      sentAt: "2024-11-20T10:30:00",
+      recipientCount: 245,
+      readCount: 189,
+    },
+    {
+      id: 2,
+      title: "Google Drive Scheduled - Dec 5th",
+      message: "Google is visiting campus for SDE roles. Package: 45 LPA. Eligibility: CGPA 7.5+. Register before Nov 30th.",
+      recipientType: "students",
+      targetGroup: "All Departments - Final Year",
+      category: "placement",
+      status: "sent",
+      sentAt: "2024-11-19T14:20:00",
+      recipientCount: 312,
+      readCount: 298,
+    },
+    {
+      id: 3,
+      title: "Upload Offer Letters",
+      message: "Students who received job offers must upload their offer letters to the placement portal by this Friday.",
+      recipientType: "students",
+      targetGroup: "All Departments - Final Year",
+      category: "documents",
+      status: "sent",
+      sentAt: "2024-11-18T09:15:00",
+      recipientCount: 87,
+      readCount: 65,
+    },
+    {
+      id: 4,
+      title: "Department Review Meeting",
+      message: "Review of department placement statistics and upcoming drives.",
+      recipientType: "department coordinators",
+      targetGroup: "Computer Science",
+      category: "meeting",
+      status: "sent",
+      sentAt: "2024-11-16T16:00:00",
+      recipientCount: 3,
+      readCount: 3,
+    },
+  ]);
+
+  // Light Theme Function
+  const getLightTheme = () => ({
+    background: "bg-gradient-to-br from-slate-50 to-slate-100",
+    cardBg: "bg-white",
+    cardBorder: "border-slate-200",
+    cardShadow: "shadow-md",
+    cardHoverShadow: "hover:shadow-xl",
+    textPrimary: "text-slate-900",
+    textSecondary: "text-slate-600",
+    textTertiary: "text-slate-400",
+    inputBg: "bg-white",
+    inputBorder: "border-slate-300",
+    inputDisabled: "disabled:bg-slate-100",
+    inputText: "text-slate-900",
+    inputPlaceholder: "placeholder:text-slate-400",
+    modalOverlay: "bg-black/60",
+    modalBg: "bg-white",
+    modalHeader: "bg-slate-100",
+    modalHeaderBorder: "border-slate-200",
+    emptyStateBg: "bg-slate-100",
+    emptyStateIcon: "text-slate-400",
+    statCard1Gradient: "from-white to-blue-50",
+    statCard2Gradient: "from-white to-green-50",
+    statCard3Gradient: "from-white to-purple-50",
+    statCard4Gradient: "from-white to-amber-50",
+    statIcon1Bg: "bg-blue-100",
+    statIcon1Text: "text-blue-600",
+    statIcon2Bg: "bg-green-100",
+    statIcon2Text: "text-green-600",
+    statIcon3Bg: "bg-purple-100",
+    statIcon3Text: "text-purple-600",
+    statIcon4Bg: "bg-amber-100",
+    statIcon4Text: "text-amber-600",
+    dividerBorder: "border-slate-200",
+    buttonBg: "bg-white",
+    buttonBorder: "border-slate-300",
+    buttonHover: "hover:bg-slate-50",
+    notificationCardBg: "bg-white",
+    notificationCardBorder: "border-gray-100",
+    notificationCardHover: "hover:border-gray-200",
+    iconGradient: "from-blue-50 to-blue-100",
+  });
+
+  // Dark Theme Function
+  const getDarkTheme = () => ({
+    background: "bg-gradient-to-br from-slate-950 to-slate-900",
+    cardBg: "bg-slate-900",
+    cardBorder: "border-slate-700",
+    cardShadow: "shadow-lg shadow-black/20",
+    cardHoverShadow: "hover:shadow-2xl hover:shadow-black/40",
+    textPrimary: "text-slate-50",
+    textSecondary: "text-slate-400",
+    textTertiary: "text-slate-500",
+    inputBg: "bg-slate-950",
+    inputBorder: "border-slate-600",
+    inputDisabled: "disabled:bg-slate-800",
+    inputText: "text-slate-50",
+    inputPlaceholder: "placeholder:text-slate-500",
+    modalOverlay: "bg-black/80",
+    modalBg: "bg-slate-900",
+    modalHeader: "bg-slate-800",
+    modalHeaderBorder: "border-slate-700",
+    emptyStateBg: "bg-slate-800",
+    emptyStateIcon: "text-slate-500",
+    statCard1Gradient: "from-slate-800 to-blue-900/30",
+    statCard2Gradient: "from-slate-800 to-green-900/30",
+    statCard3Gradient: "from-slate-800 to-purple-900/30",
+    statCard4Gradient: "from-slate-800 to-amber-900/30",
+    statIcon1Bg: "bg-blue-900/30",
+    statIcon1Text: "text-blue-400",
+    statIcon2Bg: "bg-green-900/30",
+    statIcon2Text: "text-green-400",
+    statIcon3Bg: "bg-purple-900/30",
+    statIcon3Text: "text-purple-400",
+    statIcon4Bg: "bg-amber-900/30",
+    statIcon4Text: "text-amber-400",
+    dividerBorder: "border-slate-700",
+    buttonBg: "bg-slate-700",
+    buttonBorder: "border-slate-600",
+    buttonHover: "hover:bg-slate-600",
+    notificationCardBg: "bg-slate-800",
+    notificationCardBorder: "border-slate-700",
+    notificationCardHover: "hover:border-slate-600",
+    iconGradient: "from-blue-900/30 to-blue-800/30",
+  });
+
+  const themeStyles = theme === "dark" ? getDarkTheme() : getLightTheme();
+
+  // Calculate statistics
+  const stats = useMemo(() => {
+    const totalNotifications = notifications.length;
+    const sentNotifications = notifications.filter((n) => n.status === "sent").length;
+    const scheduledNotifications = notifications.filter((n) => n.status === "scheduled").length;
+    const totalRecipients = notifications.reduce((sum, n) => sum + n.recipientCount, 0);
+
+    return { totalNotifications, sentNotifications, scheduledNotifications, totalRecipients };
+  }, [notifications]);
+
+  // Filter notifications
+  const filteredNotifications = useMemo(() => {
+    return notifications.filter((notification) => {
+      const matchesSearch =
+        notification.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        notification.message.toLowerCase().includes(searchQuery.toLowerCase());
+
+      let matchesStatus = true;
+      if (filterStatus !== "all") {
+        matchesStatus = notification.status === filterStatus;
+      }
+
+      let matchesRecipient = true;
+      if (filterRecipient !== "all") {
+        matchesRecipient = notification.recipientType === filterRecipient;
+      }
+
+      return matchesSearch && matchesStatus && matchesRecipient;
     });
+  }, [notifications, searchQuery, filterStatus, filterRecipient]);
 
-    const handleCreateNotification = (e) => {
-        e.preventDefault();
+  const handleRecipientTypeChange = (type) => {
+    setNotificationForm({
+      ...notificationForm,
+      recipientType: type,
+      department: "",
+      year: "",
+    });
+  };
 
-        const newNotification = {
-            id: Date.now().toString(),
-            title: formData.title,
-            message: formData.message,
-            recipient_type: formData.recipientType,
-            created_at: new Date().toISOString(),
-            created_by: 'coordinator',
-        };
+  const buildTargetGroup = () => {
+    const { recipientType, department, year } = notificationForm;
 
-        setNotifications([newNotification, ...notifications]);
-        setFormData({ title: '', message: '', recipientType: 'students' });
-        setShowCreateModal(false);
+    if (recipientType === "students") {
+      const parts = [];
+      
+      if (department) parts.push(department);
+      else parts.push("All Departments");
+
+      if (year) parts.push(year);
+      else parts.push("All Years");
+
+      return parts.join(" - ");
+    } else if (recipientType === "department coordinators") {
+      return department || "All Departments";
+    }
+    return "All";
+  };
+
+  const handleCreateNotification = () => {
+    if (!notificationForm.title || !notificationForm.message) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    // Validate based on recipient type
+    if (notificationForm.recipientType === "department coordinators") {
+      if (!notificationForm.department) {
+        alert("Please select a department");
+        return;
+      }
+    }
+
+    const newNotification = {
+      id: notifications.length + 1,
+      title: notificationForm.title,
+      message: notificationForm.message,
+      recipientType: notificationForm.recipientType,
+      targetGroup: buildTargetGroup(),
+      category: notificationForm.category,
+      status: "sent",
+      sentAt: new Date().toISOString(),
+      recipientCount: Math.floor(Math.random() * 300) + 50,
+      readCount: 0,
     };
 
-    const handleDeleteNotification = (id) => {
-        setNotifications(notifications.filter(n => n.id !== id));
+    setNotifications([newNotification, ...notifications]);
+    setShowCreateModal(false);
+    setNotificationForm({
+      title: "",
+      message: "",
+      recipientType: "students",
+      department: "",
+      year: "",
+      category: "general",
+    });
+    alert("Notification sent successfully!");
+  };
+
+  const handleDeleteNotification = (id) => {
+    if (window.confirm("Are you sure you want to delete this notification?")) {
+      setNotifications(notifications.filter((n) => n.id !== id));
+    }
+  };
+
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getCategoryIcon = (category) => {
+    const iconMap = {
+      placement: Building2,
+      profile: UserCheck,
+      documents: FileText,
+      internship: Briefcase,
+      feedback: MessageSquare,
+      meeting: Calendar,
+      attendance: Clock,
+      general: Bell,
     };
+    return iconMap[category] || Bell;
+  };
 
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-
-        if (diffInDays === 0) return 'Today';
-        if (diffInDays === 1) return 'Yesterday';
-        if (diffInDays < 7) return `${diffInDays} days ago`;
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const getRecipientIcon = (recipientType) => {
+    const iconMap = {
+      students: GraduationCap,
+      "department coordinators": Award,
     };
+    return iconMap[recipientType] || Users;
+  };
 
-    const getRecipientBadge = (type) => {
-        switch (type) {
-            case 'students':
-                return { icon: User, label: 'Students', color: 'bg-blue-100 text-blue-700' };
-            case 'volunteers':
-                return { icon: UserCheck, label: 'Volunteers', color: 'bg-green-100 text-green-700' };
-            case 'both':
-                return { icon: Users, label: 'All', color: 'bg-purple-100 text-purple-700' };
-        }
-    };
+  return (
+    <div className={`min-h-screen ${themeStyles.background}`}>
+      <div className="max-w-full mx-auto p-4 sm:p-6 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className={`text-2xl sm:text-3xl font-bold ${themeStyles.textPrimary}`}>
+              Notification Management
+            </h1>
+            <p className={`mt-2 text-sm sm:text-base ${themeStyles.textSecondary}`}>
+              Send and manage notifications to students and department coordinators
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all shadow-sm hover:shadow-md flex items-center gap-2"
+            >
+              <Send className="h-4 w-4" />
+              Create Notification
+            </button>
+          </div>
+        </div>
 
-    return (
-        <div className={`min-h-screen ${theme.background} p-6`}>
-            <div className="max-w-6xl mx-auto">
-                <div className="mb-8 flex justify-between items-center">
-                    <div>
-                        <h1 className={`text-3xl font-bold ${theme.textPrimary} mb-2`}>
-                            Notification Management
-                        </h1>
-                        <p className={theme.textSecondary}>
-                            Create and manage notifications for students and volunteers
-                        </p>
-                    </div>
-                    <button
-                        onClick={() => setShowCreateModal(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg"
-                    >
-                        <Send className="w-5 h-5" />
-                        Create Notification
-                    </button>
+        {/* Statistics */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} bg-gradient-to-br ${themeStyles.statCard1Gradient} transition-all`}
+          >
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={`text-xs sm:text-sm font-semibold ${themeStyles.textSecondary} uppercase tracking-wide`}>
+                    Total Notifications
+                  </p>
+                  <h3 className={`text-xl sm:text-3xl font-bold ${themeStyles.textPrimary} mt-1 sm:mt-2`}>
+                    {stats.totalNotifications}
+                  </h3>
                 </div>
-
-                <div className={`${theme.cardBg} rounded-xl border ${theme.cardBorder} ${theme.cardShadow} overflow-hidden`}>
-                    <div className={`p-6 ${theme.modalHeader} border-b ${theme.modalHeaderBorder}`}>
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-100 rounded-lg">
-                                <Bell className="w-6 h-6 text-blue-600" />
-                            </div>
-                            <div>
-                                <h2 className={`text-xl font-semibold ${theme.textPrimary}`}>
-                                    Sent Notifications
-                                </h2>
-                                <p className={`text-sm ${theme.textSecondary}`}>
-                                    {notifications.length} notification{notifications.length !== 1 ? 's' : ''} sent
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="divide-y divide-opacity-10">
-                        {notifications.length === 0 ? (
-                            <div className="p-12 text-center">
-                                <Bell className={`w-16 h-16 mx-auto mb-4 ${theme.textTertiary}`} />
-                                <p className={`text-lg ${theme.textSecondary}`}>
-                                    No notifications sent yet
-                                </p>
-                                <p className={`text-sm ${theme.textTertiary} mt-2`}>
-                                    Create your first notification to get started
-                                </p>
-                            </div>
-                        ) : (
-                            notifications.map((notification) => {
-                                const recipientInfo = getRecipientBadge(notification.recipient_type);
-                                const RecipientIcon = recipientInfo.icon;
-
-                                return (
-                                    <div
-                                        key={notification.id}
-                                        className={`p-6 ${theme.cardHoverShadow} transition-all duration-200 hover:bg-opacity-50`}
-                                    >
-                                        <div className="flex justify-between items-start gap-4">
-                                            <div className="flex-1">
-                                                <div className="flex items-start gap-3 mb-3">
-                                                    <div className="p-2 bg-blue-100 rounded-lg">
-                                                        <Bell className="w-5 h-5 text-blue-600" />
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <h3 className={`text-lg font-semibold ${theme.textPrimary} mb-1`}>
-                                                            {notification.title}
-                                                        </h3>
-                                                        <p className={`${theme.textSecondary} leading-relaxed`}>
-                                                            {notification.message}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center gap-4 ml-14">
-                                                    <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${recipientInfo.color}`}>
-                                                        <RecipientIcon className="w-4 h-4" />
-                                                        {recipientInfo.label}
-                                                    </div>
-                                                    <div className={`flex items-center gap-1.5 text-sm ${theme.textTertiary}`}>
-                                                        <Calendar className="w-4 h-4" />
-                                                        {formatDate(notification.created_at)}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <button
-                                                onClick={() => handleDeleteNotification(notification.id)}
-                                                className={`p-2 rounded-lg ${theme.buttonBg} ${theme.buttonHover} border ${theme.buttonBorder} transition-colors`}
-                                                title="Delete notification"
-                                            >
-                                                <X className={`w-5 h-5 ${theme.textSecondary}`} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
+                <div className={`h-8 w-8 sm:h-12 sm:w-12 ${themeStyles.statIcon1Bg} rounded-xl flex items-center justify-center`}>
+                  <Bell className={`h-4 w-4 sm:h-6 sm:w-6 ${themeStyles.statIcon1Text}`} />
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} bg-gradient-to-br ${themeStyles.statCard2Gradient} transition-all`}
+          >
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={`text-xs sm:text-sm font-semibold ${themeStyles.textSecondary} uppercase tracking-wide`}>
+                    Sent
+                  </p>
+                  <h3 className={`text-xl sm:text-3xl font-bold ${themeStyles.textPrimary} mt-1 sm:mt-2`}>
+                    {stats.sentNotifications}
+                  </h3>
+                </div>
+                <div className={`h-8 w-8 sm:h-12 sm:w-12 ${themeStyles.statIcon2Bg} rounded-xl flex items-center justify-center`}>
+                  <CheckCircle2 className={`h-4 w-4 sm:h-6 sm:w-6 ${themeStyles.statIcon2Text}`} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} bg-gradient-to-br ${themeStyles.statCard3Gradient} transition-all`}
+          >
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={`text-xs sm:text-sm font-semibold ${themeStyles.textSecondary} uppercase tracking-wide`}>
+                    Scheduled
+                  </p>
+                  <h3 className={`text-xl sm:text-3xl font-bold ${themeStyles.textPrimary} mt-1 sm:mt-2`}>
+                    {stats.scheduledNotifications}
+                  </h3>
+                </div>
+                <div className={`h-8 w-8 sm:h-12 sm:w-12 ${themeStyles.statIcon3Bg} rounded-xl flex items-center justify-center`}>
+                  <Clock className={`h-4 w-4 sm:h-6 sm:w-6 ${themeStyles.statIcon3Text}`} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} bg-gradient-to-br ${themeStyles.statCard4Gradient} transition-all`}
+          >
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={`text-xs sm:text-sm font-semibold ${themeStyles.textSecondary} uppercase tracking-wide`}>
+                    Total Recipients
+                  </p>
+                  <h3 className={`text-xl sm:text-3xl font-bold ${themeStyles.textPrimary} mt-1 sm:mt-2`}>
+                    {stats.totalRecipients}
+                  </h3>
+                </div>
+                <div className={`h-8 w-8 sm:h-12 sm:w-12 ${themeStyles.statIcon4Bg} rounded-xl flex items-center justify-center`}>
+                  <Users className={`h-4 w-4 sm:h-6 sm:w-6 ${themeStyles.statIcon4Text}`} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Filter */}
+        <div className={`rounded-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow}`}>
+          <div className="p-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${themeStyles.textTertiary} h-4 w-4`} />
+                <input
+                  type="text"
+                  placeholder="Search notifications..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={`w-full pl-10 pr-4 py-2.5 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                />
+              </div>
+              <div className="flex gap-2">
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className={`px-4 py-2.5 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                >
+                  <option value="all">All Status</option>
+                  <option value="sent">Sent</option>
+                  <option value="scheduled">Scheduled</option>
+                </select>
+                <select
+                  value={filterRecipient}
+                  onChange={(e) => setFilterRecipient(e.target.value)}
+                  className={`px-4 py-2.5 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                >
+                  <option value="all">All Recipients</option>
+                  <option value="students">Students</option>
+                  <option value="department coordinators">Department Coordinators</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Notifications List */}
+        <div className={`rounded-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow}`}>
+          <div className="p-4 sm:p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className={`text-lg sm:text-xl font-bold ${themeStyles.textPrimary}`}>
+                Recent Notifications
+              </h2>
+              <span className={`text-sm ${themeStyles.textSecondary}`}>
+                {filteredNotifications.length} notifications
+              </span>
             </div>
 
-            {showCreateModal && (
-                <div className={`fixed inset-0 ${theme.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
-                    <div className={`${theme.cardBg} rounded-2xl ${theme.cardShadow} max-w-2xl w-full max-h-[90vh] overflow-y-auto`}>
-                        <div className={`p-6 ${theme.modalHeader} border-b ${theme.modalHeaderBorder} flex justify-between items-center`}>
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-100 rounded-lg">
-                                    <Send className="w-6 h-6 text-blue-600" />
-                                </div>
-                                <div>
-                                    <h2 className={`text-2xl font-bold ${theme.textPrimary}`}>
-                                        Create Notification
-                                    </h2>
-                                    <p className={`text-sm ${theme.textSecondary}`}>
-                                        Send a notification to students, volunteers, or both
-                                    </p>
-                                </div>
-                            </div>
+            <div className="space-y-4">
+              {filteredNotifications.map((notification) => {
+                const CategoryIcon = getCategoryIcon(notification.category);
+                const RecipientIcon = getRecipientIcon(notification.recipientType);
+                const readPercentage = notification.status === "sent"
+                  ? Math.round((notification.readCount / notification.recipientCount) * 100)
+                  : 0;
+
+                return (
+                  <div
+                    key={notification.id}
+                    className={`border ${themeStyles.notificationCardBorder} rounded-2xl p-4 sm:p-6 ${themeStyles.cardHoverShadow} transition-all duration-200 ${themeStyles.notificationCardBg} ${themeStyles.notificationCardHover}`}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`h-12 w-12 bg-gradient-to-br ${themeStyles.iconGradient} rounded-xl flex items-center justify-center shadow-sm flex-shrink-0`}>
+                        <CategoryIcon className={`h-6 w-6 ${themeStyles.statIcon1Text}`} />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+                          <div className="flex-1 min-w-0">
+                            <h3 className={`text-lg font-bold ${themeStyles.textPrimary} mb-1`}>
+                              {notification.title}
+                            </h3>
+                            <p className={`${themeStyles.textSecondary} text-sm line-clamp-2`}>
+                              {notification.message}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
                             <button
-                                onClick={() => setShowCreateModal(false)}
-                                className={`p-2 rounded-lg ${theme.buttonHover} transition-colors`}
+                              onClick={() => handleDeleteNotification(notification.id)}
+                              className={`p-2 rounded-lg ${themeStyles.buttonBg} border ${themeStyles.buttonBorder} ${themeStyles.buttonHover} transition-colors`}
                             >
-                                <X className={`w-6 h-6 ${theme.textSecondary}`} />
+                              <Trash2 className={`h-4 w-4 ${themeStyles.textSecondary}`} />
                             </button>
+                          </div>
                         </div>
 
-                        <form onSubmit={handleCreateNotification} className="p-6 space-y-6">
-                            <div>
-                                <label className={`block text-sm font-medium ${theme.textPrimary} mb-2`}>
-                                    Notification Title
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    className={`w-full px-4 py-3 ${theme.inputBg} border ${theme.inputBorder} ${theme.inputText} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${theme.inputPlaceholder}`}
-                                    placeholder="Enter notification title"
-                                    required
-                                />
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          <Badge
+                            variant={notification.status === "sent" ? "success" : "warning"}
+                            className="text-xs"
+                          >
+                            {notification.status === "sent" ? "✓ Sent" : "⏰ Scheduled"}
+                          </Badge>
+                          <Badge variant="default" className="text-xs flex items-center gap-1">
+                            <RecipientIcon className="h-3 w-3" />
+                            {notification.recipientType}
+                          </Badge>
+                          <Badge variant="info" className="text-xs">
+                            {notification.targetGroup}
+                          </Badge>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Clock className={`h-4 w-4 ${themeStyles.textTertiary}`} />
+                            <span className={themeStyles.textSecondary}>
+                              {formatDateTime(notification.sentAt)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users className={`h-4 w-4 ${themeStyles.textTertiary}`} />
+                            <span className={themeStyles.textSecondary}>
+                              {notification.recipientCount} recipients
+                            </span>
+                          </div>
+                          {notification.status === "sent" && (
+                            <div className="flex items-center gap-2">
+                              <Eye className={`h-4 w-4 ${themeStyles.textTertiary}`} />
+                              <span className={themeStyles.textSecondary}>
+                                {notification.readCount} read ({readPercentage}%)
+                              </span>
                             </div>
-
-                            <div>
-                                <label className={`block text-sm font-medium ${theme.textPrimary} mb-2`}>
-                                    Message
-                                </label>
-                                <textarea
-                                    value={formData.message}
-                                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                    className={`w-full px-4 py-3 ${theme.inputBg} border ${theme.inputBorder} ${theme.inputText} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${theme.inputPlaceholder} resize-none`}
-                                    placeholder="Enter notification message"
-                                    rows={5}
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className={`block text-sm font-medium ${theme.textPrimary} mb-3`}>
-                                    Send To
-                                </label>
-                                <div className="grid grid-cols-3 gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, recipientType: 'students' })}
-                                        className={`p-4 rounded-lg border-2 transition-all ${formData.recipientType === 'students'
-                                                ? 'border-blue-500 bg-blue-50'
-                                                : `border-transparent ${theme.buttonBg} ${theme.buttonHover}`
-                                            }`}
-                                    >
-                                        <User className={`w-6 h-6 mx-auto mb-2 ${formData.recipientType === 'students' ? 'text-blue-600' : theme.textSecondary}`} />
-                                        <p className={`text-sm font-medium ${formData.recipientType === 'students' ? 'text-blue-700' : theme.textPrimary}`}>
-                                            Students
-                                        </p>
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, recipientType: 'volunteers' })}
-                                        className={`p-4 rounded-lg border-2 transition-all ${formData.recipientType === 'volunteers'
-                                                ? 'border-green-500 bg-green-50'
-                                                : `border-transparent ${theme.buttonBg} ${theme.buttonHover}`
-                                            }`}
-                                    >
-                                        <UserCheck className={`w-6 h-6 mx-auto mb-2 ${formData.recipientType === 'volunteers' ? 'text-green-600' : theme.textSecondary}`} />
-                                        <p className={`text-sm font-medium ${formData.recipientType === 'volunteers' ? 'text-green-700' : theme.textPrimary}`}>
-                                            Volunteers
-                                        </p>
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, recipientType: 'both' })}
-                                        className={`p-4 rounded-lg border-2 transition-all ${formData.recipientType === 'both'
-                                                ? 'border-purple-500 bg-purple-50'
-                                                : `border-transparent ${theme.buttonBg} ${theme.buttonHover}`
-                                            }`}
-                                    >
-                                        <Users className={`w-6 h-6 mx-auto mb-2 ${formData.recipientType === 'both' ? 'text-purple-600' : theme.textSecondary}`} />
-                                        <p className={`text-sm font-medium ${formData.recipientType === 'both' ? 'text-purple-700' : theme.textPrimary}`}>
-                                            Both
-                                        </p>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-3 pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowCreateModal(false)}
-                                    className={`flex-1 px-6 py-3 ${theme.buttonBg} border ${theme.buttonBorder} ${theme.textPrimary} rounded-lg font-medium ${theme.buttonHover} transition-colors`}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                                >
-                                    <Send className="w-5 h-5" />
-                                    Send Notification
-                                </button>
-                            </div>
-                        </form>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {filteredNotifications.length === 0 && (
+              <div className={`text-center py-12 ${themeStyles.emptyStateBg} rounded-2xl`}>
+                <Bell className={`h-12 w-12 ${themeStyles.emptyStateIcon} mx-auto mb-4`} />
+                <h3 className={`text-lg font-semibold ${themeStyles.textPrimary} mb-2`}>
+                  No notifications found
+                </h3>
+                <p className={themeStyles.textSecondary}>
+                  Try adjusting your search or filter criteria
+                </p>
+              </div>
             )}
+          </div>
         </div>
-    );
-}
+      </div>
+
+      {/* Create Notification Modal */}
+      {showCreateModal && (
+        <div className={`fixed inset-0 ${themeStyles.modalOverlay} flex items-center justify-center p-4 z-50`}>
+          <div className={`${themeStyles.modalBg} rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto`}>
+            <div className={`sticky top-0 ${themeStyles.modalHeader} border-b ${themeStyles.modalHeaderBorder} px-6 py-4 flex items-center justify-between`}>
+              <h2 className={`text-xl font-bold ${themeStyles.textPrimary}`}>
+                Create New Notification
+              </h2>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className={`p-2 rounded-lg ${themeStyles.buttonHover} transition-colors`}
+              >
+                <X className={`h-5 w-5 ${themeStyles.textPrimary}`} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Title */}
+              <div>
+                <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                  Notification Title *
+                </label>
+                <input
+                  type="text"
+                  value={notificationForm.title}
+                  onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })}
+                  placeholder="Enter notification title"
+                  className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                />
+              </div>
+
+              {/* Message */}
+              <div>
+                <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                  Message *
+                </label>
+                <textarea
+                  value={notificationForm.message}
+                  onChange={(e) => setNotificationForm({ ...notificationForm, message: e.target.value })}
+                  placeholder="Enter notification message"
+                  rows="4"
+                  className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 resize-none`}
+                />
+              </div>
+
+              {/* Recipient Type */}
+              <div>
+                <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                  Recipient Type *
+                </label>
+                <select
+                  value={notificationForm.recipientType}
+                  onChange={(e) => handleRecipientTypeChange(e.target.value)}
+                  className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                  >
+                  <option value="students">Students</option>
+                  <option value="department coordinators">Department Coordinators</option>
+                </select>
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                  Category *
+                </label>
+                <select
+                  value={notificationForm.category}
+                  onChange={(e) => setNotificationForm({ ...notificationForm, category: e.target.value })}
+                  className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                >
+                  <option value="general">General</option>
+                  <option value="placement">Placement</option>
+                  <option value="profile">Profile</option>
+                  <option value="documents">Documents</option>
+                  <option value="internship">Internship</option>
+                  <option value="feedback">Feedback</option>
+                  <option value="meeting">Meeting</option>
+                  <option value="attendance">Attendance</option>
+                </select>
+              </div>
+
+              {/* Department Selection */}
+              {notificationForm.recipientType === "department coordinators" && (
+              <div>
+                <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                 Department *
+                </label>
+                <select
+                  value={notificationForm.department}
+                  onChange={(e) => setNotificationForm({ ...notificationForm, department: e.target.value })}
+                  className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                >
+                  <option value="">All Departments</option>
+                  {departments.map((dept) => (
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+           
+              {/* Year Selection - For Both */}
+{(notificationForm.recipientType === "students" || notificationForm.recipientType === "department coordinators") && (
+                <div>
+                  <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                    Year (Optional)
+                  </label>
+                  <select
+                    value={notificationForm.year}
+                    onChange={(e) => setNotificationForm({ ...notificationForm, year: e.target.value })}
+                    className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                  >
+                    <option value="">All Years</option>
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+             
+
+              {/* Target Group Preview */}
+              <div className={`p-4 rounded-xl ${themeStyles.emptyStateBg}`}>
+                <p className={`text-sm font-semibold ${themeStyles.textSecondary} mb-1`}>
+                  Target Group Preview:
+                </p>
+                <p className={`text-base font-bold ${themeStyles.textPrimary}`}>
+                  {buildTargetGroup()}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className={`flex-1 px-6 py-3 rounded-xl border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} font-semibold ${themeStyles.buttonHover} transition-all`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreateNotification}
+                  className="flex-1 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                >
+                  <Send className="h-4 w-4" />
+                  Send Notification
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CoordinatorNotifications;
