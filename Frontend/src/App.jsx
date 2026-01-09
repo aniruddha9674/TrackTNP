@@ -44,12 +44,9 @@ import DrivesListVolunteer from "./components/CollegeCoordinator/Volunteer/Drive
 import StudentListVolunteer from "./components/CollegeCoordinator/Students/StudentListVolunteer";
 import ResultsPageVolunteer from "./components/CollegeCoordinator/Results/ResultsPageVolunteer";
 import CoordinatorNotifications from "./components/CollegeCoordinator/Notification/Notification";
-import DrivesListVolunteer from "./components/CollegeCoordinator/Volunteer/DrivesListVolunteer";
-import StudentListVolunteer from "./components/CollegeCoordinator/Students/StudentListVolunteer";
-import ResultsPageVolunteer from "./components/CollegeCoordinator/Results/ResultsPageVolunteer";
-import CoordinatorNotifications from "./components/CollegeCoordinator/Notification/Notification";
 import CoordinatorCalendar from "./components/CollegeCoordinator/Calendar/Calendar";
 import SettingsPage from "./components/CollegeCoordinator/Setting/Setting";
+
 import FirstLogin from "./Pages/FirstTimeLogin";
 
 import DepartmentDashboard from "./Pages/DeptCoordinatorDash/DeptCoordinatordash";
@@ -90,6 +87,11 @@ function App() {
 
       <Route path="/firstlogin" element={<FirstLogin />} />
 
+      <Route
+        path="/volunteerdashboard"
+        element={<VolunteerDashboard />}
+      ></Route>
+
       <Route path="/admindashboard" element={<AdminDash />}>
         <Route path="" element={<Overview />} />
         <Route path="settings" element={<Settings />} />
@@ -102,6 +104,30 @@ function App() {
         <Route path="student/details" element={<StudentDetails />} />
         <Route path="student/add" element={<Addstudent />} />
         <Route path="notifications" element={<NotificationAdmin />} />
+      </Route>
+
+      <Route
+        path="/collegecoordinatordashboard"
+        element={<CollegeCoordinatorDash />}
+      >
+        <Route path="" element={<CoordinatorOverview />} />
+        <Route path="volunteer" element={<DrivesListVolunteer />} />
+        <Route path="student/details" element={<StudentListVolunteer />} />
+        <Route path="results" element={<ResultsPageVolunteer />} />
+        <Route path="notifications" element={<CoordinatorNotifications />} />
+        <Route path="calender" element={<CoordinatorCalendar />} />
+        <Route path="settings" element={<SettingsPage />} />
+      </Route>
+
+      <Route
+        path="/departmentcoordinatordashboard"
+        element={<DepartmentDashboard />}
+      >
+        <Route path="" element={<DepartmentOverview />} />
+        <Route path="calender" element={<DepartmentCalendar />} />
+        <Route path="settings" element={<DepartmentSettings />} />
+        <Route path="results" element={<DepartmentResult />} />
+        <Route path="notifications" element={<DepartmentNotification />} />
       </Route>
 
       <Route path="/studentdashboard" element={<StudentDash />}>
@@ -119,23 +145,6 @@ function App() {
         <Route path="calender" element={<StudentCalendar />} />
         <Route path="resume" element={<ResumeBuilder />} />
         <Route path="notifications" element={<VolunteerNotifications />} />
-      </Route>
-
-      <Route
-        path="/collegecoordinatordashboard"
-        element={<CollegeCoordinatorDash />}
-      >
-        <Route path="volunteer" element={<DrivesListVolunteer />} />
-        <Route path="student/details" element={<StudentListVolunteer />} />
-        <Route path="results" element={<ResultsPageVolunteer />} />
-        <Route path="notifications" element={<CoordinatorNotifications />} />
-        <Route path="calender" element={<CoordinatorCalendar />} />
-        <Route path="settings" element={<SettingsPage />} />
-        <Route path="student/details" element={<StudentListVolunteer />} />
-        <Route path="results" element={<ResultsPageVolunteer />} />
-        <Route path="notifications" element={<CoordinatorNotifications />} />
-        <Route path="calender" element={<CoordinatorCalendar />} />
-        <Route path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>
   );
