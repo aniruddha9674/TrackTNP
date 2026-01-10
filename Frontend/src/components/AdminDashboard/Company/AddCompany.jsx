@@ -12,14 +12,98 @@ import {
   Calendar,
   ArrowLeft,
   AlertTriangle,
+  BarChart3,
+  MapPin,
+  DollarSign,
+  Clock,
+  Award,
+  UserCheck,
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
+
+const getLightTheme = () => ({
+  background: "bg-gradient-to-br from-gray-50 to-white",
+  cardBg: "bg-white",
+  cardBorder: "border-slate-200",
+  cardShadow: "shadow-md",
+  cardHoverShadow: "hover:shadow-xl",
+  textPrimary: "text-gray-900",
+  textSecondary: "text-gray-600",
+  textTertiary: "text-gray-400",
+  inputBg: "bg-white",
+  inputBorder: "border-gray-300",
+  inputDisabled: "disabled:bg-gray-100",
+  inputText: "text-gray-900",
+  inputPlaceholder: "placeholder:text-gray-400",
+  modalOverlay: "bg-black/60",
+  modalHeader: "bg-slate-100",
+  buttonBg: "bg-white",
+  buttonBorder: "border-gray-300",
+  buttonHover: "hover:bg-gray-50",
+  statCard1Gradient: "from-white to-blue-50",
+  statCard2Gradient: "from-white to-green-50",
+  statCard3Gradient: "from-white to-purple-50",
+  statCard4Gradient: "from-white to-amber-50",
+  statIcon1Bg: "bg-blue-100",
+  statIcon1Text: "text-blue-600",
+  statIcon2Bg: "bg-green-100",
+  statIcon2Text: "text-green-600",
+  statIcon3Bg: "bg-purple-100",
+  statIcon3Text: "text-purple-600",
+  statIcon4Bg: "bg-amber-100",
+  statIcon4Text: "text-amber-600",
+  sectionBg: "bg-gray-50",
+  tableBg: "bg-white",
+  tableHeaderBg: "bg-gray-50",
+  tableHoverBg: "hover:bg-gray-50",
+  tableBorder: "border-gray-200",
+});
+
+const getDarkTheme = () => ({
+  background: "bg-gradient-to-br from-slate-950 to-slate-900",
+  cardBg: "bg-gray-900",
+  cardBorder: "border-slate-700",
+  cardShadow: "shadow-lg shadow-black/20",
+  cardHoverShadow: "hover:shadow-2xl hover:shadow-black/40",
+  textPrimary: "text-gray-50",
+  textSecondary: "text-gray-400",
+  textTertiary: "text-gray-500",
+  inputBg: "bg-gray-950",
+  inputBorder: "border-gray-700",
+  inputDisabled: "disabled:bg-gray-800",
+  inputText: "text-gray-50",
+  inputPlaceholder: "placeholder:text-gray-500",
+  modalOverlay: "bg-black/80",
+  modalHeader: "border-slate-700",
+  buttonBg: "bg-gray-800",
+  buttonBorder: "border-gray-700",
+  buttonHover: "hover:bg-gray-700",
+  statCard1Gradient: "from-gray-800 to-blue-900/30",
+  statCard2Gradient: "from-gray-800 to-green-900/30",
+  statCard3Gradient: "from-gray-800 to-purple-900/30",
+  statCard4Gradient: "from-gray-800 to-amber-900/30",
+  statIcon1Bg: "bg-blue-900/30",
+  statIcon1Text: "text-blue-400",
+  statIcon2Bg: "bg-green-900/30",
+  statIcon2Text: "text-green-400",
+  statIcon3Bg: "bg-purple-900/30",
+  statIcon3Text: "text-purple-400",
+  statIcon4Bg: "bg-amber-900/30",
+  statIcon4Text: "text-amber-400",
+  sectionBg: "bg-gray-800",
+  tableBg: "bg-gray-900",
+  tableHeaderBg: "bg-gray-800",
+  tableHoverBg: "hover:bg-gray-800",
+  tableBorder: "border-gray-700",
+});
 
 const CompanyManager = () => {
   const { theme } = useTheme();
   const [companies, setCompanies] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [viewMode, setViewMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -28,8 +112,8 @@ const CompanyManager = () => {
   ]);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split("T")[0],
-    month: String( new Date().getMonth() + 1),
-    year: String( new Date().getFullYear()),
+    month: String(new Date().getMonth() + 1),
+    year: String(new Date().getFullYear()),
     companyName: "",
     companyRelatedInfo: "",
     regEndDate: "",
@@ -112,82 +196,6 @@ const CompanyManager = () => {
     "Automobile Engineering",
   ];
 
-  const getLightTheme = () => ({
-    background: "bg-gradient-to-br from-gray-50 to-white",
-    cardBg: "bg-white",
-    cardBorder: "border-slate-200",
-    cardShadow: "shadow-md",
-    cardHoverShadow: "hover:shadow-xl",
-    textPrimary: "text-gray-900",
-    textSecondary: "text-gray-600",
-    textTertiary: "text-gray-400",
-    inputBg: "bg-white",
-    inputBorder: "border-gray-300",
-    inputDisabled: "disabled:bg-gray-100",
-    inputText: "text-gray-900",
-    inputPlaceholder: "placeholder:text-gray-400",
-    modalOverlay: "bg-black/60",
-    modalHeader: "bg-slate-100",
-    buttonBg: "bg-white",
-    buttonBorder: "border-gray-300",
-    buttonHover: "hover:bg-gray-50",
-    statCard1Gradient: "from-white to-blue-50",
-    statCard2Gradient: "from-white to-green-50",
-    statCard3Gradient: "from-white to-purple-50",
-    statCard4Gradient: "from-white to-amber-50",
-    statIcon1Bg: "bg-blue-100",
-    statIcon1Text: "text-blue-600",
-    statIcon2Bg: "bg-green-100",
-    statIcon2Text: "text-green-600",
-    statIcon3Bg: "bg-purple-100",
-    statIcon3Text: "text-purple-600",
-    statIcon4Bg: "bg-amber-100",
-    statIcon4Text: "text-amber-600",
-    sectionBg: "bg-gray-50",
-    tableBg: "bg-white",
-    tableHeaderBg: "bg-gray-50",
-    tableHoverBg: "hover:bg-gray-50",
-    tableBorder: "border-gray-200",
-  });
-
-  const getDarkTheme = () => ({
-    background: "bg-gradient-to-br from-slate-950 to-slate-900",
-    cardBg: "bg-gray-900",
-    cardBorder: "border-slate-700",
-    cardShadow: "shadow-lg shadow-black/20",
-    cardHoverShadow: "hover:shadow-2xl hover:shadow-black/40",
-    textPrimary: "text-gray-50",
-    textSecondary: "text-gray-400",
-    textTertiary: "text-gray-500",
-    inputBg: "bg-gray-950",
-    inputBorder: "border-gray-700",
-    inputDisabled: "disabled:bg-gray-800",
-    inputText: "text-gray-50",
-    inputPlaceholder: "placeholder:text-gray-500",
-    modalOverlay: "bg-black/80",
-    modalHeader: "border-slate-700",
-    buttonBg: "bg-gray-800",
-    buttonBorder: "border-gray-700",
-    buttonHover: "hover:bg-gray-700",
-    statCard1Gradient: "from-gray-800 to-blue-900/30",
-    statCard2Gradient: "from-gray-800 to-green-900/30",
-    statCard3Gradient: "from-gray-800 to-purple-900/30",
-    statCard4Gradient: "from-gray-800 to-amber-900/30",
-    statIcon1Bg: "bg-blue-900/30",
-    statIcon1Text: "text-blue-400",
-    statIcon2Bg: "bg-green-900/30",
-    statIcon2Text: "text-green-400",
-    statIcon3Bg: "bg-purple-900/30",
-    statIcon3Text: "text-purple-400",
-    statIcon4Bg: "bg-amber-900/30",
-    statIcon4Text: "text-amber-400",
-    sectionBg: "bg-gray-800",
-    tableBg: "bg-gray-900",
-    tableHeaderBg: "bg-gray-800",
-    tableHoverBg: "hover:bg-gray-800",
-    tableBorder: "border-gray-700",
-  });
-
   const themeStyles = theme === "dark" ? getDarkTheme() : getLightTheme();
 
   const stats = useMemo(() => {
@@ -208,7 +216,7 @@ const CompanyManager = () => {
   const resetForm = () => {
     setFormData({
       date: new Date().toISOString().split("T")[0],
-      month: String( new Date().getMonth() + 1),
+      month: String(new Date().getMonth() + 1),
       year: String(new Date().getFullYear()),
       companyName: "",
       companyRelatedInfo: "",
@@ -284,23 +292,28 @@ const CompanyManager = () => {
     setViewMode(false);
   };
 
-  const handleInputChange = (e) => {
-
+const handleInputChange = (e) => {
   const { name, value, type, checked } = e.target;
-  
-  if (type === "checkbox") {
-    if (name === "eligibleBatchYears" || name === "eligibleBranches") {
-      setFormData((prev) => ({
+
+  setFormData((prev) => {
+    // ✅ handle checkbox arrays
+    if (type === "checkbox") {
+      return {
         ...prev,
         [name]: checked
           ? [...prev[name], value]
           : prev[name].filter((item) => item !== value),
-      }));
+      };
     }
-  } else {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  }
+
+    // ✅ handle ALL other inputs safely
+    return {
+      ...prev,
+      [name]: value,
+    };
+  });
 };
+
 
   const handleSubmit = (action = "save") => {
     if (editingId !== null) {
@@ -345,6 +358,11 @@ const CompanyManager = () => {
   const handleDeleteClick = (id) => {
     setDeleteId(id);
     setShowDeleteModal(true);
+  };
+
+  const handleStatsClick = (company) => {
+    setSelectedCompany(company);
+    setShowStatsModal(true);
   };
 
   const confirmDelete = () => {
@@ -564,134 +582,406 @@ const CompanyManager = () => {
               </button>
             </div>
           ) : (
-            <div
-              className={`rounded-2xl border ${themeStyles.tableBorder} ${themeStyles.tableBg} overflow-hidden shadow-lg`}
-            >
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className={themeStyles.tableHeaderBg}>
-                    <tr>
-                      <th
-                        className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {companies.map((company) => (
+                <div
+                  key={company.id}
+                  className={`rounded-2xl border ${themeStyles.cardBorder} ${themeStyles.cardBg} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all duration-300 overflow-hidden`}
+                >
+                  <div className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3
+                          className={`text-xl font-bold ${themeStyles.textPrimary} mb-1`}
+                        >
+                          {company.companyName}
+                        </h3>
+                        <p className={`text-sm ${themeStyles.textSecondary}`}>
+                          {company.jobProfile || "N/A"}
+                        </p>
+                      </div>
+                      <span
+                        className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                          company.registrationStatus === "Open"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
                       >
-                        Company Name
-                      </th>
-                      <th
-                        className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}
-                      >
-                        Job Profile
-                      </th>
-                      <th
-                        className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}
-                      >
-                        Date
-                      </th>
-                      <th
-                        className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}
-                      >
-                        Salary
-                      </th>
-                      <th
-                        className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}
-                      >
-                        Selected
-                      </th>
-                      <th
-                        className={`px-6 py-4 text-left text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}
-                      >
-                        Status
-                      </th>
-                      <th
-                        className={`px-6 py-4 text-right text-xs font-semibold ${themeStyles.textPrimary} uppercase tracking-wider`}
-                      >
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className={`divide-y ${themeStyles.tableBorder}`}>
-                    {companies.map((company) => (
-                      <tr key={company.id} className={themeStyles.tableHoverBg}>
-                        <td className={`px-6 py-4 whitespace-nowrap`}>
-                          <div
-                            className={`text-sm font-semibold ${themeStyles.textPrimary}`}
-                          >
-                            {company.companyName}
-                          </div>
-                        </td>
-                        <td className={`px-6 py-4 whitespace-nowrap`}>
-                          <div
+                        {company.registrationStatus}
+                      </span>
+                    </div>
+
+                    <div className="space-y-3 mb-6">
+                      <div className="flex items-center gap-2">
+                        <Calendar
+                          className={`h-4 w-4 ${themeStyles.textSecondary}`}
+                        />
+                        <span
+                          className={`text-sm ${themeStyles.textSecondary}`}
+                        >
+                          {company.date}
+                        </span>
+                      </div>
+                      {company.salaryOffered && (
+                        <div className="flex items-center gap-2">
+                          <DollarSign
+                            className={`h-4 w-4 ${themeStyles.textSecondary}`}
+                          />
+                          <span
                             className={`text-sm ${themeStyles.textSecondary}`}
                           >
-                            {company.jobProfile || "N/A"}
-                          </div>
-                        </td>
-                        <td className={`px-6 py-4 whitespace-nowrap`}>
-                          <div className={`text-sm ${themeStyles.textPrimary}`}>
-                            {company.date}
-                          </div>
-                        </td>
-                        <td className={`px-6 py-4 whitespace-nowrap`}>
-                          <div className={`text-sm ${themeStyles.textPrimary}`}>
-                            {company.salaryOffered || "N/A"}
-                          </div>
-                        </td>
-                        <td className={`px-6 py-4 whitespace-nowrap`}>
-                          <div
-                            className={`text-sm font-semibold ${themeStyles.textPrimary}`}
-                          >
-                            {company.totalSelected || "0"}
-                          </div>
-                        </td>
-                        <td className={`px-6 py-4 whitespace-nowrap`}>
-                          <span
-                            className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              company.registrationStatus === "Open"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100 text-gray-800"
-                            }`}
-                          >
-                            {company.registrationStatus}
+                            {company.salaryOffered}
                           </span>
-                        </td>
-                        <td
-                          className={`px-6 py-4 whitespace-nowrap text-right text-sm font-medium`}
+                        </div>
+                      )}
+                      {company.venue && (
+                        <div className="flex items-center gap-2">
+                          <MapPin
+                            className={`h-4 w-4 ${themeStyles.textSecondary}`}
+                          />
+                          <span
+                            className={`text-sm ${themeStyles.textSecondary}`}
+                          >
+                            {company.venue}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <UserCheck
+                          className={`h-4 w-4 ${themeStyles.textSecondary}`}
+                        />
+                        <span
+                          className={`text-sm font-semibold ${themeStyles.textPrimary}`}
                         >
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleView(company)}
-                              className={`p-2 rounded-lg ${themeStyles.buttonBg} ${themeStyles.buttonHover} border ${themeStyles.buttonBorder} transition-all`}
-                              title="View"
-                            >
-                              <Eye
-                                className={`h-4 w-4 ${themeStyles.textPrimary}`}
-                              />
-                            </button>
-                            <button
-                              onClick={() => handleEdit(company)}
-                              className={`p-2 rounded-lg ${themeStyles.buttonBg} ${themeStyles.buttonHover} border ${themeStyles.buttonBorder} transition-all`}
-                              title="Edit"
-                            >
-                              <Edit2
-                                className={`h-4 w-4 ${themeStyles.textPrimary}`}
-                              />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteClick(company.id)}
-                              className="p-2 rounded-lg border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                              title="Delete"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                          {company.totalSelected || "0"} Selected
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => handleView(company)}
+                        className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg ${themeStyles.buttonBg} ${themeStyles.buttonHover} border ${themeStyles.buttonBorder} transition-all`}
+                      >
+                        <Eye className={`h-4 w-4 ${themeStyles.textPrimary}`} />
+                        <span
+                          className={`text-sm font-medium ${themeStyles.textPrimary}`}
+                        >
+                          View
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => handleEdit(company)}
+                        className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg ${themeStyles.buttonBg} ${themeStyles.buttonHover} border ${themeStyles.buttonBorder} transition-all`}
+                      >
+                        <Edit2
+                          className={`h-4 w-4 ${themeStyles.textPrimary}`}
+                        />
+                        <span
+                          className={`text-sm font-medium ${themeStyles.textPrimary}`}
+                        >
+                          Edit
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(company.id)}
+                        className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="text-sm font-medium">Delete</span>
+                      </button>
+                      <button
+                        onClick={() => handleStatsClick(company)}
+                        className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all"
+                      >
+                        <BarChart3 className="h-4 w-4" />
+                        <span className="text-sm font-medium">Statistics</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
+
+        {/* Statistics Modal */}
+        {showStatsModal && selectedCompany && (
+          <div
+            className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
+          >
+            <div
+              className={`w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl shadow-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder}`}
+            >
+              <div
+                className={`${themeStyles.modalHeader} border-b px-6 py-4 flex justify-between items-center sticky top-0 z-10`}
+              >
+                <div className="flex items-center gap-3">
+                  <BarChart3 className="h-6 w-6 text-blue-600" />
+                  <h2
+                    className={`text-2xl font-bold ${themeStyles.textPrimary}`}
+                  >
+                    Statistics - {selectedCompany.companyName}
+                  </h2>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowStatsModal(false);
+                    setSelectedCompany(null);
+                  }}
+                  className={`p-2 rounded-lg ${themeStyles.buttonHover} transition-all`}
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-100px)]">
+                {/* Overall Statistics */}
+                <div>
+                  <h3
+                    className={`text-lg font-semibold ${themeStyles.textPrimary} mb-4`}
+                  >
+                    Overall Statistics
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div
+                      className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-blue-100 rounded-lg">
+                          <Users className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <p
+                            className={`text-sm ${themeStyles.textSecondary}`}
+                          >
+                            Registered
+                          </p>
+                          <p
+                            className={`text-2xl font-bold ${themeStyles.textPrimary}`}
+                          >
+                            {selectedCompany.totalRegistered || "0"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-green-100 rounded-lg">
+                          <UserCheck className="h-6 w-6 text-green-600" />
+                        </div>
+                        <div>
+                          <p
+                            className={`text-sm ${themeStyles.textSecondary}`}
+                          >
+                            Present
+                          </p>
+                          <p
+                            className={`text-2xl font-bold ${themeStyles.textPrimary}`}
+                          >
+                            {selectedCompany.candidatesPresent || "0"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-purple-100 rounded-lg">
+                          <Award className="h-6 w-6 text-purple-600" />
+                        </div>
+                        <div>
+                          <p
+                            className={`text-sm ${themeStyles.textSecondary}`}
+                          >
+                            Selected
+                          </p>
+                          <p
+                            className={`text-2xl font-bold ${themeStyles.textPrimary}`}
+                          >
+                            {selectedCompany.totalSelected || "0"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* College-wise Selection */}
+                <div>
+                  <h3
+                    className={`text-lg font-semibold ${themeStyles.textPrimary} mb-4`}
+                  >
+                    College-wise Selection
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div
+                      className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
+                    >
+                      <h4
+                        className={`font-semibold ${themeStyles.textPrimary} mb-3`}
+                      >
+                        PCCOE
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className={themeStyles.textSecondary}>
+                            Present:
+                          </span>
+                          <span
+                            className={`font-semibold ${themeStyles.textPrimary}`}
+                          >
+                            {selectedCompany.pccoePresent || "0"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className={themeStyles.textSecondary}>
+                            Selected:
+                          </span>
+                          <span
+                            className={`font-semibold ${themeStyles.textPrimary}`}
+                          >
+                            {selectedCompany.totalSelectedPCCOE || "0"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
+                    >
+                      <h4
+                        className={`font-semibold ${themeStyles.textPrimary} mb-3`}
+                      >
+                        PCCOER
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className={themeStyles.textSecondary}>
+                            Present:
+                          </span>
+                          <span
+                            className={`font-semibold ${themeStyles.textPrimary}`}
+                          >
+                            {selectedCompany.pccoerPresent || "0"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className={themeStyles.textSecondary}>
+                            Selected:
+                          </span>
+                          <span
+                            className={`font-semibold ${themeStyles.textPrimary}`}
+                          >
+                            {selectedCompany.totalSelectedPCCOER || "0"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
+                    >
+                      <h4
+                        className={`font-semibold ${themeStyles.textPrimary} mb-3`}
+                      >
+                        NMIET
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className={themeStyles.textSecondary}>
+                            Present:
+                          </span>
+                          <span
+                            className={`font-semibold ${themeStyles.textPrimary}`}
+                          >
+                            {selectedCompany.nmietPresent || "0"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className={themeStyles.textSecondary}>
+                            Selected:
+                          </span>
+                          <span
+                            className={`font-semibold ${themeStyles.textPrimary}`}
+                          >
+                            {selectedCompany.totalSelectedNMIET || "0"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
+                    >
+                      <h4
+                        className={`font-semibold ${themeStyles.textPrimary} mb-3`}
+                      >
+                        NCER
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className={themeStyles.textSecondary}>
+                            Present:
+                          </span>
+                          <span
+                            className={`font-semibold ${themeStyles.textPrimary}`}
+                          >
+                            {selectedCompany.ncerPresent || "0"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className={themeStyles.textSecondary}>
+                            Selected:
+                          </span>
+                          <span
+                            className={`font-semibold ${themeStyles.textPrimary}`}
+                          >
+                            {selectedCompany.totalSelectedNCER || "0"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Selected Student PRNs */}
+                <div>
+                  <h3
+                    className={`text-lg font-semibold ${themeStyles.textPrimary} mb-4`}
+                  >
+                    Selected Students PRN
+                  </h3>
+                  <div
+                    className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
+                  >
+                    {selectedCompany.placedStudentPRN ? (
+                      <div className="space-y-2">
+                        {selectedCompany.placedStudentPRN
+                          .split(",")
+                          .map((prn, idx) => (
+                            <div
+                              key={idx}
+                              className={`p-3 rounded-lg ${themeStyles.cardBg} border ${themeStyles.cardBorder}`}
+                            >
+                              <span
+                                className={`font-mono ${themeStyles.textPrimary}`}
+                              >
+                                {prn.trim()}
+                              </span>
+                            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      <p className={`text-center ${themeStyles.textSecondary}`}>
+                        No PRNs available
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Delete Confirmation Modal */}
         {showDeleteModal && (
@@ -982,8 +1272,29 @@ const CompanyManager = () => {
                     name="venue"
                     placeholder="Interview venue"
                   />
-                </FormSection>     
-              <FormSection title="Drive Status">
+                </FormSection>
+                <FormSection title="Compensation">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InputField
+                      label="Salary Offered"
+                      name="salaryOffered"
+                      placeholder="e.g., 6.0 LPA"
+                    />
+                    <InputField
+                      label="Internship Stipend"
+                      name="internshipStipend"
+                      placeholder="e.g., 15000/month"
+                    />
+                  </div>
+                  <InputField
+                    label="Company Bond"
+                    name="companyBond"
+                    placeholder="Bond details if any"
+                  />
+                </FormSection>
+                
+               
+                <FormSection title="Drive Status">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <SelectField
                       label="Resume Required"

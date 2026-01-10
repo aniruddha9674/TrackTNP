@@ -46,7 +46,7 @@ import CoordinatorNotifications from "./components/CollegeCoordinator/Notificati
 import CoordinatorCalendar from "./components/CollegeCoordinator/Calendar/Calendar";
 import SettingsPage from "./components/CollegeCoordinator/Setting/Setting";
 import CoordinatorCompany from "./components/CollegeCoordinator/Company/Company";
- 
+
 import FirstLogin from "./Pages/FirstTimeLogin";
 
 import DepartmentDashboard from "./Pages/DeptCoordinatorDash/DeptCoordinatordash";
@@ -57,13 +57,15 @@ import DepartmentNotification from "./components/DeptcoordinatorDash/Notificatio
 import DepartmentOverview from "./components/DeptcoordinatorDash/Overview/Overview";
 import DepartmentStudentDetails from "./components/DeptcoordinatorDash/Student/StudentDetails";
 import DepartmentOfferLetter from "./components/DeptcoordinatorDash/Offer Letter/OfferLetter";
+import DepartmentCompany from "./components/DeptcoordinatorDash/Company/Company";
 
 import VolunteerDashboard from "./Pages/VounteerDash/VolunteerDash";
 import VolunteerCalendar from "./components/VolunteerDashboard/Callendar/Calendar";
 import VolunteerSetting from "./components/VolunteerDashboard/Setting/Setting";
 import Notification from "./components/VolunteerDashboard/Notification/Notification";
 import HistoryPageVolunteer from "./components/VolunteerDashboard/History/History";
-
+import VolunteerCompany from "./components/VolunteerDashboard/Company/Company";
+import VolunteerOverview from "./components/VolunteerDashboard/Overview/Overview";
 
 function App() {
   useEffect(() => {
@@ -95,10 +97,12 @@ function App() {
       <Route path="/firstlogin" element={<FirstLogin />} />
 
       <Route path="/volunteerdashboard" element={<VolunteerDashboard />}>
+        <Route path="" element={<VolunteerOverview />} />
         <Route path="settings" element={<VolunteerSetting />} />
         <Route path="history" element={<HistoryPageVolunteer />} />
+        <Route path="company" element={<VolunteerCompany />} />
         <Route path="calender" element={<VolunteerCalendar />} />
-        <Route path="notification" element={<Notification/>} />
+        <Route path="notification" element={<Notification />} />
       </Route>
 
       <Route path="/admindashboard" element={<AdminDash />}>
@@ -134,6 +138,7 @@ function App() {
         element={<DepartmentDashboard />}
       >
         <Route path="" element={<DepartmentOverview />} />
+        <Route path="company" element={<DepartmentCompany />} />
         <Route path="calender" element={<DepartmentCalendar />} />
         <Route path="settings" element={<DepartmentSettings />} />
         <Route path="results" element={<DepartmentResult />} />

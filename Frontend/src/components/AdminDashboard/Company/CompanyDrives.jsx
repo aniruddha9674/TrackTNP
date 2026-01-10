@@ -4,23 +4,14 @@ import {
   Users,
   TrendingUp,
   Calendar,
-  X,
   Download,
   Search,
-  ChevronRight,
 } from "lucide-react";
-import { useTheme } from "../../../Utils/context/ThemeContext";
-
 
 const CompanyDrivesManager = () => {
-  const { theme } = useTheme();
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showFilterModal, setShowFilterModal] = useState(false);
-  const [filterStep, setFilterStep] = useState(1);
-  const [selectedCollege, setSelectedCollege] = useState(null);
-  const [selectedDepartment, setSelectedDepartment] = useState(null);
-  const [selectedYear, setSelectedYear] = useState(null);
+  const [theme] = useState("light");
 
   // Theme configuration function
   const getThemeColors = () => {
@@ -114,26 +105,6 @@ const CompanyDrivesManager = () => {
       totalRounds: 3,
     },
   ]);
-
-  const colleges = [
-    { id: 1, name: "ABC Engineering College" },
-    { id: 2, name: "XYZ Institute of Technology" },
-    { id: 3, name: "PQR College of Engineering" },
-    { id: 4, name: "LMN Technical Campus" },
-  ];
-
-  const departments = [
-    { id: 1, name: "Computer Science", short: "CS" },
-    { id: 2, name: "Information Technology", short: "IT" },
-    { id: 3, name: "Electronics & Telecommunication", short: "ENTC" },
-    { id: 4, name: "Mechanical", short: "Mechanical" },
-    { id: 5, name: "Civil", short: "Civil" },
-  ];
-
-  const years = [
-    { id: 1, name: "Third Year", value: "3rd" },
-    { id: 2, name: "Fourth Year", value: "4th" },
-  ];
 
   const [students] = useState([
     {
@@ -255,42 +226,11 @@ const CompanyDrivesManager = () => {
 
   const handleCompanyClick = (company) => {
     setSelectedCompany(company);
-    setShowFilterModal(true);
-    setFilterStep(1);
-    setSelectedCollege(null);
-    setSelectedDepartment(null);
-    setSelectedYear(null);
-  };
-
-  const handleCollegeSelect = (college) => {
-    setSelectedCollege(college);
-    setFilterStep(2);
-  };
-
-  const handleDepartmentSelect = (department) => {
-    setSelectedDepartment(department);
-    setFilterStep(3);
-  };
-
-  const handleYearSelect = (year) => {
-    setSelectedYear(year);
-    setShowFilterModal(false);
-  };
-
-  const handleCloseModal = () => {
-    setShowFilterModal(false);
-    setSelectedCompany(null);
-    setFilterStep(1);
-    setSelectedCollege(null);
-    setSelectedDepartment(null);
-    setSelectedYear(null);
   };
 
   const handleBackToList = () => {
     setSelectedCompany(null);
-    setSelectedCollege(null);
-    setSelectedDepartment(null);
-    setSelectedYear(null);
+    setSearchTerm("");
   };
 
   const exportToExcel = () => {
@@ -310,17 +250,16 @@ const CompanyDrivesManager = () => {
   };
 
   // Filter students who made it to the final round
-  const filteredStudents = students.filter(
-    (s) =>
-      s.company === selectedCompany?.name &&
-      s.collegeName === selectedCollege?.name &&
-      s.branch === selectedDepartment?.name &&
-      s.year === selectedYear?.value &&
-      passedAllRounds(s, selectedCompany) &&
-      (s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.studentId.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredStudents = selectedCompany
+    ? students.filter(
+        (s) =>
+          s.company === selectedCompany.name &&
+          passedAllRounds(s, selectedCompany) &&
+          (s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            s.studentId.toLowerCase().includes(searchTerm.toLowerCase()))
+      )
+    : [];
 
   return (
     <div style={{ fontFamily: "Urbanist, sans-serif" }}>
@@ -436,222 +375,7 @@ const CompanyDrivesManager = () => {
             ))}
           </div>
 
-          {/* Filter Modal */}
-          {showFilterModal && (
-            <div
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
-              style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-            >
-              <div
-                className="rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-y-auto"
-                style={{
-                  backgroundColor: colors.modalBg,
-                }}
-              >
-                <div
-                  className="p-6 border-b flex items-center justify-between sticky top-0 z-10"
-                  style={{
-                    backgroundColor: colors.modalBg,
-                    borderColor: colors.border,
-                  }}
-                >
-                  <div>
-                    <h2
-                      className="text-2xl font-bold"
-                      style={{ color: colors.text }}
-                    >
-                      {selectedCompany.name} Drive - Filter Students
-                    </h2>
-                    <p
-                      className="text-sm mt-1"
-                      style={{ color: colors.textSecondary }}
-                    >
-                      Step {filterStep} of 3: Select{" "}
-                      {filterStep === 1
-                        ? "College"
-                        : filterStep === 2
-                          ? "Department"
-                          : "Year"}
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleCloseModal}
-                    className="p-2 rounded-lg hover:bg-gray-100 transition-all"
-                    style={{
-                      backgroundColor: colors.hoverBg,
-                    }}
-                  >
-                    <X size={24} style={{ color: colors.text }} />
-                  </button>
-                </div>
-
-                <div className="p-6">
-                  {filterStep === 1 && (
-                    <div>
-                      <h3
-                        className="text-lg font-semibold mb-4"
-                        style={{ color: colors.text }}
-                      >
-                        Select College
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {colleges.map((college) => (
-                          <div
-                            key={college.id}
-                            onClick={() => handleCollegeSelect(college)}
-                            className="p-6 rounded-xl border cursor-pointer hover:shadow-lg transition-all hover:scale-105"
-                            style={{
-                              backgroundColor: colors.hoverBg,
-                              borderColor: colors.border,
-                            }}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h4
-                                  className="font-semibold text-lg"
-                                  style={{
-                                    color: colors.text,
-                                  }}
-                                >
-                                  {college.name}
-                                </h4>
-                                <p
-                                  className="text-sm mt-1"
-                                  style={{
-                                    color: colors.textSecondary,
-                                  }}
-                                >
-                                  Click to select
-                                </p>
-                              </div>
-                              <ChevronRight
-                                size={24}
-                                style={{ color: "#465FFF" }}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {filterStep === 2 && (
-                    <div>
-                      <button
-                        onClick={() => setFilterStep(1)}
-                        className="mb-4 text-sm font-semibold flex items-center gap-2"
-                        style={{ color: "#465FFF" }}
-                      >
-                        ← Back to Colleges
-                      </button>
-                      <h3
-                        className="text-lg font-semibold mb-4"
-                        style={{ color: colors.text }}
-                      >
-                        Select Department
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {departments.map((dept) => (
-                          <div
-                            key={dept.id}
-                            onClick={() => handleDepartmentSelect(dept)}
-                            className="p-6 rounded-xl border cursor-pointer hover:shadow-lg transition-all hover:scale-105"
-                            style={{
-                              backgroundColor: colors.hoverBg,
-                              borderColor: colors.border,
-                            }}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h4
-                                  className="font-semibold text-lg"
-                                  style={{
-                                    color: colors.text,
-                                  }}
-                                >
-                                  {dept.short}
-                                </h4>
-                                <p
-                                  className="text-sm mt-1"
-                                  style={{
-                                    color: colors.textSecondary,
-                                  }}
-                                >
-                                  {dept.name}
-                                </p>
-                              </div>
-                              <ChevronRight
-                                size={24}
-                                style={{ color: "#465FFF" }}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {filterStep === 3 && (
-                    <div>
-                      <button
-                        onClick={() => setFilterStep(2)}
-                        className="mb-4 text-sm font-semibold flex items-center gap-2"
-                        style={{ color: "#465FFF" }}
-                      >
-                        ← Back to Departments
-                      </button>
-                      <h3
-                        className="text-lg font-semibold mb-4"
-                        style={{ color: colors.text }}
-                      >
-                        Select Year
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {years.map((year) => (
-                          <div
-                            key={year.id}
-                            onClick={() => handleYearSelect(year)}
-                            className="p-8 rounded-xl border cursor-pointer hover:shadow-lg transition-all hover:scale-105"
-                            style={{
-                              backgroundColor: colors.hoverBg,
-                              borderColor: colors.border,
-                            }}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h4
-                                  className="font-semibold text-2xl"
-                                  style={{
-                                    color: colors.text,
-                                  }}
-                                >
-                                  {year.name}
-                                </h4>
-                                <p
-                                  className="text-sm mt-1"
-                                  style={{
-                                    color: colors.textSecondary,
-                                  }}
-                                >
-                                  Click to view students
-                                </p>
-                              </div>
-                              <ChevronRight
-                                size={28}
-                                style={{ color: "#465FFF" }}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {!selectedCompany || !selectedYear ? (
+          {!selectedCompany ? (
             /* Company Cards Grid */
             <div>
               <h2
@@ -793,8 +517,7 @@ const CompanyDrivesManager = () => {
                         className="text-sm"
                         style={{ color: colors.textSecondary }}
                       >
-                        {selectedCollege.name} - {selectedDepartment.name} -{" "}
-                        {selectedYear.name}
+                        All students who cleared all rounds
                       </p>
                     </div>
                   </div>
@@ -899,6 +622,18 @@ const CompanyDrivesManager = () => {
                         College Name
                       </th>
                       <th
+                        className="p-4 text-left text-sm font-semibold"
+                        style={{ color: colors.text }}
+                      >
+                        Branch
+                      </th>
+                      <th
+                        className="p-4 text-left text-sm font-semibold"
+                        style={{ color: colors.text }}
+                      >
+                        Year
+                      </th>
+                      <th
                         className="p-4 text-center text-sm font-semibold"
                         style={{ color: colors.text }}
                       >
@@ -944,6 +679,18 @@ const CompanyDrivesManager = () => {
                         >
                           {student.collegeName}
                         </td>
+                        <td
+                          className="p-4"
+                          style={{ color: colors.textSecondary }}
+                        >
+                          {student.branch}
+                        </td>
+                        <td
+                          className="p-4"
+                          style={{ color: colors.textSecondary }}
+                        >
+                          {student.year}
+                        </td>
                         <td className="p-4 text-center">
                           <span
                             className="px-3 py-1 rounded-full text-xs font-semibold inline-block"
@@ -983,7 +730,7 @@ const CompanyDrivesManager = () => {
                     className="text-sm mt-2"
                     style={{ color: colors.textTertiary }}
                   >
-                    Try selecting different filters or check back later
+                    Try adjusting your search or check back later
                   </p>
                 </div>
               )}
