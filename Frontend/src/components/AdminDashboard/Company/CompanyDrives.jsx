@@ -7,11 +7,12 @@ import {
   Download,
   Search,
 } from "lucide-react";
+import { useTheme } from "../../../Utils/context/ThemeContext";
 
 const CompanyDrivesManager = () => {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [theme] = useState("light");
+  const { theme } = useTheme();
 
   // Theme configuration function
   const getThemeColors = () => {
