@@ -494,7 +494,7 @@ const CoordinatorOfferLetters = () => {
                                     <th
                                         className={`px-4 py-4 text-left text-xs font-semibold ${themeStyles.textSecondary} uppercase tracking-wider`}
                                     >
-                                        Sr No
+                                        PRN no
                                     </th>
                                     <th
                                         className={`px-4 py-4 text-left text-xs font-semibold ${themeStyles.textSecondary} uppercase tracking-wider`}

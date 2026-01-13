@@ -126,6 +126,7 @@ const CompanyManager = () => {
     placedBelow: "",
     eligibleBatchYears: [],
     eligibleBranches: [],
+    eligibleColleges: [],
     jobOpenings: "",
     companyType: "",
     driveType: "",
@@ -195,6 +196,7 @@ const CompanyManager = () => {
     "Information Technology",
     "Automobile Engineering",
   ];
+  const Colleges = ["PCCOE", "PCCOER", "NMIET", "NCER"];
 
   const themeStyles = theme === "dark" ? getDarkTheme() : getLightTheme();
 
@@ -230,6 +232,7 @@ const CompanyManager = () => {
       placedBelow: "",
       eligibleBatchYears: [],
       eligibleBranches: [],
+      eligibleColleges: [],
       jobOpenings: "",
       companyType: "",
       driveType: "",
@@ -292,28 +295,28 @@ const CompanyManager = () => {
     setViewMode(false);
   };
 
-const handleInputChange = (e) => {
-  const { name, value, type, checked } = e.target;
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
 
-  setFormData((prev) => {
-    // ✅ handle checkbox arrays
     if (type === "checkbox") {
-      return {
+      // Handle checkbox arrays
+      setFormData((prev) => {
+        const currentArray = prev[name] || [];
+        return {
+          ...prev,
+          [name]: checked
+            ? [...currentArray, value]
+            : currentArray.filter((item) => item !== value),
+        };
+      });
+    } else {
+      // Handle all other inputs (text, number, textarea, select, etc.)
+      setFormData((prev) => ({
         ...prev,
-        [name]: checked
-          ? [...prev[name], value]
-          : prev[name].filter((item) => item !== value),
-      };
+        [name]: value,
+      }));
     }
-
-    // ✅ handle ALL other inputs safely
-    return {
-      ...prev,
-      [name]: value,
-    };
-  });
-};
-
+  };
 
   const handleSubmit = (action = "save") => {
     if (editingId !== null) {
@@ -332,11 +335,14 @@ const handleInputChange = (e) => {
       };
       setCompanies((prev) => [...prev, newCompany]);
     }
+
     if (action === "save") {
       setShowModal(false);
       resetForm();
     } else if (action === "saveAndAdd") {
       resetForm();
+    } else if (action === "saveAndContinue") {
+      // Keep modal open and editing state - don't reset
     }
   };
 
@@ -751,9 +757,7 @@ const handleInputChange = (e) => {
                           <Users className="h-6 w-6 text-blue-600" />
                         </div>
                         <div>
-                          <p
-                            className={`text-sm ${themeStyles.textSecondary}`}
-                          >
+                          <p className={`text-sm ${themeStyles.textSecondary}`}>
                             Registered
                           </p>
                           <p
@@ -772,9 +776,7 @@ const handleInputChange = (e) => {
                           <UserCheck className="h-6 w-6 text-green-600" />
                         </div>
                         <div>
-                          <p
-                            className={`text-sm ${themeStyles.textSecondary}`}
-                          >
+                          <p className={`text-sm ${themeStyles.textSecondary}`}>
                             Present
                           </p>
                           <p
@@ -793,9 +795,7 @@ const handleInputChange = (e) => {
                           <Award className="h-6 w-6 text-purple-600" />
                         </div>
                         <div>
-                          <p
-                            className={`text-sm ${themeStyles.textSecondary}`}
-                          >
+                          <p className={`text-sm ${themeStyles.textSecondary}`}>
                             Selected
                           </p>
                           <p
@@ -1069,7 +1069,7 @@ const handleInputChange = (e) => {
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)] scroll-smooth">
+              <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)]">
                 <FormSection title="Basic Information">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <InputField label="Date" name="date" type="date" required />
@@ -1093,6 +1093,7 @@ const handleInputChange = (e) => {
                     name="companyName"
                     required
                     placeholder="Enter company name"
+                    key={`companyName-${theme}`}
                   />
                   <InputField
                     label="Company Related Info"
@@ -1114,6 +1115,7 @@ const handleInputChange = (e) => {
                     />
                   </div>
                 </FormSection>
+
                 <FormSection title="Recruitment Details">
                   <SelectField
                     label="Recruitment Method"
@@ -1162,6 +1164,7 @@ const handleInputChange = (e) => {
                             onChange={handleInputChange}
                             disabled={viewMode}
                             className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                            key={`year-${year}-${theme}`}
                           />
                           <span
                             className={`text-sm ${themeStyles.textPrimary}`}
@@ -1201,8 +1204,39 @@ const handleInputChange = (e) => {
                         </label>
                       ))}
                     </div>
+                    <label
+                      className={`block text-sm font-medium ${themeStyles.textPrimary} mt-4 mb-2`}
+                    >
+                      Eligible Colleges
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {Colleges.map((college) => (
+                        <label
+                          key={college}
+                          className="flex items-center space-x-2 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            name="eligibleColleges"
+                            value={college}
+                            checked={formData.eligibleColleges.includes(
+                              college
+                            )}
+                            onChange={handleInputChange}
+                            disabled={viewMode}
+                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                          />
+                          <span
+                            className={`text-sm ${themeStyles.textPrimary}`}
+                          >
+                            {college}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
                 </FormSection>
+
                 <FormSection title="Job Details">
                   <InputField
                     label="Job Openings"
@@ -1240,6 +1274,7 @@ const handleInputChange = (e) => {
                     placeholder="e.g., Software Engineer"
                   />
                 </FormSection>
+
                 <FormSection title="Eligibility Criteria">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <InputField
@@ -1273,6 +1308,7 @@ const handleInputChange = (e) => {
                     placeholder="Interview venue"
                   />
                 </FormSection>
+
                 <FormSection title="Compensation">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <InputField
@@ -1292,8 +1328,298 @@ const handleInputChange = (e) => {
                     placeholder="Bond details if any"
                   />
                 </FormSection>
-                
-               
+
+                <FormSection title="Participation Data">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InputField
+                      label="Total Registered"
+                      name="totalRegistered"
+                      type="number"
+                      placeholder="Number of registrations"
+                    />
+                    <InputField
+                      label="Candidates Present"
+                      name="candidatesPresent"
+                      type="number"
+                      placeholder="Students who attended"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <InputField
+                      label="PCCOE Present"
+                      name="pccoePresent"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="PCCOER Present"
+                      name="pccoerPresent"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="NMIET Present"
+                      name="nmietPresent"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="NCER Present"
+                      name="ncerPresent"
+                      type="number"
+                      placeholder="0"
+                    />
+                  </div>
+                </FormSection>
+
+                <FormSection title="Selection Results - College-wise">
+                  <InputField
+                    label="Total Selected"
+                    name="totalSelected"
+                    type="number"
+                    placeholder="Total students selected"
+                  />
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <InputField
+                      label="PCCOE Selected"
+                      name="totalSelectedPCCOE"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="PCCOER Selected"
+                      name="totalSelectedPCCOER"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="NMIET Selected"
+                      name="totalSelectedNMIET"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="NCER Selected"
+                      name="totalSelectedNCER"
+                      type="number"
+                      placeholder="0"
+                    />
+                  </div>
+                </FormSection>
+
+                <FormSection title="PCCOE - Branch-wise Selection">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <InputField
+                      label="Computer Eng."
+                      name="pccoeComputerSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="AI & ML"
+                      name="pccoeAIMLSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="Computer (Regional)"
+                      name="pccoeComputerRegionalSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="IT"
+                      name="pccoeITSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="EnTC"
+                      name="pccoeEnTCSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="Mechanical"
+                      name="pccoeMechanicalSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="Civil"
+                      name="pccoeCivilSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                  </div>
+                </FormSection>
+
+                <FormSection title="PCCOER - Branch-wise Selection">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <InputField
+                      label="Computer Eng."
+                      name="pccoerComputerSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="IT"
+                      name="pccoerITSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="EnTC"
+                      name="pccoerEnTCSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="Mechanical"
+                      name="pccoerMechanicalSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="Civil"
+                      name="pccoerCivilSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                  </div>
+                </FormSection>
+
+                <FormSection title="NMIET - Branch-wise Selection">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <InputField
+                      label="Computer Eng."
+                      name="nmietComputerSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="IT"
+                      name="nmietITSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="EnTC"
+                      name="nmietEnTCSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="Mechanical"
+                      name="nmietMechanicalSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                  </div>
+                </FormSection>
+
+                <FormSection title="NCER - Branch-wise Selection">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <InputField
+                      label="Computer Eng."
+                      name="ncerComputerSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="AI & ML"
+                      name="ncerAIMLSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="EnTC"
+                      name="ncerEnTCSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="Mechanical"
+                      name="ncerMechanicalSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="Automobile"
+                      name="ncerAutomobileSelected"
+                      type="number"
+                      placeholder="0"
+                    />
+                  </div>
+                </FormSection>
+
+                <FormSection title="Internship Selection Data">
+                  <InputField
+                    label="Total Internship Selected"
+                    name="totalInternshipSelected"
+                    type="number"
+                    placeholder="Total internships"
+                  />
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <InputField
+                      label="PCCOE"
+                      name="totalInternshipSelectedPCCOE"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="PCCOER"
+                      name="totalInternshipSelectedPCCOER"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="NMIET"
+                      name="totalInternshipSelectedNMIET"
+                      type="number"
+                      placeholder="0"
+                    />
+                    <InputField
+                      label="NCER"
+                      name="totalInternshipSelectedNCER"
+                      type="number"
+                      placeholder="0"
+                    />
+                  </div>
+                </FormSection>
+
+                <FormSection title="Student PRNs">
+                  <InputField
+                    label="Placed Student PRNs (comma-separated)"
+                    name="placedStudentPRN"
+                    type="textarea"
+                    placeholder="Enter PRNs separated by commas, e.g., PRN001, PRN002, PRN003"
+                  />
+                  <InputField
+                    label="Internship Selected PRNs (comma-separated)"
+                    name="internshipSelectedPRN"
+                    type="textarea"
+                    placeholder="Enter PRNs separated by commas"
+                  />
+                </FormSection>
+
+                <FormSection title="Expenditure">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InputField
+                      label="Approved Expenditure"
+                      name="approvedExpenditure"
+                      type="number"
+                      placeholder="Approved amount"
+                    />
+                    <InputField
+                      label="Actual Expenditure"
+                      name="actualExpenditure"
+                      type="number"
+                      placeholder="Actual amount spent"
+                    />
+                  </div>
+                </FormSection>
+
                 <FormSection title="Drive Status">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <SelectField
@@ -1322,6 +1648,7 @@ const handleInputChange = (e) => {
                     />
                   </div>
                 </FormSection>
+
                 {!viewMode && (
                   <FormSection title="Additional Files">
                     <div className="space-y-3">

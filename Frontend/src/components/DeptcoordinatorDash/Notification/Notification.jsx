@@ -59,13 +59,13 @@ const CoordinatorNotifications = () => {
     title: "",
     message: "",
     recipientType: "students",
-    department: "",
+    
     year: "",
     category: "general",
   });
 
   // Sample data
-  const departments = ["Computer Science", "Information Technology", "Electronics", "Mechanical", "Civil", "Electrical"];
+ 
   const years = ["Third Year", "Final Year"];
 
   // Sample notifications data
@@ -110,7 +110,6 @@ const CoordinatorNotifications = () => {
       id: 4,
       title: "Department Review Meeting",
       message: "Review of department placement statistics and upcoming drives.",
-      recipientType: "department coordinators",
       targetGroup: "Computer Science",
       category: "meeting",
       status: "sent",
@@ -243,19 +242,17 @@ const CoordinatorNotifications = () => {
     setNotificationForm({
       ...notificationForm,
       recipientType: type,
-      department: "",
       year: "",
     });
   };
 
   const buildTargetGroup = () => {
-    const { recipientType, department, year } = notificationForm;
+    const { recipientType, year } = notificationForm;
 
     if (recipientType === "students") {
       const parts = [];
       
-      if (department) parts.push(department);
-      else parts.push("All Departments");
+      
 
       if (year) parts.push(year);
       else parts.push("All Years");
@@ -272,12 +269,7 @@ const CoordinatorNotifications = () => {
     }
 
     // Validate based on recipient type
-    if (notificationForm.recipientType === "department coordinators") {
-      if (!notificationForm.department) {
-        alert("Please select a department");
-        return;
-      }
-    }
+   
 
     const newNotification = {
       id: notifications.length + 1,
@@ -298,7 +290,6 @@ const CoordinatorNotifications = () => {
       title: "",
       message: "",
       recipientType: "students",
-      department: "",
       year: "",
       category: "general",
     });
@@ -339,7 +330,7 @@ const CoordinatorNotifications = () => {
   const getRecipientIcon = (recipientType) => {
     const iconMap = {
       students: GraduationCap,
-      "department coordinators": Award,
+      
     };
     return iconMap[recipientType] || Users;
   };
@@ -482,7 +473,7 @@ const CoordinatorNotifications = () => {
                 >
                   <option value="all">All Recipients</option>
                   <option value="students">Students</option>
-                  <option value="department coordinators">Department Coordinators</option>
+                  
                 </select>
               </div>
             </div>
@@ -680,26 +671,8 @@ const CoordinatorNotifications = () => {
                 </select>
               </div>
 
-              {/* Department Selection */}
-              {notificationForm.recipientType === "students" && (
-              <div>
-                <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
-                 Department *
-                </label>
-                <select
-                  value={notificationForm.department}
-                  onChange={(e) => setNotificationForm({ ...notificationForm, department: e.target.value })}
-                  className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
-                >
-                  <option value="">All Departments</option>
-                  {departments.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            
+         
 
            
               {/* Year Selection - For Both */}

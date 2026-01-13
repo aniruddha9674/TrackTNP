@@ -16,6 +16,7 @@ import {
   Search,
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
+
 const StaffDetailsManager = () => {
   const { theme } = useTheme();
   const [staff, setStaff] = useState([
@@ -23,7 +24,7 @@ const StaffDetailsManager = () => {
       id: 1,
       name: "PATEL",
       email: "imrankpatel7861@gmail.com",
-      collegeName: "College 1",
+      collegeName: "Pimpri Chinchwad College of Engineering PCCOE",
       department: "",
       phoneNumber: "1234567890",
       status: "Active",
@@ -33,7 +34,7 @@ const StaffDetailsManager = () => {
       id: 2,
       name: "PATEL",
       email: "imrankpatel7861@gmail.com",
-      collegeName: "College 1",
+      collegeName: "Pimpri Chinchwad College of Engineering PCCOE",
       department: "",
       phoneNumber: "1234567890",
       status: "Active",
@@ -43,7 +44,7 @@ const StaffDetailsManager = () => {
       id: 3,
       name: "PATEL",
       email: "imrankpatel7861@gmail.com",
-      collegeName: "College 1",
+      collegeName: "Pimpri Chinchwad College of Engineering PCCOE",
       department: "",
       phoneNumber: "1234567890",
       status: "Active",
@@ -91,16 +92,16 @@ const StaffDetailsManager = () => {
     emptyStateIcon: "text-slate-400",
     statCard1Gradient: "from-white to-blue-50",
     statCard2Gradient: "from-white to-green-50",
-    statCard3Gradient: "from-white to-emerald-50",
-    statCard4Gradient: "from-white to-red-50",
+    statCard3Gradient: "from-white to-purple-50",
+    statCard4Gradient: "from-white to-amber-50",
     statIcon1Bg: "bg-blue-100",
     statIcon1Text: "text-blue-600",
     statIcon2Bg: "bg-green-100",
     statIcon2Text: "text-green-600",
-    statIcon3Bg: "bg-emerald-100",
-    statIcon3Text: "text-emerald-600",
-    statIcon4Bg: "bg-red-100",
-    statIcon4Text: "text-red-600",
+    statIcon3Bg: "bg-purple-100",
+    statIcon3Text: "text-purple-600",
+    statIcon4Bg: "bg-amber-100",
+    statIcon4Text: "text-amber-600",
     dividerBorder: "border-slate-200",
     buttonBg: "bg-white",
     buttonBorder: "border-slate-300",
@@ -131,16 +132,16 @@ const StaffDetailsManager = () => {
     emptyStateIcon: "text-slate-500",
     statCard1Gradient: "from-slate-800 to-blue-900/30",
     statCard2Gradient: "from-slate-800 to-green-900/30",
-    statCard3Gradient: "from-slate-800 to-emerald-900/30",
-    statCard4Gradient: "from-slate-800 to-red-900/30",
+    statCard3Gradient: "from-slate-800 to-purple-900/30",
+    statCard4Gradient: "from-slate-800 to-amber-900/30",
     statIcon1Bg: "bg-blue-900/30",
     statIcon1Text: "text-blue-400",
     statIcon2Bg: "bg-green-900/30",
     statIcon2Text: "text-green-400",
-    statIcon3Bg: "bg-emerald-900/30",
-    statIcon3Text: "text-emerald-400",
-    statIcon4Bg: "bg-red-900/30",
-    statIcon4Text: "text-red-400",
+    statIcon3Bg: "bg-purple-900/30",
+    statIcon3Text: "text-purple-400",
+    statIcon4Bg: "bg-amber-900/30",
+    statIcon4Text: "text-amber-400",
     dividerBorder: "border-slate-700",
     buttonBg: "bg-slate-700",
     buttonBorder: "border-slate-600",
@@ -708,16 +709,26 @@ const StaffDetailsManager = () => {
                   >
                     College Name <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="collegeName"
                     value={formData.collegeName}
                     onChange={handleInputChange}
-                    placeholder="Enter college name"
                     disabled={viewMode}
                     required
-                    className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
-                  />
+                    className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} transition-all`}
+                  >
+                    <option value="">Select a college</option>
+                    <option value="Pimpri Chinchwad College of Engineering PCCOE">
+                      Pimpri Chinchwad College of Engineering PCCOE
+                    </option>
+                    <option value="Pimpri Chinchwad College of Engineering & Research PCCOER">
+                      Pimpri Chinchwad College of Engineering & Research PCCOER
+                    </option>
+                    <option value="Nutan Maharashtra Institute of Engineering and Technology NMIET">
+                      Nutan Maharashtra Institute of Engineering and Technology
+                      NMIET
+                    </option>
+                  </select>
                 </div>
                 {/* Department - Show only for Department Coordinators */}
                 {formData.role === "DepartmentCoordinator" && (
@@ -727,16 +738,21 @@ const StaffDetailsManager = () => {
                     >
                       Department <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
+                    <select
                       name="department"
                       value={formData.department}
                       onChange={handleInputChange}
-                      placeholder="Enter department name"
                       disabled={viewMode}
                       required
-                      className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
-                    />
+                      className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} transition-all`}
+                    >
+                      <option value="">Select a department</option>
+                      <option value="Computer">Computer</option>
+                      <option value="IT">IT</option>
+                      <option value="ENTC">ENTC</option>
+                      <option value="Mechanical">Mechanical</option>
+                      <option value="Civil">Civil</option>
+                    </select>
                   </div>
                 )}
                 {/* Phone Number */}

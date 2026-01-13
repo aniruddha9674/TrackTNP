@@ -150,7 +150,6 @@ function App() {
       <Route path="/studentdashboard" element={<StudentDash />}>
         <Route path="" element={<StudentOverview />} />
 
-
         <Route
           path="companyregistration"
           element={<CompanyRegistrationfrom />}
@@ -166,8 +165,6 @@ function App() {
         <Route path="notifications" element={<VolunteerNotifications />} />
       </Route>
     </Routes>
-
-
   );
 }
 

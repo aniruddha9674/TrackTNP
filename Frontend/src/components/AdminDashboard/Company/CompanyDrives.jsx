@@ -9,13 +9,12 @@ import {
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
 
-
 const CompanyDrivesManager = () => {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { theme } = useTheme();
 
-  // Theme configuration function
+  // Theme configuration
   const getThemeColors = () => {
     const isDark = theme === "dark";
     if (isDark) {
@@ -31,6 +30,8 @@ const CompanyDrivesManager = () => {
         modalBg: "#1D2939",
         tableBg: "#1D2939",
         tableHeaderBg: "#1D2939",
+        accent: "#3b82f6",
+        success: "#10b981",
       };
     } else {
       return {
@@ -45,6 +46,8 @@ const CompanyDrivesManager = () => {
         modalBg: "#ffffff",
         tableBg: "#ffffff",
         tableHeaderBg: "#F2F4F7",
+        accent: "#2563eb",
+        success: "#059669",
       };
     }
   };
@@ -64,7 +67,6 @@ const CompanyDrivesManager = () => {
       salary: "6.5 LPA",
       venue: "Seminar Hall",
       type: "Placement",
-      color: "#465FFF",
       totalRounds: 5,
     },
     {
@@ -77,7 +79,6 @@ const CompanyDrivesManager = () => {
       salary: "4.5 LPA",
       venue: "Main Auditorium",
       type: "Placement",
-      color: "#32D583",
       totalRounds: 3,
     },
     {
@@ -90,7 +91,6 @@ const CompanyDrivesManager = () => {
       salary: "5.0 LPA",
       venue: "Conference Hall",
       type: "Internship",
-      color: "#0BA5EC",
       totalRounds: 4,
     },
     {
@@ -103,12 +103,11 @@ const CompanyDrivesManager = () => {
       salary: "4.0 LPA",
       venue: "Lab Complex",
       type: "Placement",
-      color: "#F97066",
       totalRounds: 3,
     },
   ]);
 
-  const [students] = useState([
+  const [students, setStudents] = useState([
     {
       id: 1,
       fullName: "Soham Pachpute",
@@ -120,8 +119,7 @@ const CompanyDrivesManager = () => {
       round3: "Pass",
       round4: "Pass",
       round5: "Pass",
-      placementSelected: true,
-      internshipSelected: false,
+      selectionStatus: "none",
       company: "Incorbis",
       collegeName: "ABC Engineering College",
       branch: "Computer Science",
@@ -138,8 +136,7 @@ const CompanyDrivesManager = () => {
       round3: "Fail",
       round4: "-",
       round5: "-",
-      placementSelected: false,
-      internshipSelected: true,
+      selectionStatus: "none",
       company: "Incorbis",
       collegeName: "ABC Engineering College",
       branch: "Computer Science",
@@ -156,8 +153,7 @@ const CompanyDrivesManager = () => {
       round3: "Pass",
       round4: "Pass",
       round5: "Pass",
-      placementSelected: false,
-      internshipSelected: true,
+      selectionStatus: "none",
       company: "Incorbis",
       collegeName: "ABC Engineering College",
       branch: "Information Technology",
@@ -174,8 +170,7 @@ const CompanyDrivesManager = () => {
       round3: "Pass",
       round4: "-",
       round5: "-",
-      placementSelected: true,
-      internshipSelected: false,
+      selectionStatus: "none",
       company: "TCS",
       collegeName: "XYZ Institute of Technology",
       branch: "Mechanical",
@@ -192,8 +187,7 @@ const CompanyDrivesManager = () => {
       round3: "-",
       round4: "-",
       round5: "-",
-      placementSelected: false,
-      internshipSelected: false,
+      selectionStatus: "none",
       company: "Infosys",
       collegeName: "ABC Engineering College",
       branch: "Electronics & Telecommunication",
@@ -210,8 +204,7 @@ const CompanyDrivesManager = () => {
       round3: "Pass",
       round4: "Pass",
       round5: "-",
-      placementSelected: true,
-      internshipSelected: false,
+      selectionStatus: "none",
       company: "Incorbis",
       collegeName: "ABC Engineering College",
       branch: "Computer Science",
@@ -239,7 +232,20 @@ const CompanyDrivesManager = () => {
     alert("Exporting students to Excel...");
   };
 
-  // Check if student passed all rounds up to the company's total rounds
+  const handleSelectionToggle = (studentId) => {
+    setStudents(
+      students.map((student) => {
+        if (student.id === studentId) {
+          const statuses = ["none", "internship", "placement"];
+          const currentIndex = statuses.indexOf(student.selectionStatus);
+          const nextIndex = (currentIndex + 1) % statuses.length;
+          return { ...student, selectionStatus: statuses[nextIndex] };
+        }
+        return student;
+      })
+    );
+  };
+
   const passedAllRounds = (student, company) => {
     const totalRounds = company.totalRounds;
     for (let i = 1; i <= totalRounds; i++) {
@@ -251,7 +257,6 @@ const CompanyDrivesManager = () => {
     return true;
   };
 
-  // Filter students who made it to the final round
   const filteredStudents = selectedCompany
     ? students.filter(
         (s) =>
@@ -264,11 +269,7 @@ const CompanyDrivesManager = () => {
     : [];
 
   return (
-    <div style={{ fontFamily: "Urbanist, sans-serif" }}>
-      <style>
-        {`@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap');`}
-      </style>
-
+    <div style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
       <div
         className="min-h-screen transition-colors duration-300"
         style={{ backgroundColor: colors.background }}
@@ -391,16 +392,12 @@ const CompanyDrivesManager = () => {
                   <div
                     key={company.id}
                     onClick={() => handleCompanyClick(company)}
-                    className="rounded-2xl border shadow-lg hover:shadow-2xl transition-all cursor-pointer overflow-hidden hover:scale-105"
+                    className="rounded-xl border shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-105"
                     style={{
                       backgroundColor: colors.cardBg,
                       borderColor: colors.border,
                     }}
                   >
-                    <div
-                      className="h-2"
-                      style={{ backgroundColor: company.color }}
-                    />
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
                         <div>
@@ -422,8 +419,8 @@ const CompanyDrivesManager = () => {
                           style={{
                             backgroundColor:
                               company.registrationStatus === "Open"
-                                ? "#32D583"
-                                : "#F97066",
+                                ? colors.success
+                                : colors.textSecondary,
                             color: "#ffffff",
                           }}
                         >
@@ -471,7 +468,7 @@ const CompanyDrivesManager = () => {
                           </span>
                           <span
                             className="font-medium"
-                            style={{ color: "#32D583" }}
+                            style={{ color: colors.success }}
                           >
                             {company.totalSelected}
                           </span>
@@ -532,14 +529,15 @@ const CompanyDrivesManager = () => {
                       className="text-sm font-medium"
                       style={{ color: colors.textSecondary }}
                     >
-                      Students who cleared all {selectedCompany.totalRounds} rounds
+                      Students who cleared all {selectedCompany.totalRounds}{" "}
+                      rounds
                     </p>
                   </div>
                   <button
                     onClick={exportToExcel}
                     className="px-4 py-2 rounded-lg font-semibold transition-all hover:scale-105 flex items-center gap-2"
                     style={{
-                      backgroundColor: "#32D583",
+                      backgroundColor: colors.accent,
                       color: "#ffffff",
                     }}
                   >
@@ -639,7 +637,7 @@ const CompanyDrivesManager = () => {
                         className="p-4 text-center text-sm font-semibold"
                         style={{ color: colors.text }}
                       >
-                        Selected For
+                        Selection Status
                       </th>
                     </tr>
                   </thead>
@@ -694,25 +692,28 @@ const CompanyDrivesManager = () => {
                           {student.year}
                         </td>
                         <td className="p-4 text-center">
-                          <span
-                            className="px-3 py-1 rounded-full text-xs font-semibold inline-block"
+                          <button
+                            onClick={() => handleSelectionToggle(student.id)}
+                            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
                             style={{
-                              backgroundColor: student.placementSelected
-                                ? "#32D583"
-                                : student.internshipSelected
-                                  ? "#0BA5EC"
+                              backgroundColor:
+                                student.selectionStatus === "placement"
+                                  ? colors.success
+                                  : student.selectionStatus === "internship"
+                                  ? colors.accent
                                   : colors.border,
-                              color: student.placementSelected || student.internshipSelected
-                                ? "#ffffff"
-                                : colors.textSecondary,
+                              color:
+                                student.selectionStatus === "none"
+                                  ? colors.textSecondary
+                                  : "#ffffff",
                             }}
                           >
-                            {student.placementSelected
+                            {student.selectionStatus === "placement"
                               ? "Placement"
-                              : student.internshipSelected
-                                ? "Internship"
-                                : "Not Selected"}
-                          </span>
+                              : student.selectionStatus === "internship"
+                              ? "Internship"
+                              : "Not Selected"}
+                          </button>
                         </td>
                       </tr>
                     ))}

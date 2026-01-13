@@ -66,16 +66,27 @@ const NotificationAdmin = () => {
   });
 
   // Sample data
-  const colleges = ["College of Engineering", "College of Arts", "College of Science", "College of Commerce"];
-  const departments = ["Computer Science", "Information Technology", "Electronics", "Mechanical", "Civil", "Electrical"];
-  const years = ["First Year", "Second Year", "Third Year", "Final Year"];
+  const colleges = [
+    "Pimpri Chinchwad College of Engineering PCCOE",
+    "Pimpri Chinchwad College of Engineering & Research PCCOER",
+    "Nutan Maharashtra Institute of Engineering and Technology NMIET",
+  ];
+  const departments = [
+    "Computer Science",
+    "Information Technology",
+    "Electronics & Telecommunication",
+    "Mechanical",
+    "Civil",
+  ];
+  const years = ["Third Year", "Final Year"];
 
   // Sample notifications data
   const [notifications, setNotifications] = useState([
     {
       id: 1,
       title: "Complete Your Profile - Urgent",
-      message: "Please update your profile with latest CGPA, skills, and resume before the placement season begins.",
+      message:
+        "Please update your profile with latest CGPA, skills, and resume before the placement season begins.",
       recipientType: "students",
       targetGroup: "College of Engineering - Computer Science - Final Year",
       category: "profile",
@@ -87,7 +98,8 @@ const NotificationAdmin = () => {
     {
       id: 2,
       title: "Google Drive Scheduled - Dec 5th",
-      message: "Google is visiting campus for SDE roles. Package: 45 LPA. Eligibility: CGPA 7.5+. Register before Nov 30th.",
+      message:
+        "Google is visiting campus for SDE roles. Package: 45 LPA. Eligibility: CGPA 7.5+. Register before Nov 30th.",
       recipientType: "students",
       targetGroup: "College of Engineering - All Departments - Final Year",
       category: "placement",
@@ -99,7 +111,8 @@ const NotificationAdmin = () => {
     {
       id: 3,
       title: "Upload Offer Letters",
-      message: "Students who received job offers must upload their offer letters to the placement portal by this Friday.",
+      message:
+        "Students who received job offers must upload their offer letters to the placement portal by this Friday.",
       recipientType: "students",
       targetGroup: "All Colleges - All Departments - Final Year",
       category: "documents",
@@ -111,7 +124,8 @@ const NotificationAdmin = () => {
     {
       id: 4,
       title: "Coordinator Meeting - December",
-      message: "Monthly coordinator meeting scheduled for discussion on upcoming placement activities.",
+      message:
+        "Monthly coordinator meeting scheduled for discussion on upcoming placement activities.",
       recipientType: "college coordinators",
       targetGroup: "College of Engineering",
       category: "meeting",
@@ -237,11 +251,23 @@ const NotificationAdmin = () => {
   // Calculate statistics
   const stats = useMemo(() => {
     const totalNotifications = notifications.length;
-    const sentNotifications = notifications.filter((n) => n.status === "sent").length;
-    const scheduledNotifications = notifications.filter((n) => n.status === "scheduled").length;
-    const totalRecipients = notifications.reduce((sum, n) => sum + n.recipientCount, 0);
+    const sentNotifications = notifications.filter(
+      (n) => n.status === "sent"
+    ).length;
+    const scheduledNotifications = notifications.filter(
+      (n) => n.status === "scheduled"
+    ).length;
+    const totalRecipients = notifications.reduce(
+      (sum, n) => sum + n.recipientCount,
+      0
+    );
 
-    return { totalNotifications, sentNotifications, scheduledNotifications, totalRecipients };
+    return {
+      totalNotifications,
+      sentNotifications,
+      scheduledNotifications,
+      totalRecipients,
+    };
   }, [notifications]);
 
   // Filter notifications
@@ -311,8 +337,14 @@ const NotificationAdmin = () => {
 
     // Validate based on recipient type
     if (notificationForm.recipientType === "students") {
-      if (!notificationForm.college && !notificationForm.department && !notificationForm.year) {
-        alert("Please select at least one target criterion (College, Department, or Year)");
+      if (
+        !notificationForm.college &&
+        !notificationForm.department &&
+        !notificationForm.year
+      ) {
+        alert(
+          "Please select at least one target criterion (College, Department, or Year)"
+        );
         return;
       }
     } else if (notificationForm.recipientType === "college coordinators") {
@@ -401,10 +433,14 @@ const NotificationAdmin = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className={`text-2xl sm:text-3xl font-bold ${themeStyles.textPrimary}`}>
+            <h1
+              className={`text-2xl sm:text-3xl font-bold ${themeStyles.textPrimary}`}
+            >
               Notification Management
             </h1>
-            <p className={`mt-2 text-sm sm:text-base ${themeStyles.textSecondary}`}>
+            <p
+              className={`mt-2 text-sm sm:text-base ${themeStyles.textSecondary}`}
+            >
               Send and manage notifications to students, staff, and volunteers
             </p>
           </div>
@@ -427,15 +463,23 @@ const NotificationAdmin = () => {
             <div className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className={`text-xs sm:text-sm font-semibold ${themeStyles.textSecondary} uppercase tracking-wide`}>
+                  <p
+                    className={`text-xs sm:text-sm font-semibold ${themeStyles.textSecondary} uppercase tracking-wide`}
+                  >
                     Total Notifications
                   </p>
-                  <h3 className={`text-xl sm:text-3xl font-bold ${themeStyles.textPrimary} mt-1 sm:mt-2`}>
+                  <h3
+                    className={`text-xl sm:text-3xl font-bold ${themeStyles.textPrimary} mt-1 sm:mt-2`}
+                  >
                     {stats.totalNotifications}
                   </h3>
                 </div>
-                <div className={`h-8 w-8 sm:h-12 sm:w-12 ${themeStyles.statIcon1Bg} rounded-xl flex items-center justify-center`}>
-                  <Bell className={`h-4 w-4 sm:h-6 sm:w-6 ${themeStyles.statIcon1Text}`} />
+                <div
+                  className={`h-8 w-8 sm:h-12 sm:w-12 ${themeStyles.statIcon1Bg} rounded-xl flex items-center justify-center`}
+                >
+                  <Bell
+                    className={`h-4 w-4 sm:h-6 sm:w-6 ${themeStyles.statIcon1Text}`}
+                  />
                 </div>
               </div>
             </div>
@@ -447,15 +491,23 @@ const NotificationAdmin = () => {
             <div className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className={`text-xs sm:text-sm font-semibold ${themeStyles.textSecondary} uppercase tracking-wide`}>
+                  <p
+                    className={`text-xs sm:text-sm font-semibold ${themeStyles.textSecondary} uppercase tracking-wide`}
+                  >
                     Sent
                   </p>
-                  <h3 className={`text-xl sm:text-3xl font-bold ${themeStyles.textPrimary} mt-1 sm:mt-2`}>
+                  <h3
+                    className={`text-xl sm:text-3xl font-bold ${themeStyles.textPrimary} mt-1 sm:mt-2`}
+                  >
                     {stats.sentNotifications}
                   </h3>
                 </div>
-                <div className={`h-8 w-8 sm:h-12 sm:w-12 ${themeStyles.statIcon2Bg} rounded-xl flex items-center justify-center`}>
-                  <CheckCircle2 className={`h-4 w-4 sm:h-6 sm:w-6 ${themeStyles.statIcon2Text}`} />
+                <div
+                  className={`h-8 w-8 sm:h-12 sm:w-12 ${themeStyles.statIcon2Bg} rounded-xl flex items-center justify-center`}
+                >
+                  <CheckCircle2
+                    className={`h-4 w-4 sm:h-6 sm:w-6 ${themeStyles.statIcon2Text}`}
+                  />
                 </div>
               </div>
             </div>
@@ -467,15 +519,23 @@ const NotificationAdmin = () => {
             <div className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className={`text-xs sm:text-sm font-semibold ${themeStyles.textSecondary} uppercase tracking-wide`}>
+                  <p
+                    className={`text-xs sm:text-sm font-semibold ${themeStyles.textSecondary} uppercase tracking-wide`}
+                  >
                     Scheduled
                   </p>
-                  <h3 className={`text-xl sm:text-3xl font-bold ${themeStyles.textPrimary} mt-1 sm:mt-2`}>
+                  <h3
+                    className={`text-xl sm:text-3xl font-bold ${themeStyles.textPrimary} mt-1 sm:mt-2`}
+                  >
                     {stats.scheduledNotifications}
                   </h3>
                 </div>
-                <div className={`h-8 w-8 sm:h-12 sm:w-12 ${themeStyles.statIcon3Bg} rounded-xl flex items-center justify-center`}>
-                  <Clock className={`h-4 w-4 sm:h-6 sm:w-6 ${themeStyles.statIcon3Text}`} />
+                <div
+                  className={`h-8 w-8 sm:h-12 sm:w-12 ${themeStyles.statIcon3Bg} rounded-xl flex items-center justify-center`}
+                >
+                  <Clock
+                    className={`h-4 w-4 sm:h-6 sm:w-6 ${themeStyles.statIcon3Text}`}
+                  />
                 </div>
               </div>
             </div>
@@ -487,15 +547,23 @@ const NotificationAdmin = () => {
             <div className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className={`text-xs sm:text-sm font-semibold ${themeStyles.textSecondary} uppercase tracking-wide`}>
+                  <p
+                    className={`text-xs sm:text-sm font-semibold ${themeStyles.textSecondary} uppercase tracking-wide`}
+                  >
                     Total Recipients
                   </p>
-                  <h3 className={`text-xl sm:text-3xl font-bold ${themeStyles.textPrimary} mt-1 sm:mt-2`}>
+                  <h3
+                    className={`text-xl sm:text-3xl font-bold ${themeStyles.textPrimary} mt-1 sm:mt-2`}
+                  >
                     {stats.totalRecipients}
                   </h3>
                 </div>
-                <div className={`h-8 w-8 sm:h-12 sm:w-12 ${themeStyles.statIcon4Bg} rounded-xl flex items-center justify-center`}>
-                  <Users className={`h-4 w-4 sm:h-6 sm:w-6 ${themeStyles.statIcon4Text}`} />
+                <div
+                  className={`h-8 w-8 sm:h-12 sm:w-12 ${themeStyles.statIcon4Bg} rounded-xl flex items-center justify-center`}
+                >
+                  <Users
+                    className={`h-4 w-4 sm:h-6 sm:w-6 ${themeStyles.statIcon4Text}`}
+                  />
                 </div>
               </div>
             </div>
@@ -503,11 +571,15 @@ const NotificationAdmin = () => {
         </div>
 
         {/* Search and Filter */}
-        <div className={`rounded-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow}`}>
+        <div
+          className={`rounded-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow}`}
+        >
           <div className="p-4">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
-                <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${themeStyles.textTertiary} h-4 w-4`} />
+                <Search
+                  className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${themeStyles.textTertiary} h-4 w-4`}
+                />
                 <input
                   type="text"
                   placeholder="Search notifications..."
@@ -533,8 +605,12 @@ const NotificationAdmin = () => {
                 >
                   <option value="all">All Recipients</option>
                   <option value="students">Students</option>
-                  <option value="college coordinators">College Coordinators</option>
-                  <option value="department coordinators">Department Coordinators</option>
+                  <option value="college coordinators">
+                    College Coordinators
+                  </option>
+                  <option value="department coordinators">
+                    Department Coordinators
+                  </option>
                   <option value="volunteers">Volunteers</option>
                 </select>
               </div>
@@ -543,10 +619,14 @@ const NotificationAdmin = () => {
         </div>
 
         {/* Notifications List */}
-        <div className={`rounded-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow}`}>
+        <div
+          className={`rounded-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow}`}
+        >
           <div className="p-4 sm:p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className={`text-lg sm:text-xl font-bold ${themeStyles.textPrimary}`}>
+              <h2
+                className={`text-lg sm:text-xl font-bold ${themeStyles.textPrimary}`}
+              >
                 Recent Notifications
               </h2>
               <span className={`text-sm ${themeStyles.textSecondary}`}>
@@ -557,10 +637,16 @@ const NotificationAdmin = () => {
             <div className="space-y-4">
               {filteredNotifications.map((notification) => {
                 const CategoryIcon = getCategoryIcon(notification.category);
-                const RecipientIcon = getRecipientIcon(notification.recipientType);
-                const readPercentage = notification.status === "sent"
-                  ? Math.round((notification.readCount / notification.recipientCount) * 100)
-                  : 0;
+                const RecipientIcon = getRecipientIcon(
+                  notification.recipientType
+                );
+                const readPercentage =
+                  notification.status === "sent"
+                    ? Math.round(
+                        (notification.readCount / notification.recipientCount) *
+                          100
+                      )
+                    : 0;
 
                 return (
                   <div
@@ -568,38 +654,59 @@ const NotificationAdmin = () => {
                     className={`border ${themeStyles.notificationCardBorder} rounded-2xl p-4 sm:p-6 ${themeStyles.cardHoverShadow} transition-all duration-200 ${themeStyles.notificationCardBg} ${themeStyles.notificationCardHover}`}
                   >
                     <div className="flex items-start gap-4">
-                      <div className={`h-12 w-12 bg-gradient-to-br ${themeStyles.iconGradient} rounded-xl flex items-center justify-center shadow-sm flex-shrink-0`}>
-                        <CategoryIcon className={`h-6 w-6 ${themeStyles.statIcon1Text}`} />
+                      <div
+                        className={`h-12 w-12 bg-gradient-to-br ${themeStyles.iconGradient} rounded-xl flex items-center justify-center shadow-sm flex-shrink-0`}
+                      >
+                        <CategoryIcon
+                          className={`h-6 w-6 ${themeStyles.statIcon1Text}`}
+                        />
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                           <div className="flex-1 min-w-0">
-                            <h3 className={`text-lg font-bold ${themeStyles.textPrimary} mb-1`}>
+                            <h3
+                              className={`text-lg font-bold ${themeStyles.textPrimary} mb-1`}
+                            >
                               {notification.title}
                             </h3>
-                            <p className={`${themeStyles.textSecondary} text-sm line-clamp-2`}>
+                            <p
+                              className={`${themeStyles.textSecondary} text-sm line-clamp-2`}
+                            >
                               {notification.message}
                             </p>
                           </div>
                           <div className="flex gap-2">
                             <button
-                              onClick={() => handleDeleteNotification(notification.id)}
+                              onClick={() =>
+                                handleDeleteNotification(notification.id)
+                              }
                               className={`p-2 rounded-lg ${themeStyles.buttonBg} border ${themeStyles.buttonBorder} ${themeStyles.buttonHover} transition-colors`}
                             >
-                              <Trash2 className={`h-4 w-4 ${themeStyles.textSecondary}`} />
+                              <Trash2
+                                className={`h-4 w-4 ${themeStyles.textSecondary}`}
+                              />
                             </button>
                           </div>
                         </div>
 
                         <div className="flex flex-wrap gap-2 mb-4">
                           <Badge
-                            variant={notification.status === "sent" ? "success" : "warning"}
+                            variant={
+                              notification.status === "sent"
+                                ? "success"
+                                : "warning"
+                            }
                             className="text-xs"
                           >
-                            {notification.status === "sent" ? "✓ Sent" : "⏰ Scheduled"}
+                            {notification.status === "sent"
+                              ? "✓ Sent"
+                              : "⏰ Scheduled"}
                           </Badge>
-                          <Badge variant="default" className="text-xs flex items-center gap-1">
+                          <Badge
+                            variant="default"
+                            className="text-xs flex items-center gap-1"
+                          >
                             <RecipientIcon className="h-3 w-3" />
                             {notification.recipientType}
                           </Badge>
@@ -610,22 +717,29 @@ const NotificationAdmin = () => {
 
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm">
                           <div className="flex items-center gap-2">
-                            <Clock className={`h-4 w-4 ${themeStyles.textTertiary}`} />
+                            <Clock
+                              className={`h-4 w-4 ${themeStyles.textTertiary}`}
+                            />
                             <span className={themeStyles.textSecondary}>
                               {formatDateTime(notification.sentAt)}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Users className={`h-4 w-4 ${themeStyles.textTertiary}`} />
+                            <Users
+                              className={`h-4 w-4 ${themeStyles.textTertiary}`}
+                            />
                             <span className={themeStyles.textSecondary}>
                               {notification.recipientCount} recipients
                             </span>
                           </div>
                           {notification.status === "sent" && (
                             <div className="flex items-center gap-2">
-                              <Eye className={`h-4 w-4 ${themeStyles.textTertiary}`} />
+                              <Eye
+                                className={`h-4 w-4 ${themeStyles.textTertiary}`}
+                              />
                               <span className={themeStyles.textSecondary}>
-                                {notification.readCount} read ({readPercentage}%)
+                                {notification.readCount} read ({readPercentage}
+                                %)
                               </span>
                             </div>
                           )}
@@ -638,9 +752,15 @@ const NotificationAdmin = () => {
             </div>
 
             {filteredNotifications.length === 0 && (
-              <div className={`text-center py-12 ${themeStyles.emptyStateBg} rounded-2xl`}>
-                <Bell className={`h-12 w-12 ${themeStyles.emptyStateIcon} mx-auto mb-4`} />
-                <h3 className={`text-lg font-semibold ${themeStyles.textPrimary} mb-2`}>
+              <div
+                className={`text-center py-12 ${themeStyles.emptyStateBg} rounded-2xl`}
+              >
+                <Bell
+                  className={`h-12 w-12 ${themeStyles.emptyStateIcon} mx-auto mb-4`}
+                />
+                <h3
+                  className={`text-lg font-semibold ${themeStyles.textPrimary} mb-2`}
+                >
                   No notifications found
                 </h3>
                 <p className={themeStyles.textSecondary}>
@@ -654,9 +774,15 @@ const NotificationAdmin = () => {
 
       {/* Create Notification Modal */}
       {showCreateModal && (
-        <div className={`fixed inset-0 ${themeStyles.modalOverlay} flex items-center justify-center p-4 z-50`}>
-          <div className={`${themeStyles.modalBg} rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto`}>
-            <div className={`sticky top-0 ${themeStyles.modalHeader} border-b ${themeStyles.modalHeaderBorder} px-6 py-4 flex items-center justify-between`}>
+        <div
+          className={`fixed inset-0 ${themeStyles.modalOverlay} flex items-center justify-center p-4 z-50`}
+        >
+          <div
+            className={`${themeStyles.modalBg} rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto`}
+          >
+            <div
+              className={`sticky top-0 ${themeStyles.modalHeader} border-b ${themeStyles.modalHeaderBorder} px-6 py-4 flex items-center justify-between`}
+            >
               <h2 className={`text-xl font-bold ${themeStyles.textPrimary}`}>
                 Create New Notification
               </h2>
@@ -671,13 +797,20 @@ const NotificationAdmin = () => {
             <div className="p-6 space-y-6">
               {/* Title */}
               <div>
-                <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                <label
+                  className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
+                >
                   Notification Title *
                 </label>
                 <input
                   type="text"
                   value={notificationForm.title}
-                  onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })}
+                  onChange={(e) =>
+                    setNotificationForm({
+                      ...notificationForm,
+                      title: e.target.value,
+                    })
+                  }
                   placeholder="Enter notification title"
                   className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
                 />
@@ -685,12 +818,19 @@ const NotificationAdmin = () => {
 
               {/* Message */}
               <div>
-                <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                <label
+                  className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
+                >
                   Message *
                 </label>
                 <textarea
                   value={notificationForm.message}
-                  onChange={(e) => setNotificationForm({ ...notificationForm, message: e.target.value })}
+                  onChange={(e) =>
+                    setNotificationForm({
+                      ...notificationForm,
+                      message: e.target.value,
+                    })
+                  }
                   placeholder="Enter notification message"
                   rows="4"
                   className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 resize-none`}
@@ -699,7 +839,9 @@ const NotificationAdmin = () => {
 
               {/* Recipient Type */}
               <div>
-                <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                <label
+                  className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
+                >
                   Recipient Type *
                 </label>
                 <select
@@ -709,8 +851,12 @@ const NotificationAdmin = () => {
                 >
                   <option value="students">Students</option>
                   <option value="volunteers">Volunteers</option>
-                  <option value="college coordinators">College Coordinators</option>
-                  <option value="department coordinators">Department Coordinators</option>
+                  <option value="college coordinators">
+                    College Coordinators
+                  </option>
+                  <option value="department coordinators">
+                    Department Coordinators
+                  </option>
                 </select>
               </div>
 
@@ -718,49 +864,76 @@ const NotificationAdmin = () => {
               {notificationForm.recipientType === "students" && (
                 <div className="space-y-4">
                   <div>
-                    <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                    <label
+                      className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
+                    >
                       College (Optional)
                     </label>
                     <select
                       value={notificationForm.college}
-                      onChange={(e) => setNotificationForm({ ...notificationForm, college: e.target.value })}
+                      onChange={(e) =>
+                        setNotificationForm({
+                          ...notificationForm,
+                          college: e.target.value,
+                        })
+                      }
                       className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
                     >
                       <option value="">All Colleges</option>
                       {colleges.map((college) => (
-                        <option key={college} value={college}>{college}</option>
+                        <option key={college} value={college}>
+                          {college}
+                        </option>
                       ))}
                     </select>
                   </div>
 
                   <div>
-                    <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                    <label
+                      className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
+                    >
                       Department (Optional)
                     </label>
                     <select
                       value={notificationForm.department}
-                      onChange={(e) => setNotificationForm({ ...notificationForm, department: e.target.value })}
+                      onChange={(e) =>
+                        setNotificationForm({
+                          ...notificationForm,
+                          department: e.target.value,
+                        })
+                      }
                       className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
                     >
                       <option value="">All Departments</option>
                       {departments.map((dept) => (
-                        <option key={dept} value={dept}>{dept}</option>
+                        <option key={dept} value={dept}>
+                          {dept}
+                        </option>
                       ))}
                     </select>
                   </div>
 
                   <div>
-                    <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                    <label
+                      className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
+                    >
                       Year (Optional)
                     </label>
                     <select
                       value={notificationForm.year}
-                      onChange={(e) => setNotificationForm({ ...notificationForm, year: e.target.value })}
+                      onChange={(e) =>
+                        setNotificationForm({
+                          ...notificationForm,
+                          year: e.target.value,
+                        })
+                      }
                       className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
                     >
                       <option value="">All Years</option>
                       {years.map((year) => (
-                        <option key={year} value={year}>{year}</option>
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -769,17 +942,26 @@ const NotificationAdmin = () => {
 
               {notificationForm.recipientType === "college coordinators" && (
                 <div>
-                  <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                  <label
+                    className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
+                  >
                     College *
                   </label>
                   <select
                     value={notificationForm.college}
-                    onChange={(e) => setNotificationForm({ ...notificationForm, college: e.target.value })}
+                    onChange={(e) =>
+                      setNotificationForm({
+                        ...notificationForm,
+                        college: e.target.value,
+                      })
+                    }
                     className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
                   >
                     <option value="">Select College</option>
                     {colleges.map((college) => (
-                      <option key={college} value={college}>{college}</option>
+                      <option key={college} value={college}>
+                        {college}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -788,33 +970,51 @@ const NotificationAdmin = () => {
               {notificationForm.recipientType === "department coordinators" && (
                 <div className="space-y-4">
                   <div>
-                    <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                    <label
+                      className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
+                    >
                       College *
                     </label>
                     <select
                       value={notificationForm.college}
-                      onChange={(e) => setNotificationForm({ ...notificationForm, college: e.target.value })}
+                      onChange={(e) =>
+                        setNotificationForm({
+                          ...notificationForm,
+                          college: e.target.value,
+                        })
+                      }
                       className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
                     >
                       <option value="">Select College</option>
                       {colleges.map((college) => (
-                        <option key={college} value={college}>{college}</option>
+                        <option key={college} value={college}>
+                          {college}
+                        </option>
                       ))}
                     </select>
                   </div>
 
                   <div>
-                    <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                    <label
+                      className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
+                    >
                       Department *
                     </label>
                     <select
                       value={notificationForm.department}
-                      onChange={(e) => setNotificationForm({ ...notificationForm, department: e.target.value })}
+                      onChange={(e) =>
+                        setNotificationForm({
+                          ...notificationForm,
+                          department: e.target.value,
+                        })
+                      }
                       className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
                     >
                       <option value="">Select Department</option>
                       {departments.map((dept) => (
-                        <option key={dept} value={dept}>{dept}</option>
+                        <option key={dept} value={dept}>
+                          {dept}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -831,12 +1031,19 @@ const NotificationAdmin = () => {
 
               {/* Category */}
               <div>
-                <label className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}>
+                <label
+                  className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
+                >
                   Category
                 </label>
                 <select
                   value={notificationForm.category}
-                  onChange={(e) => setNotificationForm({ ...notificationForm, category: e.target.value })}
+                  onChange={(e) =>
+                    setNotificationForm({
+                      ...notificationForm,
+                      category: e.target.value,
+                    })
+                  }
                   className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
                 >
                   <option value="general">General</option>
