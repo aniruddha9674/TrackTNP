@@ -12,22 +12,20 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import os
 from dotenv import load_dotenv
-load_dotenv()
 
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^%taruqfc(_d7*-ooqknomnltp(l$*+4k9(l*t8izxrg=q90a+'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = []
 
@@ -44,6 +42,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'api.apps.ApiConfig',
 ]
+
+AUTH_USER_MODEL = 'api.User'
 
 CORS_ALLOWED_ALL_ORIGINS = True
 
@@ -84,11 +84,11 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'TrackTNP',
-        'USER': 'postgres',
-        'PASSWORD': 'Ssp@3705',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 

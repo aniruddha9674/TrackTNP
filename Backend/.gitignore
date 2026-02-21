@@ -1,4 +1,7 @@
-venv
+.env
+__pycache__/
+venv/
+db.sqlite3
 # Node modules
 node_modules/
 # Logs
