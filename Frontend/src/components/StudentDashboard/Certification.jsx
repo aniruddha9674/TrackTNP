@@ -209,11 +209,15 @@ const CertificationManager = () => {
   };
 
   return (
-    <div className={`min-h-screen ${themeStyles.background} p-6`}>
+    // ── MOBILE: reduced outer padding (p-4 → md:p-6) ──
+    <div className={`min-h-screen ${themeStyles.background} p-4 md:p-6`}>
       <div className="max-w-full mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
+
+        {/* Header
+            MOBILE: wrap to two rows when screen is narrow;
+            gap-3 keeps button from touching the title */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className={`text-2xl md:text-3xl font-bold ${themeStyles.textPrimary}`}>
             Certification
           </h1>
           <button
@@ -221,15 +225,15 @@ const CertificationManager = () => {
               resetForm();
               setShowModal(true);
             }}
-            className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-700 font-medium transition-all shadow-lg"
+            className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-700 font-medium transition-all shadow-lg whitespace-nowrap"
           >
             <Plus size={20} className="mr-2" />
             Add Certification
           </button>
         </div>
 
-        {/* Summary Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Summary Statistics — already grid-responsive */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {[
             {
               icon: Award,
@@ -274,7 +278,7 @@ const CertificationManager = () => {
           ].map((stat, idx) => (
             <div
               key={idx}
-              className={`bg-gradient-to-br ${stat.bgColor} ${themeStyles.cardBorder} border ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} p-6 rounded-xl transition-all`}
+              className={`bg-gradient-to-br ${stat.bgColor} ${themeStyles.cardBorder} border ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} p-5 md:p-6 rounded-xl transition-all`}
             >
               <div className="flex items-center justify-between mb-4">
                 <div
@@ -286,7 +290,8 @@ const CertificationManager = () => {
               <div className={`text-sm ${themeStyles.textSecondary} mb-1`}>
                 {stat.label}
               </div>
-              <div className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
+              {/* MOBILE: scale down the large number slightly */}
+              <div className={`text-2xl md:text-3xl font-bold ${themeStyles.textPrimary}`}>
                 {stat.value}
               </div>
               <div className={`text-xs ${themeStyles.textTertiary} mt-1`}>
@@ -302,11 +307,11 @@ const CertificationManager = () => {
 
         {/* Certification Cards */}
         <div
-          className={`${themeStyles.cardBg} ${themeStyles.cardBorder} border ${themeStyles.cardShadow} rounded-xl p-6`}
+          className={`${themeStyles.cardBg} ${themeStyles.cardBorder} border ${themeStyles.cardShadow} rounded-xl p-4 md:p-6`}
         >
           {certifications.length === 0 ? (
             <div
-              className={`${themeStyles.emptyStateBg} ${themeStyles.cardBorder}   rounded-xl p-12 text-center`}
+              className={`${themeStyles.emptyStateBg} ${themeStyles.cardBorder} rounded-xl p-8 md:p-12 text-center`}
             >
               <Award
                 className={`${themeStyles.emptyStateIcon} mx-auto mb-4`}
@@ -333,16 +338,17 @@ const CertificationManager = () => {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {certifications.map((certification) => (
                 <div
                   key={certification.id}
-                  className={`${themeStyles.cardBg} ${themeStyles.cardBorder} border ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} rounded-xl p-6 transition-all`}
+                  className={`${themeStyles.cardBg} ${themeStyles.cardBorder} border ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} rounded-xl p-5 md:p-6 transition-all`}
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
+                      {/* MOBILE: allow title to wrap gracefully */}
                       <h3
-                        className={`text-lg font-bold ${themeStyles.textPrimary} mb-2`}
+                        className={`text-base md:text-lg font-bold ${themeStyles.textPrimary} mb-2 break-words`}
                       >
                         {certification.certificationName}
                       </h3>
@@ -359,13 +365,14 @@ const CertificationManager = () => {
                     <div className="flex items-center">
                       <BookOpen
                         size={16}
-                        className={`${themeStyles.textSecondary} mr-2`}
+                        className={`${themeStyles.textSecondary} mr-2 shrink-0`}
                       />
                       <span className={`text-sm ${themeStyles.textSecondary}`}>
                         Platform
                       </span>
+                      {/* MOBILE: truncate long platform names */}
                       <span
-                        className={`text-sm ${themeStyles.textPrimary} ml-auto font-medium`}
+                        className={`text-sm ${themeStyles.textPrimary} ml-auto font-medium truncate max-w-[120px] md:max-w-none text-right`}
                       >
                         {certification.platform}
                       </span>
@@ -373,7 +380,7 @@ const CertificationManager = () => {
                     <div className="flex items-center">
                       <Clock
                         size={16}
-                        className={`${themeStyles.textSecondary} mr-2`}
+                        className={`${themeStyles.textSecondary} mr-2 shrink-0`}
                       />
                       <span className={`text-sm ${themeStyles.textSecondary}`}>
                         Duration: {certification.duration} weeks
@@ -393,24 +400,25 @@ const CertificationManager = () => {
                     </div>
                   )}
 
+                  {/* MOBILE: ensure action buttons don't shrink too much */}
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleView(certification)}
-                      className={`flex-1 inline-flex items-center justify-center px-3 py-2 text-sm rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
+                      className={`flex-1 inline-flex items-center justify-center px-2 md:px-3 py-2 text-sm rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
                     >
-                      <Eye size={16} className="mr-1" />
-                      View
+                      <Eye size={16} className="mr-1 shrink-0" />
+                      <span className="truncate">View</span>
                     </button>
                     <button
                       onClick={() => handleEdit(certification)}
-                      className={`flex-1 inline-flex items-center justify-center px-3 py-2 text-sm rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
+                      className={`flex-1 inline-flex items-center justify-center px-2 md:px-3 py-2 text-sm rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
                     >
-                      <Edit2 size={16} className="mr-1" />
-                      Edit
+                      <Edit2 size={16} className="mr-1 shrink-0" />
+                      <span className="truncate">Edit</span>
                     </button>
                     <button
                       onClick={() => handleDelete(certification.id)}
-                      className="p-2 rounded-lg border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                      className="p-2 rounded-lg border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0"
                       title="Delete"
                     >
                       <Trash2 size={16} />
@@ -422,7 +430,7 @@ const CertificationManager = () => {
           )}
         </div>
 
-        {/* Modal */}
+        {/* Add / Edit / View Modal */}
         {showModal && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
             <div
@@ -433,14 +441,15 @@ const CertificationManager = () => {
               }}
             />
 
-            <div className="flex min-h-full items-center justify-center p-4">
+            {/* MOBILE: tighter outer padding (p-3) so modal has more breathing room */}
+            <div className="flex min-h-full items-center justify-center p-3 md:p-4">
               <div
                 className={`relative ${themeStyles.cardBg} ${themeStyles.cardBorder} border rounded-2xl shadow-2xl w-full max-w-2xl`}
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* HEADER */}
+                {/* HEADER — reduced padding on mobile */}
                 <div
-                  className={`flex items-center justify-between p-6 border-b ${themeStyles.modalHeaderBorder}`}
+                  className={`flex items-center justify-between p-4 md:p-6 border-b ${themeStyles.modalHeaderBorder}`}
                 >
                   {viewMode && (
                     <button
@@ -454,13 +463,13 @@ const CertificationManager = () => {
                     </button>
                   )}
                   <h2
-                    className={`text-2xl font-bold ${themeStyles.textPrimary}`}
+                    className={`text-xl md:text-2xl font-bold ${themeStyles.textPrimary}`}
                   >
                     {viewMode
                       ? "Certification Details"
                       : editingId
-                      ? "Edit Certification"
-                      : "Add New Certification"}
+                        ? "Edit Certification"
+                        : "Add New Certification"}
                   </h2>
                   <button
                     onClick={() => {
@@ -473,8 +482,8 @@ const CertificationManager = () => {
                   </button>
                 </div>
 
-                {/* BODY */}
-                <div className="p-6 space-y-6">
+                {/* BODY — tighter spacing on mobile */}
+                <div className="p-4 md:p-6 space-y-4 md:space-y-6">
                   {/* Certification Name */}
                   <div>
                     <label
@@ -562,9 +571,9 @@ const CertificationManager = () => {
                   </div>
                 </div>
 
-                {/* Buttons */}
+                {/* Buttons — reduced padding on mobile */}
                 {!viewMode && (
-                  <div className="flex gap-3 p-6 ">
+                  <div className="flex gap-3 p-4 md:p-6">
                     <button
                       onClick={() => {
                         setShowModal(false);
@@ -589,7 +598,7 @@ const CertificationManager = () => {
 
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-4">
             <div
               className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm`}
               onClick={() => {
@@ -602,9 +611,9 @@ const CertificationManager = () => {
               className={`relative ${themeStyles.cardBg} ${themeStyles.cardBorder} border rounded-2xl shadow-2xl w-full max-w-lg`}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between p-6 pb-4">
+              <div className="flex items-center justify-between p-4 md:p-6 pb-4">
                 <h2
-                  className={`text-2xl font-semibold ${themeStyles.textPrimary}`}
+                  className={`text-xl md:text-2xl font-semibold ${themeStyles.textPrimary}`}
                 >
                   Confirm Deletion
                 </h2>
@@ -619,27 +628,28 @@ const CertificationManager = () => {
                 </button>
               </div>
 
-              <div className="px-6 pb-6">
+              <div className="px-4 md:px-6 pb-4 md:pb-6">
                 <p
-                  className={`${themeStyles.textSecondary} mb-8 text-base leading-relaxed`}
+                  className={`${themeStyles.textSecondary} mb-6 md:mb-8 text-base leading-relaxed`}
                 >
                   Are you sure you want to delete this certification? This
                   action cannot be undone.
                 </p>
 
-                <div className="flex justify-end gap-3">
+                {/* MOBILE: full-width stacked buttons on very small screens */}
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                   <button
                     onClick={() => {
                       setShowDeleteConfirm(false);
                       setDeleteId(null);
                     }}
-                    className={`px-6 py-2.5 rounded-lg ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
+                    className={`w-full sm:w-auto px-6 py-2.5 rounded-lg ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={confirmDelete}
-                    className="px-6 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium transition-all"
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium transition-all"
                   >
                     Delete
                   </button>

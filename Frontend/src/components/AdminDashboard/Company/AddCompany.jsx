@@ -97,6 +97,94 @@ const getDarkTheme = () => ({
   tableBorder: "border-gray-700",
 });
 
+// ─── Sub-components defined OUTSIDE CompanyManager ───────────────────────────
+// Defining them inside would create a new component type on every render,
+// causing React to unmount/remount the input on each keystroke → focus lost.
+
+const FormSection = ({ title, children, themeStyles }) => (
+  <div className={`p-6 rounded-xl ${themeStyles.sectionBg} space-y-4`}>
+    <h3 className={`text-lg font-semibold ${themeStyles.textPrimary} mb-4`}>
+      {title}
+    </h3>
+    {children}
+  </div>
+);
+
+const InputField = ({
+  label,
+  name,
+  type = "text",
+  required = false,
+  placeholder = "",
+  formData,
+  handleInputChange,
+  viewMode,
+  themeStyles,
+  ...props
+}) => (
+  <div className="space-y-2">
+    <label className={`block text-sm font-medium ${themeStyles.textPrimary}`}>
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    {type === "textarea" ? (
+      <textarea
+        name={name}
+        value={formData[name] ?? ""}
+        onChange={handleInputChange}
+        placeholder={placeholder}
+        disabled={viewMode}
+        className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all resize-none`}
+        rows={4}
+        {...props}
+      />
+    ) : (
+      <input
+        type={type}
+        name={name}
+        value={formData[name] ?? ""}
+        onChange={handleInputChange}
+        placeholder={placeholder}
+        disabled={viewMode}
+        className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
+        {...props}
+      />
+    )}
+  </div>
+);
+
+const SelectField = ({
+  label,
+  name,
+  options,
+  required = false,
+  placeholder = "Select...",
+  formData,
+  handleInputChange,
+  viewMode,
+  themeStyles,
+}) => (
+  <div className="space-y-2">
+    <label className={`block text-sm font-medium ${themeStyles.textPrimary}`}>
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <select
+      name={name}
+      value={formData[name] ?? ""}
+      onChange={handleInputChange}
+      disabled={viewMode}
+      className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} transition-all`}
+    >
+      <option value="">{placeholder}</option>
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  </div>
+);
+// ─────────────────────────────────────────────────────────────────────────────
+
 const CompanyManager = () => {
   const { theme } = useTheme();
   const [companies, setCompanies] = useState([]);
@@ -200,6 +288,9 @@ const CompanyManager = () => {
 
   const themeStyles = theme === "dark" ? getDarkTheme() : getLightTheme();
 
+  // Shared props passed down to every InputField / SelectField
+  const fieldProps = { formData, handleInputChange, viewMode, themeStyles };
+
   const stats = useMemo(() => {
     const total = companies.length;
     const openDrives = companies.filter(
@@ -295,11 +386,9 @@ const CompanyManager = () => {
     setViewMode(false);
   };
 
-  const handleInputChange = (e) => {
+  function handleInputChange(e) {
     const { name, value, type, checked } = e.target;
-
     if (type === "checkbox") {
-      // Handle checkbox arrays
       setFormData((prev) => {
         const currentArray = prev[name] || [];
         return {
@@ -310,13 +399,9 @@ const CompanyManager = () => {
         };
       });
     } else {
-      // Handle all other inputs (text, number, textarea, select, etc.)
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
-  };
+  }
 
   const handleSubmit = (action = "save") => {
     if (editingId !== null) {
@@ -341,9 +426,8 @@ const CompanyManager = () => {
       resetForm();
     } else if (action === "saveAndAdd") {
       resetForm();
-    } else if (action === "saveAndContinue") {
-      // Keep modal open and editing state - don't reset
     }
+    // "saveAndContinue" — keep modal open, keep editing state
   };
 
   const handleEdit = (company) => {
@@ -384,81 +468,6 @@ const CompanyManager = () => {
   const removeFileInput = (id) => {
     setAdditionalFiles((prev) => prev.filter((file) => file.id !== id));
   };
-
-  const FormSection = ({ title, children }) => (
-    <div className={`p-6 rounded-xl ${themeStyles.sectionBg} space-y-4`}>
-      <h3 className={`text-lg font-semibold ${themeStyles.textPrimary} mb-4`}>
-        {title}
-      </h3>
-      {children}
-    </div>
-  );
-
-  const InputField = ({
-    label,
-    name,
-    type = "text",
-    required = false,
-    placeholder = "",
-    ...props
-  }) => (
-    <div className="space-y-2">
-      <label className={`block text-sm font-medium ${themeStyles.textPrimary}`}>
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      {type === "textarea" ? (
-        <textarea
-          name={name}
-          value={formData[name] ?? ""}
-          onChange={handleInputChange}
-          placeholder={placeholder}
-          disabled={viewMode}
-          className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all resize-none`}
-          rows={4}
-          {...props}
-        />
-      ) : (
-        <input
-          type={type}
-          name={name}
-          value={formData[name] ?? ""}
-          onChange={handleInputChange}
-          placeholder={placeholder}
-          disabled={viewMode}
-          className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
-          {...props}
-        />
-      )}
-    </div>
-  );
-
-  const SelectField = ({
-    label,
-    name,
-    options,
-    required = false,
-    placeholder = "Select...",
-  }) => (
-    <div className="space-y-2">
-      <label className={`block text-sm font-medium ${themeStyles.textPrimary}`}>
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <select
-        name={name}
-        value={formData[name] ?? ""}
-        onChange={handleInputChange}
-        disabled={viewMode}
-        className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} transition-all`}
-      >
-        <option value="">{placeholder}</option>
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
 
   return (
     <div className={`min-h-screen ${themeStyles.background} p-6`}>
@@ -531,23 +540,17 @@ const CompanyManager = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p
-                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
-                  >
+                  <p className={`text-sm font-medium ${themeStyles.textSecondary}`}>
                     {stat.label}
                   </p>
-                  <h3
-                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
-                  >
+                  <h3 className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}>
                     {stat.value}
                   </h3>
                   <p className={`text-sm ${themeStyles.textTertiary} mt-1`}>
                     {stat.subtitle}
                   </p>
                 </div>
-                <div
-                  className={`h-12 w-12 ${stat.iconBg} rounded-full flex items-center justify-center`}
-                >
+                <div className={`h-12 w-12 ${stat.iconBg} rounded-full flex items-center justify-center`}>
                   <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
                 </div>
               </div>
@@ -556,31 +559,22 @@ const CompanyManager = () => {
         </div>
 
         <div>
-          <h2
-            className={`text-xl font-semibold ${themeStyles.textPrimary} mb-4`}
-          >
+          <h2 className={`text-xl font-semibold ${themeStyles.textPrimary} mb-4`}>
             Recent Drives
           </h2>
           {companies.length === 0 ? (
             <div
               className={`rounded-2xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardBg} p-12 text-center`}
             >
-              <Building2
-                className={`h-12 w-12 ${themeStyles.textTertiary} mx-auto mb-4`}
-              />
-              <h3
-                className={`text-xl font-semibold ${themeStyles.textPrimary} mb-2`}
-              >
+              <Building2 className={`h-12 w-12 ${themeStyles.textTertiary} mx-auto mb-4`} />
+              <h3 className={`text-xl font-semibold ${themeStyles.textPrimary} mb-2`}>
                 No Company Drives Yet
               </h3>
               <p className={`${themeStyles.textSecondary} mb-6`}>
                 Add your first company recruitment drive
               </p>
               <button
-                onClick={() => {
-                  resetForm();
-                  setShowModal(true);
-                }}
+                onClick={() => { resetForm(); setShowModal(true); }}
                 className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all"
               >
                 <Plus className="mr-2 h-4 w-4" />
@@ -597,9 +591,7 @@ const CompanyManager = () => {
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <h3
-                          className={`text-xl font-bold ${themeStyles.textPrimary} mb-1`}
-                        >
+                        <h3 className={`text-xl font-bold ${themeStyles.textPrimary} mb-1`}>
                           {company.companyName}
                         </h3>
                         <p className={`text-sm ${themeStyles.textSecondary}`}>
@@ -607,11 +599,10 @@ const CompanyManager = () => {
                         </p>
                       </div>
                       <span
-                        className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                          company.registrationStatus === "Open"
+                        className={`px-3 py-1 text-xs font-semibold rounded-full ${company.registrationStatus === "Open"
                             ? "bg-green-100 text-green-800"
                             : "bg-gray-100 text-gray-800"
-                        }`}
+                          }`}
                       >
                         {company.registrationStatus}
                       </span>
@@ -619,46 +610,24 @@ const CompanyManager = () => {
 
                     <div className="space-y-3 mb-6">
                       <div className="flex items-center gap-2">
-                        <Calendar
-                          className={`h-4 w-4 ${themeStyles.textSecondary}`}
-                        />
-                        <span
-                          className={`text-sm ${themeStyles.textSecondary}`}
-                        >
-                          {company.date}
-                        </span>
+                        <Calendar className={`h-4 w-4 ${themeStyles.textSecondary}`} />
+                        <span className={`text-sm ${themeStyles.textSecondary}`}>{company.date}</span>
                       </div>
                       {company.salaryOffered && (
                         <div className="flex items-center gap-2">
-                          <DollarSign
-                            className={`h-4 w-4 ${themeStyles.textSecondary}`}
-                          />
-                          <span
-                            className={`text-sm ${themeStyles.textSecondary}`}
-                          >
-                            {company.salaryOffered}
-                          </span>
+                          <DollarSign className={`h-4 w-4 ${themeStyles.textSecondary}`} />
+                          <span className={`text-sm ${themeStyles.textSecondary}`}>{company.salaryOffered}</span>
                         </div>
                       )}
                       {company.venue && (
                         <div className="flex items-center gap-2">
-                          <MapPin
-                            className={`h-4 w-4 ${themeStyles.textSecondary}`}
-                          />
-                          <span
-                            className={`text-sm ${themeStyles.textSecondary}`}
-                          >
-                            {company.venue}
-                          </span>
+                          <MapPin className={`h-4 w-4 ${themeStyles.textSecondary}`} />
+                          <span className={`text-sm ${themeStyles.textSecondary}`}>{company.venue}</span>
                         </div>
                       )}
                       <div className="flex items-center gap-2">
-                        <UserCheck
-                          className={`h-4 w-4 ${themeStyles.textSecondary}`}
-                        />
-                        <span
-                          className={`text-sm font-semibold ${themeStyles.textPrimary}`}
-                        >
+                        <UserCheck className={`h-4 w-4 ${themeStyles.textSecondary}`} />
+                        <span className={`text-sm font-semibold ${themeStyles.textPrimary}`}>
                           {company.totalSelected || "0"} Selected
                         </span>
                       </div>
@@ -670,24 +639,14 @@ const CompanyManager = () => {
                         className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg ${themeStyles.buttonBg} ${themeStyles.buttonHover} border ${themeStyles.buttonBorder} transition-all`}
                       >
                         <Eye className={`h-4 w-4 ${themeStyles.textPrimary}`} />
-                        <span
-                          className={`text-sm font-medium ${themeStyles.textPrimary}`}
-                        >
-                          View
-                        </span>
+                        <span className={`text-sm font-medium ${themeStyles.textPrimary}`}>View</span>
                       </button>
                       <button
                         onClick={() => handleEdit(company)}
                         className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg ${themeStyles.buttonBg} ${themeStyles.buttonHover} border ${themeStyles.buttonBorder} transition-all`}
                       >
-                        <Edit2
-                          className={`h-4 w-4 ${themeStyles.textPrimary}`}
-                        />
-                        <span
-                          className={`text-sm font-medium ${themeStyles.textPrimary}`}
-                        >
-                          Edit
-                        </span>
+                        <Edit2 className={`h-4 w-4 ${themeStyles.textPrimary}`} />
+                        <span className={`text-sm font-medium ${themeStyles.textPrimary}`}>Edit</span>
                       </button>
                       <button
                         onClick={() => handleDeleteClick(company.id)}
@@ -713,268 +672,85 @@ const CompanyManager = () => {
 
         {/* Statistics Modal */}
         {showStatsModal && selectedCompany && (
-          <div
-            className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
-          >
-            <div
-              className={`w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl shadow-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder}`}
-            >
-              <div
-                className={`${themeStyles.modalHeader} border-b px-6 py-4 flex justify-between items-center sticky top-0 z-10`}
-              >
+          <div className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
+            <div className={`w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl shadow-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder}`}>
+              <div className={`${themeStyles.modalHeader} border-b px-6 py-4 flex justify-between items-center sticky top-0 z-10`}>
                 <div className="flex items-center gap-3">
                   <BarChart3 className="h-6 w-6 text-blue-600" />
-                  <h2
-                    className={`text-2xl font-bold ${themeStyles.textPrimary}`}
-                  >
+                  <h2 className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
                     Statistics - {selectedCompany.companyName}
                   </h2>
                 </div>
                 <button
-                  onClick={() => {
-                    setShowStatsModal(false);
-                    setSelectedCompany(null);
-                  }}
+                  onClick={() => { setShowStatsModal(false); setSelectedCompany(null); }}
                   className={`p-2 rounded-lg ${themeStyles.buttonHover} transition-all`}
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
               <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-100px)]">
-                {/* Overall Statistics */}
                 <div>
-                  <h3
-                    className={`text-lg font-semibold ${themeStyles.textPrimary} mb-4`}
-                  >
-                    Overall Statistics
-                  </h3>
+                  <h3 className={`text-lg font-semibold ${themeStyles.textPrimary} mb-4`}>Overall Statistics</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div
-                      className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-blue-100 rounded-lg">
-                          <Users className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className={`text-sm ${themeStyles.textSecondary}`}>
-                            Registered
-                          </p>
-                          <p
-                            className={`text-2xl font-bold ${themeStyles.textPrimary}`}
-                          >
-                            {selectedCompany.totalRegistered || "0"}
-                          </p>
+                    {[
+                      { icon: Users, bg: "bg-blue-100", iconCls: "text-blue-600", label: "Registered", val: selectedCompany.totalRegistered },
+                      { icon: UserCheck, bg: "bg-green-100", iconCls: "text-green-600", label: "Present", val: selectedCompany.candidatesPresent },
+                      { icon: Award, bg: "bg-purple-100", iconCls: "text-purple-600", label: "Selected", val: selectedCompany.totalSelected },
+                    ].map(({ icon: Icon, bg, iconCls, label, val }) => (
+                      <div key={label} className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}>
+                        <div className="flex items-center gap-3">
+                          <div className={`p-3 ${bg} rounded-lg`}>
+                            <Icon className={`h-6 w-6 ${iconCls}`} />
+                          </div>
+                          <div>
+                            <p className={`text-sm ${themeStyles.textSecondary}`}>{label}</p>
+                            <p className={`text-2xl font-bold ${themeStyles.textPrimary}`}>{val || "0"}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div
-                      className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-green-100 rounded-lg">
-                          <UserCheck className="h-6 w-6 text-green-600" />
-                        </div>
-                        <div>
-                          <p className={`text-sm ${themeStyles.textSecondary}`}>
-                            Present
-                          </p>
-                          <p
-                            className={`text-2xl font-bold ${themeStyles.textPrimary}`}
-                          >
-                            {selectedCompany.candidatesPresent || "0"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-purple-100 rounded-lg">
-                          <Award className="h-6 w-6 text-purple-600" />
-                        </div>
-                        <div>
-                          <p className={`text-sm ${themeStyles.textSecondary}`}>
-                            Selected
-                          </p>
-                          <p
-                            className={`text-2xl font-bold ${themeStyles.textPrimary}`}
-                          >
-                            {selectedCompany.totalSelected || "0"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* College-wise Selection */}
                 <div>
-                  <h3
-                    className={`text-lg font-semibold ${themeStyles.textPrimary} mb-4`}
-                  >
-                    College-wise Selection
-                  </h3>
+                  <h3 className={`text-lg font-semibold ${themeStyles.textPrimary} mb-4`}>College-wise Selection</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div
-                      className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
-                    >
-                      <h4
-                        className={`font-semibold ${themeStyles.textPrimary} mb-3`}
-                      >
-                        PCCOE
-                      </h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className={themeStyles.textSecondary}>
-                            Present:
-                          </span>
-                          <span
-                            className={`font-semibold ${themeStyles.textPrimary}`}
-                          >
-                            {selectedCompany.pccoePresent || "0"}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className={themeStyles.textSecondary}>
-                            Selected:
-                          </span>
-                          <span
-                            className={`font-semibold ${themeStyles.textPrimary}`}
-                          >
-                            {selectedCompany.totalSelectedPCCOE || "0"}
-                          </span>
+                    {[
+                      { name: "PCCOE", present: selectedCompany.pccoePresent, selected: selectedCompany.totalSelectedPCCOE },
+                      { name: "PCCOER", present: selectedCompany.pccoerPresent, selected: selectedCompany.totalSelectedPCCOER },
+                      { name: "NMIET", present: selectedCompany.nmietPresent, selected: selectedCompany.totalSelectedNMIET },
+                      { name: "NCER", present: selectedCompany.ncerPresent, selected: selectedCompany.totalSelectedNCER },
+                    ].map(({ name, present, selected }) => (
+                      <div key={name} className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}>
+                        <h4 className={`font-semibold ${themeStyles.textPrimary} mb-3`}>{name}</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className={themeStyles.textSecondary}>Present:</span>
+                            <span className={`font-semibold ${themeStyles.textPrimary}`}>{present || "0"}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className={themeStyles.textSecondary}>Selected:</span>
+                            <span className={`font-semibold ${themeStyles.textPrimary}`}>{selected || "0"}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div
-                      className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
-                    >
-                      <h4
-                        className={`font-semibold ${themeStyles.textPrimary} mb-3`}
-                      >
-                        PCCOER
-                      </h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className={themeStyles.textSecondary}>
-                            Present:
-                          </span>
-                          <span
-                            className={`font-semibold ${themeStyles.textPrimary}`}
-                          >
-                            {selectedCompany.pccoerPresent || "0"}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className={themeStyles.textSecondary}>
-                            Selected:
-                          </span>
-                          <span
-                            className={`font-semibold ${themeStyles.textPrimary}`}
-                          >
-                            {selectedCompany.totalSelectedPCCOER || "0"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
-                    >
-                      <h4
-                        className={`font-semibold ${themeStyles.textPrimary} mb-3`}
-                      >
-                        NMIET
-                      </h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className={themeStyles.textSecondary}>
-                            Present:
-                          </span>
-                          <span
-                            className={`font-semibold ${themeStyles.textPrimary}`}
-                          >
-                            {selectedCompany.nmietPresent || "0"}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className={themeStyles.textSecondary}>
-                            Selected:
-                          </span>
-                          <span
-                            className={`font-semibold ${themeStyles.textPrimary}`}
-                          >
-                            {selectedCompany.totalSelectedNMIET || "0"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
-                    >
-                      <h4
-                        className={`font-semibold ${themeStyles.textPrimary} mb-3`}
-                      >
-                        NCER
-                      </h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className={themeStyles.textSecondary}>
-                            Present:
-                          </span>
-                          <span
-                            className={`font-semibold ${themeStyles.textPrimary}`}
-                          >
-                            {selectedCompany.ncerPresent || "0"}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className={themeStyles.textSecondary}>
-                            Selected:
-                          </span>
-                          <span
-                            className={`font-semibold ${themeStyles.textPrimary}`}
-                          >
-                            {selectedCompany.totalSelectedNCER || "0"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* Selected Student PRNs */}
                 <div>
-                  <h3
-                    className={`text-lg font-semibold ${themeStyles.textPrimary} mb-4`}
-                  >
-                    Selected Students PRN
-                  </h3>
-                  <div
-                    className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}
-                  >
+                  <h3 className={`text-lg font-semibold ${themeStyles.textPrimary} mb-4`}>Selected Students PRN</h3>
+                  <div className={`p-4 rounded-xl ${themeStyles.sectionBg} border ${themeStyles.cardBorder}`}>
                     {selectedCompany.placedStudentPRN ? (
                       <div className="space-y-2">
-                        {selectedCompany.placedStudentPRN
-                          .split(",")
-                          .map((prn, idx) => (
-                            <div
-                              key={idx}
-                              className={`p-3 rounded-lg ${themeStyles.cardBg} border ${themeStyles.cardBorder}`}
-                            >
-                              <span
-                                className={`font-mono ${themeStyles.textPrimary}`}
-                              >
-                                {prn.trim()}
-                              </span>
-                            </div>
-                          ))}
+                        {selectedCompany.placedStudentPRN.split(",").map((prn, idx) => (
+                          <div key={idx} className={`p-3 rounded-lg ${themeStyles.cardBg} border ${themeStyles.cardBorder}`}>
+                            <span className={`font-mono ${themeStyles.textPrimary}`}>{prn.trim()}</span>
+                          </div>
+                        ))}
                       </div>
                     ) : (
-                      <p className={`text-center ${themeStyles.textSecondary}`}>
-                        No PRNs available
-                      </p>
+                      <p className={`text-center ${themeStyles.textSecondary}`}>No PRNs available</p>
                     )}
                   </div>
                 </div>
@@ -985,31 +761,21 @@ const CompanyManager = () => {
 
         {/* Delete Confirmation Modal */}
         {showDeleteModal && (
-          <div
-            className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
-          >
-            <div
-              className={`w-full max-w-md rounded-2xl shadow-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} overflow-hidden`}
-            >
-              <div className={`p-6`}>
+          <div className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
+            <div className={`w-full max-w-md rounded-2xl shadow-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} overflow-hidden`}>
+              <div className="p-6">
                 <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-red-100">
                   <AlertTriangle className="h-6 w-6 text-red-600" />
                 </div>
-                <h3
-                  className={`text-xl font-bold text-center ${themeStyles.textPrimary} mb-2`}
-                >
+                <h3 className={`text-xl font-bold text-center ${themeStyles.textPrimary} mb-2`}>
                   Delete Company Drive
                 </h3>
                 <p className={`text-center ${themeStyles.textSecondary} mb-6`}>
-                  Are you sure you want to delete this company drive? This
-                  action cannot be undone.
+                  Are you sure you want to delete this company drive? This action cannot be undone.
                 </p>
                 <div className="flex gap-3">
                   <button
-                    onClick={() => {
-                      setShowDeleteModal(false);
-                      setDeleteId(null);
-                    }}
+                    onClick={() => { setShowDeleteModal(false); setDeleteId(null); }}
                     className={`flex-1 px-4 py-3 rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
                   >
                     Cancel
@@ -1028,134 +794,67 @@ const CompanyManager = () => {
 
         {/* Form Modal */}
         {showModal && (
-          <div
-            className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
-          >
-            <div
-              className={`w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-2xl shadow-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder}`}
-            >
-              <div
-                className={`${themeStyles.modalHeader} border-b px-6 py-4 flex justify-between items-center sticky top-0 z-10`}
-              >
+          <div className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
+            <div className={`w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-2xl shadow-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder}`}>
+              <div className={`${themeStyles.modalHeader} border-b px-6 py-4 flex justify-between items-center sticky top-0 z-10`}>
                 <div className="flex items-center gap-3">
                   {viewMode && (
                     <button
-                      onClick={() => {
-                        setShowModal(false);
-                        resetForm();
-                      }}
+                      onClick={() => { setShowModal(false); resetForm(); }}
                       className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
                     >
                       <ArrowLeft className="h-5 w-5" />
                     </button>
                   )}
-                  <h2
-                    className={`text-2xl font-bold ${themeStyles.textPrimary}`}
-                  >
-                    {viewMode
-                      ? "Company Drive Details"
-                      : editingId
-                      ? "Edit Company Drive"
-                      : "Add Company Drive"}
+                  <h2 className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
+                    {viewMode ? "Company Drive Details" : editingId ? "Edit Company Drive" : "Add Company Drive"}
                   </h2>
                 </div>
                 <button
-                  onClick={() => {
-                    setShowModal(false);
-                    resetForm();
-                  }}
+                  onClick={() => { setShowModal(false); resetForm(); }}
                   className={`p-2 rounded-lg ${themeStyles.buttonHover} transition-all`}
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
+
               <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)]">
-                <FormSection title="Basic Information">
+                <FormSection title="Basic Information" themeStyles={themeStyles}>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <InputField label="Date" name="date" type="date" required />
-                    <InputField
-                      label="Month"
-                      name="month"
-                      type="number"
-                      min="1"
-                      max="12"
-                      required
-                    />
-                    <InputField
-                      label="Year"
-                      name="year"
-                      type="number"
-                      required
-                    />
+                    <InputField label="Date" name="date" type="date" required {...fieldProps} />
+                    <InputField label="Month" name="month" type="number" min="1" max="12" required {...fieldProps} />
+                    <InputField label="Year" name="year" type="number" required {...fieldProps} />
                   </div>
-                  <InputField
-                    label="Company Name"
-                    name="companyName"
-                    required
-                    placeholder="Enter company name"
-                    key={`companyName-${theme}`}
-                  />
-                  <InputField
-                    label="Company Related Info"
-                    name="companyRelatedInfo"
-                    type="textarea"
-                    placeholder="Additional company information"
-                  />
+                  <InputField label="Company Name" name="companyName" required placeholder="Enter company name" {...fieldProps} />
+                  <InputField label="Company Related Info" name="companyRelatedInfo" type="textarea" placeholder="Additional company information" {...fieldProps} />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField
-                      label="Registration End Date"
-                      name="regEndDate"
-                      type="date"
-                      required
-                    />
-                    <InputField
-                      label="Registration Time"
-                      name="registrationTime"
-                      type="time"
-                    />
+                    <InputField label="Registration End Date" name="regEndDate" type="date" required {...fieldProps} />
+                    <InputField label="Registration Time" name="registrationTime" type="time" {...fieldProps} />
                   </div>
                 </FormSection>
 
-                <FormSection title="Recruitment Details">
+                <FormSection title="Recruitment Details" themeStyles={themeStyles}>
                   <SelectField
                     label="Recruitment Method"
                     name="recruitmentMethod"
                     required
                     options={[
-                      {
-                        value: "Everyone",
-                        label: "Everyone - Everyone can apply",
-                      },
-                      {
-                        value: "Unplaced",
-                        label: "Unplaced - Only unplaced students",
-                      },
-                      {
-                        value: "Placed Below XYZ Package",
-                        label: "Placed Below Package",
-                      },
+                      { value: "Everyone", label: "Everyone - Everyone can apply" },
+                      { value: "Unplaced", label: "Unplaced - Only unplaced students" },
+                      { value: "Placed Below XYZ Package", label: "Placed Below Package" },
                     ]}
+                    {...fieldProps}
                   />
-                  {formData.recruitmentMethod ===
-                    "Placed Below XYZ Package" && (
-                    <InputField
-                      label="Placed Below Package"
-                      name="placedBelow"
-                      placeholder="e.g., 5.0 LPA"
-                    />
+                  {formData.recruitmentMethod === "Placed Below XYZ Package" && (
+                    <InputField label="Placed Below Package" name="placedBelow" placeholder="e.g., 5.0 LPA" {...fieldProps} />
                   )}
                   <div>
-                    <label
-                      className={`block text-sm font-medium ${themeStyles.textPrimary} mb-2`}
-                    >
+                    <label className={`block text-sm font-medium ${themeStyles.textPrimary} mb-2`}>
                       Eligible Batch Years
                     </label>
                     <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                       {batchYears.map((year) => (
-                        <label
-                          key={year}
-                          className="flex items-center space-x-2 cursor-pointer"
-                        >
+                        <label key={year} className="flex items-center space-x-2 cursor-pointer">
                           <input
                             type="checkbox"
                             name="eligibleBatchYears"
@@ -1164,29 +863,19 @@ const CompanyManager = () => {
                             onChange={handleInputChange}
                             disabled={viewMode}
                             className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                            key={`year-${year}-${theme}`}
                           />
-                          <span
-                            className={`text-sm ${themeStyles.textPrimary}`}
-                          >
-                            {year}
-                          </span>
+                          <span className={`text-sm ${themeStyles.textPrimary}`}>{year}</span>
                         </label>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <label
-                      className={`block text-sm font-medium ${themeStyles.textPrimary} mb-2`}
-                    >
+                    <label className={`block text-sm font-medium ${themeStyles.textPrimary} mb-2`}>
                       Eligible Branches
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {branches.map((branch) => (
-                        <label
-                          key={branch}
-                          className="flex items-center space-x-2 cursor-pointer"
-                        >
+                        <label key={branch} className="flex items-center space-x-2 cursor-pointer">
                           <input
                             type="checkbox"
                             name="eligibleBranches"
@@ -1196,461 +885,173 @@ const CompanyManager = () => {
                             disabled={viewMode}
                             className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                           />
-                          <span
-                            className={`text-sm ${themeStyles.textPrimary}`}
-                          >
-                            {branch}
-                          </span>
+                          <span className={`text-sm ${themeStyles.textPrimary}`}>{branch}</span>
                         </label>
                       ))}
                     </div>
-                    <label
-                      className={`block text-sm font-medium ${themeStyles.textPrimary} mt-4 mb-2`}
-                    >
+                    <label className={`block text-sm font-medium ${themeStyles.textPrimary} mt-4 mb-2`}>
                       Eligible Colleges
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {Colleges.map((college) => (
-                        <label
-                          key={college}
-                          className="flex items-center space-x-2 cursor-pointer"
-                        >
+                        <label key={college} className="flex items-center space-x-2 cursor-pointer">
                           <input
                             type="checkbox"
                             name="eligibleColleges"
                             value={college}
-                            checked={formData.eligibleColleges.includes(
-                              college
-                            )}
+                            checked={formData.eligibleColleges.includes(college)}
                             onChange={handleInputChange}
                             disabled={viewMode}
                             className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                           />
-                          <span
-                            className={`text-sm ${themeStyles.textPrimary}`}
-                          >
-                            {college}
-                          </span>
+                          <span className={`text-sm ${themeStyles.textPrimary}`}>{college}</span>
                         </label>
                       ))}
                     </div>
                   </div>
                 </FormSection>
 
-                <FormSection title="Job Details">
-                  <InputField
-                    label="Job Openings"
-                    name="jobOpenings"
-                    type="number"
-                    placeholder="Number of openings"
-                  />
+                <FormSection title="Job Details" themeStyles={themeStyles}>
+                  <InputField label="Job Openings" name="jobOpenings" type="number" placeholder="Number of openings" {...fieldProps} />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <SelectField
-                      label="Company Type"
-                      name="companyType"
-                      options={[
-                        { value: "Product", label: "Product" },
-                        { value: "Core", label: "Core" },
-                        { value: "IT", label: "IT" },
-                        { value: "Other", label: "Other" },
-                      ]}
-                    />
-                    <SelectField
-                      label="Drive Type"
-                      name="driveType"
-                      options={[
-                        { value: "Internship", label: "Internship" },
-                        { value: "Placement", label: "Placement" },
-                        {
-                          value: "Internship + PPO",
-                          label: "Internship + PPO",
-                        },
-                      ]}
-                    />
+                    <SelectField label="Company Type" name="companyType" options={[
+                      { value: "Product", label: "Product" },
+                      { value: "Core", label: "Core" },
+                      { value: "IT", label: "IT" },
+                      { value: "Other", label: "Other" },
+                    ]} {...fieldProps} />
+                    <SelectField label="Drive Type" name="driveType" options={[
+                      { value: "Internship", label: "Internship" },
+                      { value: "Placement", label: "Placement" },
+                      { value: "Internship + PPO", label: "Internship + PPO" },
+                    ]} {...fieldProps} />
                   </div>
-                  <InputField
-                    label="Job Profile"
-                    name="jobProfile"
-                    placeholder="e.g., Software Engineer"
-                  />
+                  <InputField label="Job Profile" name="jobProfile" placeholder="e.g., Software Engineer" {...fieldProps} />
                 </FormSection>
 
-                <FormSection title="Eligibility Criteria">
+                <FormSection title="Eligibility Criteria" themeStyles={themeStyles}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField
-                      label="SSC Criteria (%)"
-                      name="sscCriteria"
-                      type="number"
-                      placeholder="e.g., 60"
-                    />
-                    <InputField
-                      label="HSC Criteria (%)"
-                      name="hscCriteria"
-                      type="number"
-                      placeholder="e.g., 60"
-                    />
-                    <InputField
-                      label="CGPA Criteria"
-                      name="cgpaCriteria"
-                      type="number"
-                      step="0.01"
-                      placeholder="e.g., 7.0"
-                    />
-                    <InputField
-                      label="Backlog Criteria"
-                      name="backlogCriteria"
-                      placeholder="e.g., No active backlogs"
-                    />
+                    <InputField label="SSC Criteria (%)" name="sscCriteria" type="number" placeholder="e.g., 60" {...fieldProps} />
+                    <InputField label="HSC Criteria (%)" name="hscCriteria" type="number" placeholder="e.g., 60" {...fieldProps} />
+                    <InputField label="CGPA Criteria" name="cgpaCriteria" type="number" step="0.01" placeholder="e.g., 7.0" {...fieldProps} />
+                    <InputField label="Backlog Criteria" name="backlogCriteria" placeholder="e.g., No active backlogs" {...fieldProps} />
                   </div>
-                  <InputField
-                    label="Venue"
-                    name="venue"
-                    placeholder="Interview venue"
-                  />
+                  <InputField label="Venue" name="venue" placeholder="Interview venue" {...fieldProps} />
                 </FormSection>
 
-                <FormSection title="Compensation">
+                <FormSection title="Compensation" themeStyles={themeStyles}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField
-                      label="Salary Offered"
-                      name="salaryOffered"
-                      placeholder="e.g., 6.0 LPA"
-                    />
-                    <InputField
-                      label="Internship Stipend"
-                      name="internshipStipend"
-                      placeholder="e.g., 15000/month"
-                    />
+                    <InputField label="Salary Offered" name="salaryOffered" placeholder="e.g., 6.0 LPA" {...fieldProps} />
+                    <InputField label="Internship Stipend" name="internshipStipend" placeholder="e.g., 15000/month" {...fieldProps} />
                   </div>
-                  <InputField
-                    label="Company Bond"
-                    name="companyBond"
-                    placeholder="Bond details if any"
-                  />
+                  <InputField label="Company Bond" name="companyBond" placeholder="Bond details if any" {...fieldProps} />
                 </FormSection>
 
-                <FormSection title="Participation Data">
+                <FormSection title="Participation Data" themeStyles={themeStyles}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField
-                      label="Total Registered"
-                      name="totalRegistered"
-                      type="number"
-                      placeholder="Number of registrations"
-                    />
-                    <InputField
-                      label="Candidates Present"
-                      name="candidatesPresent"
-                      type="number"
-                      placeholder="Students who attended"
-                    />
+                    <InputField label="Total Registered" name="totalRegistered" type="number" placeholder="Number of registrations" {...fieldProps} />
+                    <InputField label="Candidates Present" name="candidatesPresent" type="number" placeholder="Students who attended" {...fieldProps} />
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <InputField
-                      label="PCCOE Present"
-                      name="pccoePresent"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="PCCOER Present"
-                      name="pccoerPresent"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="NMIET Present"
-                      name="nmietPresent"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="NCER Present"
-                      name="ncerPresent"
-                      type="number"
-                      placeholder="0"
-                    />
+                    <InputField label="PCCOE Present" name="pccoePresent" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="PCCOER Present" name="pccoerPresent" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="NMIET Present" name="nmietPresent" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="NCER Present" name="ncerPresent" type="number" placeholder="0" {...fieldProps} />
                   </div>
                 </FormSection>
 
-                <FormSection title="Selection Results - College-wise">
-                  <InputField
-                    label="Total Selected"
-                    name="totalSelected"
-                    type="number"
-                    placeholder="Total students selected"
-                  />
+                <FormSection title="Selection Results - College-wise" themeStyles={themeStyles}>
+                  <InputField label="Total Selected" name="totalSelected" type="number" placeholder="Total students selected" {...fieldProps} />
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <InputField
-                      label="PCCOE Selected"
-                      name="totalSelectedPCCOE"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="PCCOER Selected"
-                      name="totalSelectedPCCOER"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="NMIET Selected"
-                      name="totalSelectedNMIET"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="NCER Selected"
-                      name="totalSelectedNCER"
-                      type="number"
-                      placeholder="0"
-                    />
+                    <InputField label="PCCOE Selected" name="totalSelectedPCCOE" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="PCCOER Selected" name="totalSelectedPCCOER" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="NMIET Selected" name="totalSelectedNMIET" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="NCER Selected" name="totalSelectedNCER" type="number" placeholder="0" {...fieldProps} />
                   </div>
                 </FormSection>
 
-                <FormSection title="PCCOE - Branch-wise Selection">
+                <FormSection title="PCCOE - Branch-wise Selection" themeStyles={themeStyles}>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <InputField
-                      label="Computer Eng."
-                      name="pccoeComputerSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="AI & ML"
-                      name="pccoeAIMLSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="Computer (Regional)"
-                      name="pccoeComputerRegionalSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="IT"
-                      name="pccoeITSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="EnTC"
-                      name="pccoeEnTCSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="Mechanical"
-                      name="pccoeMechanicalSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="Civil"
-                      name="pccoeCivilSelected"
-                      type="number"
-                      placeholder="0"
-                    />
+                    <InputField label="Computer Eng." name="pccoeComputerSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="AI & ML" name="pccoeAIMLSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="Computer (Regional)" name="pccoeComputerRegionalSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="IT" name="pccoeITSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="EnTC" name="pccoeEnTCSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="Mechanical" name="pccoeMechanicalSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="Civil" name="pccoeCivilSelected" type="number" placeholder="0" {...fieldProps} />
                   </div>
                 </FormSection>
 
-                <FormSection title="PCCOER - Branch-wise Selection">
+                <FormSection title="PCCOER - Branch-wise Selection" themeStyles={themeStyles}>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <InputField
-                      label="Computer Eng."
-                      name="pccoerComputerSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="IT"
-                      name="pccoerITSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="EnTC"
-                      name="pccoerEnTCSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="Mechanical"
-                      name="pccoerMechanicalSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="Civil"
-                      name="pccoerCivilSelected"
-                      type="number"
-                      placeholder="0"
-                    />
+                    <InputField label="Computer Eng." name="pccoerComputerSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="IT" name="pccoerITSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="EnTC" name="pccoerEnTCSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="Mechanical" name="pccoerMechanicalSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="Civil" name="pccoerCivilSelected" type="number" placeholder="0" {...fieldProps} />
                   </div>
                 </FormSection>
 
-                <FormSection title="NMIET - Branch-wise Selection">
+                <FormSection title="NMIET - Branch-wise Selection" themeStyles={themeStyles}>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <InputField
-                      label="Computer Eng."
-                      name="nmietComputerSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="IT"
-                      name="nmietITSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="EnTC"
-                      name="nmietEnTCSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="Mechanical"
-                      name="nmietMechanicalSelected"
-                      type="number"
-                      placeholder="0"
-                    />
+                    <InputField label="Computer Eng." name="nmietComputerSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="IT" name="nmietITSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="EnTC" name="nmietEnTCSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="Mechanical" name="nmietMechanicalSelected" type="number" placeholder="0" {...fieldProps} />
                   </div>
                 </FormSection>
 
-                <FormSection title="NCER - Branch-wise Selection">
+                <FormSection title="NCER - Branch-wise Selection" themeStyles={themeStyles}>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <InputField
-                      label="Computer Eng."
-                      name="ncerComputerSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="AI & ML"
-                      name="ncerAIMLSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="EnTC"
-                      name="ncerEnTCSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="Mechanical"
-                      name="ncerMechanicalSelected"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="Automobile"
-                      name="ncerAutomobileSelected"
-                      type="number"
-                      placeholder="0"
-                    />
+                    <InputField label="Computer Eng." name="ncerComputerSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="AI & ML" name="ncerAIMLSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="EnTC" name="ncerEnTCSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="Mechanical" name="ncerMechanicalSelected" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="Automobile" name="ncerAutomobileSelected" type="number" placeholder="0" {...fieldProps} />
                   </div>
                 </FormSection>
 
-                <FormSection title="Internship Selection Data">
-                  <InputField
-                    label="Total Internship Selected"
-                    name="totalInternshipSelected"
-                    type="number"
-                    placeholder="Total internships"
-                  />
+                <FormSection title="Internship Selection Data" themeStyles={themeStyles}>
+                  <InputField label="Total Internship Selected" name="totalInternshipSelected" type="number" placeholder="Total internships" {...fieldProps} />
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <InputField
-                      label="PCCOE"
-                      name="totalInternshipSelectedPCCOE"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="PCCOER"
-                      name="totalInternshipSelectedPCCOER"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="NMIET"
-                      name="totalInternshipSelectedNMIET"
-                      type="number"
-                      placeholder="0"
-                    />
-                    <InputField
-                      label="NCER"
-                      name="totalInternshipSelectedNCER"
-                      type="number"
-                      placeholder="0"
-                    />
+                    <InputField label="PCCOE" name="totalInternshipSelectedPCCOE" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="PCCOER" name="totalInternshipSelectedPCCOER" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="NMIET" name="totalInternshipSelectedNMIET" type="number" placeholder="0" {...fieldProps} />
+                    <InputField label="NCER" name="totalInternshipSelectedNCER" type="number" placeholder="0" {...fieldProps} />
                   </div>
                 </FormSection>
 
-                <FormSection title="Student PRNs">
-                  <InputField
-                    label="Placed Student PRNs (comma-separated)"
-                    name="placedStudentPRN"
-                    type="textarea"
-                    placeholder="Enter PRNs separated by commas, e.g., PRN001, PRN002, PRN003"
-                  />
-                  <InputField
-                    label="Internship Selected PRNs (comma-separated)"
-                    name="internshipSelectedPRN"
-                    type="textarea"
-                    placeholder="Enter PRNs separated by commas"
-                  />
+                <FormSection title="Student PRNs" themeStyles={themeStyles}>
+                  <InputField label="Placed Student PRNs (comma-separated)" name="placedStudentPRN" type="textarea" placeholder="Enter PRNs separated by commas, e.g., PRN001, PRN002, PRN003" {...fieldProps} />
+                  <InputField label="Internship Selected PRNs (comma-separated)" name="internshipSelectedPRN" type="textarea" placeholder="Enter PRNs separated by commas" {...fieldProps} />
                 </FormSection>
 
-                <FormSection title="Expenditure">
+                <FormSection title="Expenditure" themeStyles={themeStyles}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField
-                      label="Approved Expenditure"
-                      name="approvedExpenditure"
-                      type="number"
-                      placeholder="Approved amount"
-                    />
-                    <InputField
-                      label="Actual Expenditure"
-                      name="actualExpenditure"
-                      type="number"
-                      placeholder="Actual amount spent"
-                    />
+                    <InputField label="Approved Expenditure" name="approvedExpenditure" type="number" placeholder="Approved amount" {...fieldProps} />
+                    <InputField label="Actual Expenditure" name="actualExpenditure" type="number" placeholder="Actual amount spent" {...fieldProps} />
                   </div>
                 </FormSection>
 
-                <FormSection title="Drive Status">
+                <FormSection title="Drive Status" themeStyles={themeStyles}>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <SelectField
-                      label="Resume Required"
-                      name="resumeRequired"
-                      options={[
-                        { value: "Required", label: "Required" },
-                        { value: "Not Required", label: "Not Required" },
-                      ]}
-                    />
-                    <SelectField
-                      label="Registration Status"
-                      name="registrationStatus"
-                      options={[
-                        { value: "Open", label: "Open" },
-                        { value: "Closed", label: "Closed" },
-                      ]}
-                    />
-                    <SelectField
-                      label="Drive Completed"
-                      name="driveCompleted"
-                      options={[
-                        { value: "Yes", label: "Yes" },
-                        { value: "No", label: "No" },
-                      ]}
-                    />
+                    <SelectField label="Resume Required" name="resumeRequired" options={[
+                      { value: "Required", label: "Required" },
+                      { value: "Not Required", label: "Not Required" },
+                    ]} {...fieldProps} />
+                    <SelectField label="Registration Status" name="registrationStatus" options={[
+                      { value: "Open", label: "Open" },
+                      { value: "Closed", label: "Closed" },
+                    ]} {...fieldProps} />
+                    <SelectField label="Drive Completed" name="driveCompleted" options={[
+                      { value: "Yes", label: "Yes" },
+                      { value: "No", label: "No" },
+                    ]} {...fieldProps} />
                   </div>
                 </FormSection>
 
                 {!viewMode && (
-                  <FormSection title="Additional Files">
+                  <FormSection title="Additional Files" themeStyles={themeStyles}>
                     <div className="space-y-3">
                       {additionalFiles.map((file, index) => (
                         <div key={file.id} className="flex items-center gap-3">
@@ -1685,6 +1086,7 @@ const CompanyManager = () => {
                     </div>
                   </FormSection>
                 )}
+
                 {!viewMode && (
                   <div className="flex flex-col sm:flex-row gap-3 pt-4">
                     <button

@@ -17,6 +17,7 @@ import {
   Moon,
   User,
   Bell,
+  X, // ← was missing; caused runtime error that broke the mobile sidebar toggle
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
 
@@ -252,39 +253,33 @@ const Dashboard = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-screen ${themeStyles.surface} ${
-          themeStyles.sidebarBorder
-        } transition-all duration-300
-        ${
-          sidebarExpanded
+        className={`fixed top-0 left-0 z-40 h-screen ${themeStyles.surface} ${themeStyles.sidebarBorder
+          } transition-all duration-300
+        ${sidebarExpanded
             ? themeStyles.sidebarWidth
             : themeStyles.sidebarCollapsedWidth
-        }
-        ${
-          sidebarOpen ? themeStyles.sidebarTranslate : themeStyles.sidebarHidden
-        }
+          }
+        ${sidebarOpen ? themeStyles.sidebarTranslate : themeStyles.sidebarHidden
+          }
         ${themeStyles.sidebarExpanded} group`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div
-            className={`flex items-center h-16 px-6 border-b ${
-              themeStyles.border
-            } ${!sidebarExpanded && "justify-center"}`}
+            className={`flex items-center h-16 px-6 border-b ${themeStyles.border
+              } ${!sidebarExpanded && "justify-center"}`}
           >
             <img
               src={isDarkTheme ? DarkLogo : LightLogo}
               alt="Logo"
-              className={`w-8 h-8 ${
-                !sidebarExpanded ? "block" : "hidden lg:block"
-              }`}
+              className={`w-8 h-8 ${!sidebarExpanded ? "block" : "hidden lg:block"
+                }`}
             />
             <div
-              className={`text-2xl font-bold pl-1 ${
-                sidebarExpanded
+              className={`text-2xl font-bold pl-1 ${sidebarExpanded
                   ? themeStyles.sidebarLogoText
                   : themeStyles.sidebarLogoTextCollapsed
-              } ${!sidebarExpanded && "hidden"}`}
+                } ${!sidebarExpanded && "hidden"}`}
             >
               TRACKTNP
             </div>
@@ -300,38 +295,33 @@ const Dashboard = () => {
                       to={item.path}
                       onClick={() => setSidebarOpen(false)}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-base border-2
-                      ${
-                        isActive(item.path)
+                      ${isActive(item.path)
                           ? `${themeStyles.sidebarNavItemActive} border-2`
                           : `${themeStyles.sidebarNavItem} ${themeStyles.sidebarNavItemInactive} border-transparent`
-                      }
-                      ${
-                        !sidebarExpanded && themeStyles.sidebarNavItemCollapsed
-                      }`}
+                        }
+                      ${!sidebarExpanded && themeStyles.sidebarNavItemCollapsed
+                        }`}
                     >
                       <div
                         className={`transition-transform duration-300
-                        ${
-                          sidebarExpanded
+                        ${sidebarExpanded
                             ? themeStyles.sidebarNavItemIconExpanded
                             : themeStyles.sidebarNavItemIconCollapsed
-                        }
-                        ${
-                          isActive(item.path)
+                          }
+                        ${isActive(item.path)
                             ? themeStyles.sidebarNavItemIconActive
                             : themeStyles.sidebarNavItemIcon
-                        }`}
+                          }`}
                       >
                         {item.icon}
                       </div>
                       {sidebarExpanded && (
                         <span
                           className={`font-medium text-base transition-opacity duration-200
-                          ${
-                            isActive(item.path)
+                          ${isActive(item.path)
                               ? themeStyles.activeText
                               : themeStyles.textPrimary
-                          }`}
+                            }`}
                         >
                           {item.name}
                         </span>
@@ -347,18 +337,15 @@ const Dashboard = () => {
           <div className={`p-4 border-t ${themeStyles.border}`}>
             <button
               onClick={() => setShowLogoutModal(true)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                themeStyles.sidebarLogout
-              } ${themeStyles.sidebarNavItemInactive} border-transparent ${
-                !sidebarExpanded && themeStyles.sidebarNavItemCollapsed
-              }`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${themeStyles.sidebarLogout
+                } ${themeStyles.sidebarNavItemInactive} border-transparent ${!sidebarExpanded && themeStyles.sidebarNavItemCollapsed
+                }`}
             >
               <div
-                className={`transition-transform duration-300 ${
-                  sidebarExpanded
+                className={`transition-transform duration-300 ${sidebarExpanded
                     ? themeStyles.sidebarNavItemIconExpanded
                     : themeStyles.sidebarNavItemIconCollapsed
-                } ${themeStyles.sidebarNavItemIcon}`}
+                  } ${themeStyles.sidebarNavItemIcon}`}
               >
                 <LogOut className="w-6 h-6" />
               </div>
@@ -382,9 +369,8 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <div
-        className={`transition-all duration-300 ${
-          sidebarExpanded ? "lg:ml-62" : "lg:ml-20"
-        }`}
+        className={`transition-all duration-300 ${sidebarExpanded ? "lg:ml-62" : "lg:ml-20"
+          }`}
       >
         {/* Top Bar */}
         <header

@@ -154,24 +154,24 @@ const Calendar = () => {
         className="min-h-screen transition-colors duration-300"
         style={{ backgroundColor: isDark ? "#020617" : "#ffffff" }}
       >
-        <div className="max-w-full mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="max-w-full mx-auto p-3 sm:p-4 md:p-6 lg:p-8">
           <div
-            className="rounded-xl shadow-sm  p-6 mb-6"
+            className="rounded-xl shadow-sm  p-4 sm:p-5 md:p-6 mb-4 sm:mb-6"
             style={{
               backgroundColor: isDark ? "#020617" : "#ffffff",
               borderColor: isDark ? "#1D2939" : "#e5e7eb",
             }}
           >
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+              <div className="flex items-start sm:items-center gap-2 sm:gap-3 w-full">
                 <div
-                  className="p-3 rounded-lg"
+                  className="p-2 sm:p-3 rounded-lg flex-shrink-0"
                   style={{ backgroundColor: "#465FFF" }}
                 >
                   <svg
                     className="text-white"
-                    width="24"
-                    height="24"
+                    width="18"
+                    height="18"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -194,13 +194,13 @@ const Calendar = () => {
                 </div>
                 <div>
                   <h1
-                    className="text-3xl font-bold"
+                    className="text-xl sm:text-2xl md:text-3xl font-bold"
                     style={{ color: isDark ? "#F9FAFB" : "#101828" }}
                   >
                     Calendar
                   </h1>
                   <p
-                    className="text-sm"
+                    className="text-xs sm:text-sm"
                     style={{ color: isDark ? "#98A2B3" : "#667085" }}
                   >
                     Manage your events and schedule
@@ -209,23 +209,23 @@ const Calendar = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto overflow-x-auto">
                 <button
                   onClick={handlePrevMonth}
-                  className="p-2 rounded-lg transition-all hover:scale-105"
+                  className="p-1.5 sm:p-2 rounded-lg transition-all hover:scale-105 flex-shrink-0"
                   style={{
                     backgroundColor: isDark ? "#1D2939" : "#F2F4F7",
                     color: isDark ? "#F9FAFB" : "#101828",
                   }}
                 >
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={18} />
                 </button>
 
                 <select
                   value={currentMonth}
                   onChange={(e) => setCurrentMonth(parseInt(e.target.value))}
-                  className="px-4 py-2 rounded-lg border font-medium transition-colors cursor-pointer"
+                  className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border font-medium transition-colors cursor-pointer text-xs sm:text-sm"
                   style={{
                     backgroundColor: isDark ? "#1D2939" : "#ffffff",
                     borderColor: isDark ? "#344054" : "#E4E7EC",
@@ -242,7 +242,7 @@ const Calendar = () => {
                 <select
                   value={currentYear}
                   onChange={(e) => setCurrentYear(parseInt(e.target.value))}
-                  className="px-4 py-2 rounded-lg border font-medium transition-colors cursor-pointer"
+                  className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border font-medium transition-colors cursor-pointer text-xs sm:text-sm"
                   style={{
                     backgroundColor: isDark ? "#1D2939" : "#ffffff",
                     borderColor: isDark ? "#344054" : "#E4E7EC",
@@ -258,13 +258,13 @@ const Calendar = () => {
 
                 <button
                   onClick={handleNextMonth}
-                  className="p-2 rounded-lg transition-all hover:scale-105"
+                  className="p-1.5 sm:p-2 rounded-lg transition-all hover:scale-105 flex-shrink-0"
                   style={{
                     backgroundColor: isDark ? "#1D2939" : "#F2F4F7",
                     color: isDark ? "#F9FAFB" : "#101828",
                   }}
                 >
-                  <ChevronRight size={20} />
+                  <ChevronRight size={18} />
                 </button>
               </div>
 
@@ -273,7 +273,7 @@ const Calendar = () => {
                   setCurrentMonth(new Date().getMonth());
                   setCurrentYear(new Date().getFullYear());
                 }}
-                className="px-5 py-2 rounded-lg font-semibold transition-all hover:scale-105"
+                className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-lg font-semibold transition-all hover:scale-105 text-sm w-full sm:w-auto"
                 style={{
                   backgroundColor: "#465FFF",
                   color: "#ffffff",
@@ -291,12 +291,12 @@ const Calendar = () => {
               borderColor: isDark ? "#1D2939" : "#e5e7eb",
             }}
           >
-            <div className="p-6">
-              <div className="grid grid-cols-7 gap-3">
+            <div className="p-3 sm:p-4 md:p-6">
+              <div className="grid grid-cols-7 gap-1 sm:gap-2 md:gap-3">
                 {daysOfWeek.map((day) => (
                   <div
                     key={day}
-                    className="text-center font-semibold py-3 text-sm"
+                    className="text-center font-semibold py-2 text-xs sm:text-sm"
                     style={{ color: isDark ? "#98A2B3" : "#667085" }}
                   >
                     {day}
@@ -311,7 +311,7 @@ const Calendar = () => {
                     <div
                       key={index}
                       onClick={() => handleDateClick(day)}
-                      className="min-h-28 p-2 rounded-lg cursor-pointer transition-all border hover:scale-105"
+                      className="min-h-20 sm:min-h-24 md:min-h-28 p-1.5 sm:p-2 md:p-2 rounded-lg cursor-pointer transition-all border hover:scale-105"
                       style={{
                         backgroundColor: day
                           ? isDark
@@ -321,32 +321,32 @@ const Calendar = () => {
                         borderColor: isTodayDate
                           ? "#465FFF"
                           : day
-                          ? isDark
-                            ? "#344054"
-                            : "#E4E7EC"
-                          : "transparent",
+                            ? isDark
+                              ? "#344054"
+                              : "#E4E7EC"
+                            : "transparent",
                         borderWidth: isTodayDate ? "2px" : "1px",
                       }}
                     >
                       {day && (
                         <>
                           <div
-                            className="text-sm font-semibold mb-1.5"
+                            className="text-xs sm:text-sm font-semibold mb-0.5 sm:mb-1.5"
                             style={{
                               color: isTodayDate
                                 ? "#465FFF"
                                 : isDark
-                                ? "#F9FAFB"
-                                : "#101828",
+                                  ? "#F9FAFB"
+                                  : "#101828",
                             }}
                           >
                             {day}
                           </div>
-                          <div className="space-y-1">
+                          <div className="space-y-0.5">
                             {dayEvents.slice(0, 2).map((event) => (
                               <div
                                 key={event.id}
-                                className="text-xs px-2 py-1 rounded truncate text-white font-medium"
+                                className="text-xs px-1.5 py-0.5 rounded truncate text-white font-medium"
                                 style={{ backgroundColor: event.color }}
                               >
                                 {event.title}
@@ -374,45 +374,45 @@ const Calendar = () => {
 
           {events.length > 0 && (
             <div
-              className="rounded-xl shadow-sm border p-6 mt-6"
+              className="rounded-xl shadow-sm border p-4 sm:p-5 md:p-6 mt-4 sm:mt-6"
               style={{
                 backgroundColor: isDark ? "#1D2939" : "#ffffff",
                 borderColor: isDark ? "#1D2939" : "#e5e7eb",
               }}
             >
               <h2
-                className="text-xl font-bold mb-4"
+                className="text-lg sm:text-xl font-bold mb-3 sm:mb-4"
                 style={{ color: isDark ? "#F9FAFB" : "#101828" }}
               >
                 Upcoming Events
               </h2>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {events
                   .sort((a, b) => new Date(a.date) - new Date(b.date))
                   .map((event) => (
                     <div
                       key={event.id}
-                      className="p-4 rounded-lg border flex justify-between items-start transition-all hover:scale-102"
+                      className="p-3 sm:p-4 rounded-lg border flex flex-col sm:flex-row justify-between sm:items-start gap-2 sm:gap-3 transition-all hover:scale-102"
                       style={{
                         backgroundColor: isDark ? "#1D2939" : "#F2F4F7",
                         borderColor: isDark ? "#344054" : "#E4E7EC",
                       }}
                     >
-                      <div className="flex gap-3 flex-1">
+                      <div className="flex gap-2 sm:gap-3 flex-1 min-w-0">
                         <div
-                          className="w-1 rounded-full"
+                          className="w-1 rounded-full flex-shrink-0"
                           style={{ backgroundColor: event.color }}
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <h3
-                            className="font-semibold"
+                            className="font-semibold text-sm sm:text-base truncate"
                             style={{ color: isDark ? "#F9FAFB" : "#101828" }}
                           >
                             {event.title}
                           </h3>
-                          <div className="flex items-center gap-3 mt-1">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-3 mt-1">
                             <p
-                              className="text-sm flex items-center gap-1"
+                              className="text-xs sm:text-sm flex items-center gap-1"
                               style={{ color: isDark ? "#98A2B3" : "#667085" }}
                             >
                               <svg
@@ -440,7 +440,7 @@ const Calendar = () => {
                               {event.date}
                             </p>
                             <p
-                              className="text-sm flex items-center gap-1"
+                              className="text-xs sm:text-sm flex items-center gap-1"
                               style={{ color: isDark ? "#98A2B3" : "#667085" }}
                             >
                               <Clock size={14} />
@@ -449,7 +449,7 @@ const Calendar = () => {
                           </div>
                           {event.description && (
                             <p
-                              className="text-sm mt-2"
+                              className="text-xs sm:text-sm mt-1 sm:mt-2 line-clamp-2"
                               style={{ color: isDark ? "#98A2B3" : "#667085" }}
                             >
                               {event.description}
@@ -459,7 +459,7 @@ const Calendar = () => {
                       </div>
                       <button
                         onClick={() => handleDeleteEvent(event.id)}
-                        className="p-2 rounded-lg transition-all hover:scale-110"
+                        className="p-1.5 sm:p-2 rounded-lg transition-all hover:scale-110 flex-shrink-0"
                         style={{
                           color: isDark ? "#98A2B3" : "#667085",
                         }}
@@ -474,7 +474,7 @@ const Calendar = () => {
                             : "#667085";
                         }}
                       >
-                        <X size={18} />
+                        <X size={16} />
                       </button>
                     </div>
                   ))}
@@ -484,28 +484,28 @@ const Calendar = () => {
         </div>
 
         {showModal && (
-          <div className="fixed inset-0 bg-black/80 bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="fixed inset-0 bg-black/80 bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-50 backdrop-blur-sm">
             <div
-              className="rounded-xl shadow-2xl max-w-lg w-full border transform transition-all"
+              className="rounded-xl shadow-2xl max-w-2xl w-full border transform transition-all max-h-screen overflow-y-auto"
               style={{
                 backgroundColor: isDark ? "#1D2939" : "#ffffff",
                 borderColor: isDark ? "#344054" : "#e5e7eb",
               }}
             >
               <div
-                className="p-6 border-b"
+                className="p-4 sm:p-6 border-b sticky top-0"
                 style={{ borderColor: isDark ? "#344054" : "#E4E7EC" }}
               >
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center gap-3">
                   <h2
-                    className="text-2xl font-bold"
+                    className="text-xl sm:text-2xl font-bold"
                     style={{ color: isDark ? "#F9FAFB" : "#101828" }}
                   >
                     Add Event
                   </h2>
                   <button
                     onClick={() => setShowModal(false)}
-                    className="p-2 rounded-lg transition-all hover:scale-110"
+                    className="p-1.5 sm:p-2 rounded-lg transition-all hover:scale-110 flex-shrink-0"
                     style={{
                       color: isDark ? "#98A2B3" : "#667085",
                     }}
@@ -523,10 +523,10 @@ const Calendar = () => {
                 </div>
               </div>
 
-              <div className="p-6 space-y-5">
+              <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
                 <div>
                   <label
-                    className="block text-sm font-semibold mb-2"
+                    className="block text-xs sm:text-sm font-semibold mb-2"
                     style={{ color: isDark ? "#F9FAFB" : "#101828" }}
                   >
                     Event Title *
@@ -536,7 +536,7 @@ const Calendar = () => {
                     value={eventTitle}
                     onChange={(e) => setEventTitle(e.target.value)}
                     placeholder="Enter event title"
-                    className="w-full px-4 py-3 rounded-lg border transition-all"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border transition-all text-sm"
                     style={{
                       backgroundColor: isDark ? "#1D2939" : "#ffffff",
                       borderColor: isDark ? "#344054" : "#E4E7EC",
@@ -547,7 +547,7 @@ const Calendar = () => {
 
                 <div>
                   <label
-                    className="block text-sm font-semibold mb-2"
+                    className="block text-xs sm:text-sm font-semibold mb-2"
                     style={{ color: isDark ? "#F9FAFB" : "#101828" }}
                   >
                     Description
@@ -557,7 +557,7 @@ const Calendar = () => {
                     onChange={(e) => setEventDescription(e.target.value)}
                     placeholder="Enter event description"
                     rows="3"
-                    className="w-full px-4 py-3 rounded-lg border transition-all"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border transition-all text-sm"
                     style={{
                       backgroundColor: isDark ? "#1D2939" : "#ffffff",
                       borderColor: isDark ? "#344054" : "#E4E7EC",
@@ -566,16 +566,16 @@ const Calendar = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label
-                      className="block text-sm font-semibold mb-2"
+                      className="block text-xs sm:text-sm font-semibold mb-2"
                       style={{ color: isDark ? "#F9FAFB" : "#101828" }}
                     >
                       Start Date *
                     </label>
                     <div
-                      className="px-4 py-3 rounded-lg border"
+                      className="px-3 sm:px-4 py-2 sm:py-3 rounded-lg border text-sm"
                       style={{
                         backgroundColor: isDark ? "#1D2939" : "#F2F4F7",
                         borderColor: isDark ? "#344054" : "#E4E7EC",
@@ -592,13 +592,13 @@ const Calendar = () => {
 
                   <div>
                     <label
-                      className="block text-sm font-semibold mb-2"
+                      className="block text-xs sm:text-sm font-semibold mb-2"
                       style={{ color: isDark ? "#F9FAFB" : "#101828" }}
                     >
                       End Date *
                     </label>
                     <div
-                      className="px-4 py-3 rounded-lg border"
+                      className="px-3 sm:px-4 py-2 sm:py-3 rounded-lg border text-sm"
                       style={{
                         backgroundColor: isDark ? "#1D2939" : "#F2F4F7",
                         borderColor: isDark ? "#344054" : "#E4E7EC",
@@ -614,10 +614,10 @@ const Calendar = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label
-                      className="block text-sm font-semibold mb-2"
+                      className="block text-xs sm:text-sm font-semibold mb-2"
                       style={{ color: isDark ? "#F9FAFB" : "#101828" }}
                     >
                       Start Time
@@ -626,7 +626,7 @@ const Calendar = () => {
                       type="time"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border transition-all"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border transition-all text-sm"
                       style={{
                         backgroundColor: isDark ? "#1D2939" : "#ffffff",
                         borderColor: isDark ? "#344054" : "#E4E7EC",
@@ -637,7 +637,7 @@ const Calendar = () => {
 
                   <div>
                     <label
-                      className="block text-sm font-semibold mb-2"
+                      className="block text-xs sm:text-sm font-semibold mb-2"
                       style={{ color: isDark ? "#F9FAFB" : "#101828" }}
                     >
                       End Time
@@ -646,7 +646,7 @@ const Calendar = () => {
                       type="time"
                       value={endTime}
                       onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border transition-all"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border transition-all text-sm"
                       style={{
                         backgroundColor: isDark ? "#1D2939" : "#ffffff",
                         borderColor: isDark ? "#344054" : "#E4E7EC",
@@ -658,17 +658,17 @@ const Calendar = () => {
 
                 <div>
                   <label
-                    className="block text-sm font-semibold mb-3"
+                    className="block text-xs sm:text-sm font-semibold mb-2 sm:mb-3"
                     style={{ color: isDark ? "#F9FAFB" : "#101828" }}
                   >
                     Event Color
                   </label>
-                  <div className="flex gap-3">
+                  <div className="flex gap-2 sm:gap-3 flex-wrap">
                     {eventColors.map((color) => (
                       <button
                         key={color.color}
                         onClick={() => setEventColor(color.color)}
-                        className="w-10 h-10 rounded-lg transition-all hover:scale-110"
+                        className="w-8 sm:w-10 h-8 sm:h-10 rounded-lg transition-all hover:scale-110"
                         style={{
                           backgroundColor: color.color,
                           border:
@@ -688,12 +688,12 @@ const Calendar = () => {
               </div>
 
               <div
-                className="p-6 border-t flex gap-3"
+                className="p-4 sm:p-6 border-t flex flex-col sm:flex-row gap-2 sm:gap-3"
                 style={{ borderColor: isDark ? "#344054" : "#E4E7EC" }}
               >
                 <button
                   onClick={() => setShowModal(false)}
-                  className="flex-1 px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105"
+                  className="flex-1 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all hover:scale-105 text-sm"
                   style={{
                     backgroundColor: isDark ? "#1D2939" : "#F2F4F7",
                     color: isDark ? "#F9FAFB" : "#101828",
@@ -705,7 +705,7 @@ const Calendar = () => {
                 <button
                   onClick={handleAddEvent}
                   disabled={!eventTitle}
-                  className="flex-1 px-6 py-3 rounded-lg font-semibold transition-all"
+                  className="flex-1 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all text-sm"
                   style={{
                     backgroundColor: eventTitle ? "#465FFF" : "#E4E7EC",
                     color: eventTitle ? "#ffffff" : "#98A2B3",
