@@ -10,6 +10,7 @@ import {
   TrendingUp,
   Clock,
   ArrowLeft,
+  AlertCircle,
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
 
@@ -29,8 +30,9 @@ const CertificationManager = () => {
     duration: "",
     certificate: null,
   });
+  const [fieldErrors, setFieldErrors] = useState({});
 
-  // Light Theme Function
+  // ─── Themes ───────────────────────────────────────────────────────────────
   const getLightTheme = () => ({
     background: "bg-gradient-to-br from-slate-50 to-slate-100",
     cardBg: "bg-white",
@@ -42,6 +44,7 @@ const CertificationManager = () => {
     textTertiary: "text-slate-400",
     inputBg: "bg-white",
     inputBorder: "border-slate-300",
+    inputErrorBorder: "border-red-400",
     inputDisabled: "disabled:bg-slate-100",
     inputText: "text-slate-900",
     inputPlaceholder: "placeholder:text-slate-400",
@@ -72,9 +75,11 @@ const CertificationManager = () => {
     statusUpcomingBg: "bg-blue-500",
     statusCompletedBg: "bg-slate-200",
     statusCompletedText: "text-slate-700",
+    errorText: "text-red-500",
+    errorBg: "bg-red-50",
+    errorBorder: "border-red-200",
   });
 
-  // Dark Theme Function
   const getDarkTheme = () => ({
     background: "bg-gradient-to-br from-slate-950 to-slate-900",
     cardBg: "bg-slate-900",
@@ -86,11 +91,12 @@ const CertificationManager = () => {
     textTertiary: "text-slate-500",
     inputBg: "bg-slate-950",
     inputBorder: "border-slate-600",
+    inputErrorBorder: "border-red-500",
     inputDisabled: "disabled:bg-slate-800",
     inputText: "text-slate-50",
     inputPlaceholder: "placeholder:text-slate-500",
     modalOverlay: "bg-black/80",
-    modalHeader: "border-slate-200",
+    modalHeader: "bg-slate-800",
     modalHeaderBorder: "border-slate-700",
     emptyStateBg: "bg-slate-900",
     emptyStateIcon: "text-slate-500",
@@ -116,11 +122,14 @@ const CertificationManager = () => {
     statusUpcomingBg: "bg-blue-600",
     statusCompletedBg: "bg-slate-700",
     statusCompletedText: "text-slate-300",
+    errorText: "text-red-400",
+    errorBg: "bg-red-900/20",
+    errorBorder: "border-red-700",
   });
 
-  const themeStyles = isDarkTheme ? getDarkTheme() : getLightTheme();
+  const t = isDarkTheme ? getDarkTheme() : getLightTheme();
 
-  // Calculate summary statistics
+  // ─── Stats ────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
     const total = certifications.length;
     const totalWeeks = certifications.reduce(
@@ -129,17 +138,13 @@ const CertificationManager = () => {
     );
     const platforms = new Set(certifications.map((c) => c.platform)).size;
     const avgDuration = total > 0 ? totalWeeks / total : 0;
-
     return { total, totalWeeks, platforms, avgDuration };
   }, [certifications]);
 
+  // ─── Helpers ──────────────────────────────────────────────────────────────
   const resetForm = () => {
-    setFormData({
-      certificationName: "",
-      platform: "",
-      duration: "",
-      certificate: null,
-    });
+    setFormData({ certificationName: "", platform: "", duration: "", certificate: null });
+    setFieldErrors({});
     setEditingId(null);
     setViewMode(false);
   };
@@ -147,6 +152,9 @@ const CertificationManager = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleFileChange = (e) => {
@@ -156,7 +164,46 @@ const CertificationManager = () => {
     }
   };
 
+  // ─── Validation ───────────────────────────────────────────────────────────
+  const validate = () => {
+    const errors = {};
+
+    const certName = formData.certificationName.trim();
+    if (!certName) {
+      errors.certificationName = "Certification name is required.";
+    } else if (certName.length < 3) {
+      errors.certificationName = "Certification name must be at least 3 characters.";
+    }
+
+    const platform = formData.platform.trim();
+    if (!platform) {
+      errors.platform = "Platform name is required.";
+    } else if (platform.length < 2) {
+      errors.platform = "Platform name must be at least 2 characters.";
+    }
+
+    const duration = formData.duration.toString().trim();
+    if (!duration) {
+      errors.duration = "Duration is required.";
+    } else if (isNaN(duration) || Number(duration) <= 0) {
+      errors.duration = "Enter a valid positive number of weeks (e.g. 12).";
+    } else if (!Number.isInteger(Number(duration))) {
+      errors.duration = "Duration must be a whole number of weeks.";
+    } else if (Number(duration) > 260) {
+      errors.duration = "Duration seems too long (max 260 weeks / 5 years). Please verify.";
+    }
+
+    return errors;
+  };
+
+  // ─── Submit ───────────────────────────────────────────────────────────────
   const handleSubmit = () => {
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+
     if (editingId !== null) {
       setCertifications((prev) =>
         prev.map((cert) =>
@@ -164,11 +211,7 @@ const CertificationManager = () => {
         )
       );
     } else {
-      const newCertification = {
-        ...formData,
-        id: Date.now(),
-      };
-      setCertifications((prev) => [...prev, newCertification]);
+      setCertifications((prev) => [...prev, { ...formData, id: Date.now() }]);
     }
     setShowModal(false);
     resetForm();
@@ -181,6 +224,7 @@ const CertificationManager = () => {
       duration: certification.duration,
       certificate: certification.certificate,
     });
+    setFieldErrors({});
     setEditingId(certification.id);
     setViewMode(false);
     setShowModal(true);
@@ -193,6 +237,7 @@ const CertificationManager = () => {
       duration: certification.duration,
       certificate: certification.certificate,
     });
+    setFieldErrors({});
     setViewMode(true);
     setShowModal(true);
   };
@@ -208,263 +253,206 @@ const CertificationManager = () => {
     setDeleteId(null);
   };
 
+  // ─── Reusable field error ──────────────────────────────────────────────────
+  const FieldError = ({ error }) =>
+    error ? (
+      <p className={`flex items-center gap-1.5 text-xs mt-1.5 ${t.errorText}`}>
+        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+        {error}
+      </p>
+    ) : null;
+
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    // ── MOBILE: reduced outer padding (p-4 → md:p-6) ──
-    <div className={`min-h-screen ${themeStyles.background} p-4 md:p-6`}>
+    <div className={`min-h-screen ${t.background} p-4 md:p-6`}>
       <div className="max-w-full mx-auto space-y-6">
 
-        {/* Header
-            MOBILE: wrap to two rows when screen is narrow;
-            gap-3 keeps button from touching the title */}
+        {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className={`text-2xl md:text-3xl font-bold ${themeStyles.textPrimary}`}>
+          <h1 className={`text-2xl md:text-3xl font-bold ${t.textPrimary}`}>
             Certification
           </h1>
           <button
-            onClick={() => {
-              resetForm();
-              setShowModal(true);
-            }}
-            className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-700 font-medium transition-all shadow-lg whitespace-nowrap"
+            onClick={() => { resetForm(); setShowModal(true); }}
+            className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800 font-medium transition-all shadow-lg whitespace-nowrap"
           >
             <Plus size={20} className="mr-2" />
             Add Certification
           </button>
         </div>
 
-        {/* Summary Statistics — already grid-responsive */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {[
             {
-              icon: Award,
+              Icon: Award,
               label: "Total Certifications",
               value: stats.total,
-              subtitle: "certificates earned",
-              bgColor: themeStyles.statCard1Gradient,
-              borderColor: themeStyles.dividerBorder,
-              iconBg: themeStyles.statIcon1Bg,
-              iconColor: themeStyles.statIcon1Text,
+              gradient: t.statCard1Gradient,
+              iconBg: t.statIcon1Bg,
+              iconColor: t.statIcon1Text,
             },
             {
-              icon: BookOpen,
+              Icon: BookOpen,
               label: "Learning Platforms",
               value: stats.platforms,
-              subtitle: "platforms used",
-              bgColor: themeStyles.statCard2Gradient,
-              borderColor: themeStyles.dividerBorder,
-              iconBg: themeStyles.statIcon2Bg,
-              iconColor: themeStyles.statIcon2Text,
+              gradient: t.statCard2Gradient,
+              iconBg: t.statIcon2Bg,
+              iconColor: t.statIcon2Text,
             },
             {
-              icon: TrendingUp,
+              Icon: TrendingUp,
               label: "Total Learning Time",
               value: `${stats.totalWeeks} wks`,
-              subtitle: "time invested",
-              bgColor: themeStyles.statCard3Gradient,
-              borderColor: themeStyles.dividerBorder,
-              iconBg: themeStyles.statIcon3Bg,
-              iconColor: themeStyles.statIcon3Text,
+              gradient: t.statCard3Gradient,
+              iconBg: t.statIcon3Bg,
+              iconColor: t.statIcon3Text,
             },
             {
-              icon: Clock,
+              Icon: Clock,
               label: "Avg Duration",
               value: `${stats.avgDuration.toFixed(1)} wks`,
-              subtitle: "average per course",
-              bgColor: themeStyles.statCard4Gradient,
-              borderColor: themeStyles.dividerBorder,
-              iconBg: themeStyles.statIcon4Bg,
-              iconColor: themeStyles.statIcon4Text,
+              gradient: t.statCard4Gradient,
+              iconBg: t.statIcon4Bg,
+              iconColor: t.statIcon4Text,
             },
-          ].map((stat, idx) => (
+          ].map(({ Icon, label, value, subtitle, gradient, iconBg, iconColor }) => (
             <div
-              key={idx}
-              className={`bg-gradient-to-br ${stat.bgColor} ${themeStyles.cardBorder} border ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} p-5 md:p-6 rounded-xl transition-all`}
+              key={label}
+              className={`rounded-xl border ${t.cardBorder} ${t.cardShadow} ${t.cardHoverShadow} bg-gradient-to-br ${gradient} transition-all`}
             >
-              <div className="flex items-center justify-between mb-4">
-                <div
-                  className={`${stat.iconBg} p-3 rounded-lg ${themeStyles.cardShadow}`}
-                >
-                  <stat.icon className={stat.iconColor} size={24} />
+              <div className="p-6 flex items-center justify-between">
+                <div>
+                  <p className={`text-sm font-medium ${t.textSecondary}`}>{label}</p>
+                  <h3 className={`text-3xl font-bold ${t.textPrimary} mt-2`}>{value}</h3>
+                  <p className={`text-xs ${t.textTertiary} mt-1`}>{subtitle}</p>
                 </div>
-              </div>
-              <div className={`text-sm ${themeStyles.textSecondary} mb-1`}>
-                {stat.label}
-              </div>
-              {/* MOBILE: scale down the large number slightly */}
-              <div className={`text-2xl md:text-3xl font-bold ${themeStyles.textPrimary}`}>
-                {stat.value}
-              </div>
-              <div className={`text-xs ${themeStyles.textTertiary} mt-1`}>
-                {stat.subtitle}
+                <div className={`h-12 w-12 ${iconBg} rounded-full flex items-center justify-center shrink-0`}>
+                  <Icon className={`h-6 w-6 ${iconColor}`} />
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        <h2 className={`text-xl font-bold ${themeStyles.textPrimary} mb-6`}>
+        <h2 className={`text-xl font-bold ${t.textPrimary} mb-6`}>
           Your Certifications
         </h2>
 
         {/* Certification Cards */}
-        <div
-          className={`${themeStyles.cardBg} ${themeStyles.cardBorder} border ${themeStyles.cardShadow} rounded-xl p-4 md:p-6`}
-        >
-          {certifications.length === 0 ? (
-            <div
-              className={`${themeStyles.emptyStateBg} ${themeStyles.cardBorder} rounded-xl p-8 md:p-12 text-center`}
-            >
-              <Award
-                className={`${themeStyles.emptyStateIcon} mx-auto mb-4`}
-                size={64}
-              />
-              <h3
-                className={`text-xl font-semibold ${themeStyles.textPrimary} mb-2`}
-              >
+        {certifications.length === 0 ? (
+          <div className={`${t.cardBg} ${t.cardBorder} border ${t.cardShadow} rounded-xl p-4 md:p-6`}>
+            <div className={`${t.emptyStateBg} ${t.cardBorder} rounded-xl p-8 md:p-12 text-center`}>
+              <Award className={`${t.emptyStateIcon} mx-auto mb-4`} size={64} />
+              <h3 className={`text-xl font-semibold ${t.textPrimary} mb-2`}>
                 No Certifications Yet
               </h3>
-              <p className={`${themeStyles.textSecondary} mb-6`}>
-                Start building your professional portfolio by adding your first
-                certification
+              <p className={`${t.textSecondary} mb-6`}>
+                Start building your professional portfolio by adding your first certification
               </p>
               <button
-                onClick={() => {
-                  resetForm();
-                  setShowModal(true);
-                }}
-                className={`inline-flex items-center justify-center px-4 py-2 rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
+                onClick={() => { resetForm(); setShowModal(true); }}
+                className={`inline-flex items-center justify-center px-4 py-2 rounded-lg border-2 ${t.buttonBorder} ${t.buttonBg} ${t.buttonHover} ${t.textPrimary} font-medium transition-all`}
               >
                 <Plus size={20} className="mr-2" />
                 Add Your First Certification
               </button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {certifications.map((certification) => (
-                <div
-                  key={certification.id}
-                  className={`${themeStyles.cardBg} ${themeStyles.cardBorder} border ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} rounded-xl p-5 md:p-6 transition-all`}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1 min-w-0">
-                      {/* MOBILE: allow title to wrap gracefully */}
-                      <h3
-                        className={`text-base md:text-lg font-bold ${themeStyles.textPrimary} mb-2 break-words`}
-                      >
-                        {certification.certificationName}
-                      </h3>
-                      <div
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700`}
-                      >
-                        <Clock size={14} className="mr-1" />
-                        {certification.duration}
-                      </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {certifications.map((certification) => (
+              <div
+                key={certification.id}
+                className={`${t.cardBg} ${t.cardBorder} border ${t.cardShadow} ${t.cardHoverShadow} rounded-xl p-5 md:p-6 transition-all`}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`text-base md:text-lg font-bold ${t.textPrimary} mb-2 break-words`}>
+                      {certification.certificationName}
+                    </h3>
+                    <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                      <Clock size={14} className="mr-1" />
+                      {certification.duration} wks
                     </div>
-                  </div>
-
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center">
-                      <BookOpen
-                        size={16}
-                        className={`${themeStyles.textSecondary} mr-2 shrink-0`}
-                      />
-                      <span className={`text-sm ${themeStyles.textSecondary}`}>
-                        Platform
-                      </span>
-                      {/* MOBILE: truncate long platform names */}
-                      <span
-                        className={`text-sm ${themeStyles.textPrimary} ml-auto font-medium truncate max-w-[120px] md:max-w-none text-right`}
-                      >
-                        {certification.platform}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <Clock
-                        size={16}
-                        className={`${themeStyles.textSecondary} mr-2 shrink-0`}
-                      />
-                      <span className={`text-sm ${themeStyles.textSecondary}`}>
-                        Duration: {certification.duration} weeks
-                      </span>
-                    </div>
-                  </div>
-
-                  {certification.certificate && (
-                    <div
-                      className={`mb-4 p-3 rounded-lg ${themeStyles.inputBg} border ${themeStyles.inputBorder}`}
-                    >
-                      <p
-                        className={`text-xs ${themeStyles.offerLetterText} font-medium`}
-                      >
-                        📄 Certificate attached
-                      </p>
-                    </div>
-                  )}
-
-                  {/* MOBILE: ensure action buttons don't shrink too much */}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleView(certification)}
-                      className={`flex-1 inline-flex items-center justify-center px-2 md:px-3 py-2 text-sm rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
-                    >
-                      <Eye size={16} className="mr-1 shrink-0" />
-                      <span className="truncate">View</span>
-                    </button>
-                    <button
-                      onClick={() => handleEdit(certification)}
-                      className={`flex-1 inline-flex items-center justify-center px-2 md:px-3 py-2 text-sm rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
-                    >
-                      <Edit2 size={16} className="mr-1 shrink-0" />
-                      <span className="truncate">Edit</span>
-                    </button>
-                    <button
-                      onClick={() => handleDelete(certification.id)}
-                      className="p-2 rounded-lg border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0"
-                      title="Delete"
-                    >
-                      <Trash2 size={16} />
-                    </button>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
 
-        {/* Add / Edit / View Modal */}
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center">
+                    <BookOpen size={16} className={`${t.textSecondary} mr-2 shrink-0`} />
+                    <span className={`text-sm ${t.textSecondary}`}>Platform</span>
+                    <span className={`text-sm ${t.textPrimary} ml-auto font-medium truncate max-w-[120px] md:max-w-none text-right`}>
+                      {certification.platform}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <Clock size={16} className={`${t.textSecondary} mr-2 shrink-0`} />
+                    <span className={`text-sm ${t.textSecondary}`}>
+                      Duration: {certification.duration} weeks
+                    </span>
+                  </div>
+                </div>
+
+                {certification.certificate && (
+                  <div className={`mb-4 p-3 rounded-lg ${t.inputBg} border ${t.inputBorder}`}>
+                    <p className={`text-xs ${t.offerLetterText} font-medium`}>
+                      📄 Certificate attached
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleView(certification)}
+                    className={`flex-1 inline-flex items-center justify-center px-2 md:px-3 py-2 text-sm rounded-lg border-2 ${t.buttonBorder} ${t.buttonBg} ${t.buttonHover} ${t.textPrimary} font-medium transition-all`}
+                  >
+                    <Eye size={16} className="mr-1 shrink-0" />
+                    <span className="truncate">View</span>
+                  </button>
+                  <button
+                    onClick={() => handleEdit(certification)}
+                    className={`flex-1 inline-flex items-center justify-center px-2 md:px-3 py-2 text-sm rounded-lg border-2 ${t.buttonBorder} ${t.buttonBg} ${t.buttonHover} ${t.textPrimary} font-medium transition-all`}
+                  >
+                    <Edit2 size={16} className="mr-1 shrink-0" />
+                    <span className="truncate">Edit</span>
+                  </button>
+                  <button
+                    onClick={() => handleDelete(certification.id)}
+                    className="p-2 rounded-lg border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0"
+                    title="Delete"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── Add / Edit / View Modal ───────────────────────────────────────── */}
         {showModal && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
             <div
-              className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm`}
-              onClick={() => {
-                setShowModal(false);
-                resetForm();
-              }}
+              className={`fixed inset-0 ${t.modalOverlay} backdrop-blur-sm`}
+              onClick={() => { setShowModal(false); resetForm(); }}
             />
-
-            {/* MOBILE: tighter outer padding (p-3) so modal has more breathing room */}
             <div className="flex min-h-full items-center justify-center p-3 md:p-4">
               <div
-                className={`relative ${themeStyles.cardBg} ${themeStyles.cardBorder} border rounded-2xl shadow-2xl w-full max-w-2xl`}
+                className={`relative ${t.cardBg} ${t.cardBorder} border rounded-2xl shadow-2xl w-full max-w-2xl`}
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* HEADER — reduced padding on mobile */}
-                <div
-                  className={`flex items-center justify-between p-4 md:p-6 border-b ${themeStyles.modalHeaderBorder}`}
-                >
+                {/* Header */}
+                <div className={`flex items-center justify-between p-4 md:p-6 border-b ${t.modalHeader} ${t.modalHeaderBorder}`}>
                   {viewMode && (
                     <button
-                      onClick={() => {
-                        setShowModal(false);
-                        resetForm();
-                      }}
+                      onClick={() => { setShowModal(false); resetForm(); }}
                       className="inline-flex items-center justify-center p-2 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-all"
                     >
                       <ArrowLeft size={20} />
                     </button>
                   )}
-                  <h2
-                    className={`text-xl md:text-2xl font-bold ${themeStyles.textPrimary}`}
-                  >
+                  <h2 className={`text-xl md:text-2xl font-bold ${t.textPrimary}`}>
                     {viewMode
                       ? "Certification Details"
                       : editingId
@@ -472,23 +460,29 @@ const CertificationManager = () => {
                         : "Add New Certification"}
                   </h2>
                   <button
-                    onClick={() => {
-                      setShowModal(false);
-                      resetForm();
-                    }}
-                    className={`inline-flex items-center justify-center p-2 rounded-lg ${themeStyles.buttonHover} ${themeStyles.textPrimary}`}
+                    onClick={() => { setShowModal(false); resetForm(); }}
+                    className={`inline-flex items-center justify-center p-2 rounded-lg ${t.buttonHover} ${t.textPrimary}`}
                   >
                     <X size={20} />
                   </button>
                 </div>
 
-                {/* BODY — tighter spacing on mobile */}
-                <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+                {/* Validation summary banner */}
+                {!viewMode && Object.keys(fieldErrors).length > 0 && (
+                  <div className={`mx-4 md:mx-6 mt-4 flex items-start gap-3 px-4 py-3 rounded-lg border ${t.errorBg} ${t.errorBorder}`}>
+                    <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${t.errorText}`} />
+                    <p className={`text-sm ${t.errorText}`}>
+                      Please fix the highlighted fields before submitting.
+                    </p>
+                  </div>
+                )}
+
+                {/* Body */}
+                <div className="p-4 md:p-6 space-y-4 md:space-y-5">
+
                   {/* Certification Name */}
-                  <div>
-                    <label
-                      className={`block text-sm font-medium ${themeStyles.textPrimary} mb-2`}
-                    >
+                  <div className="space-y-1.5">
+                    <label className={`block text-sm font-medium ${t.textPrimary}`}>
                       Certification Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -498,17 +492,16 @@ const CertificationManager = () => {
                       onChange={handleInputChange}
                       disabled={viewMode}
                       placeholder="e.g., AWS Certified Solutions Architect"
-                      className={`w-full px-4 py-3 rounded-lg border ${themeStyles.inputBorder} ${themeStyles.inputBg} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} ${themeStyles.inputDisabled} focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`}
+                      className={`w-full px-4 py-3 rounded-lg border ${fieldErrors.certificationName ? t.inputErrorBorder : t.inputBorder
+                        } ${t.inputBg} ${t.inputText} ${t.inputPlaceholder} ${t.inputDisabled} focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`}
                     />
+                    <FieldError error={fieldErrors.certificationName} />
                   </div>
 
                   {/* Platform */}
-                  <div>
-                    <label
-                      className={`block text-sm font-medium ${themeStyles.textPrimary} mb-2`}
-                    >
-                      Certification Platform{" "}
-                      <span className="text-red-500">*</span>
+                  <div className="space-y-1.5">
+                    <label className={`block text-sm font-medium ${t.textPrimary}`}>
+                      Certification Platform <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -517,17 +510,16 @@ const CertificationManager = () => {
                       onChange={handleInputChange}
                       disabled={viewMode}
                       placeholder="e.g., Coursera, Udemy, AWS"
-                      className={`w-full px-4 py-3 rounded-lg border ${themeStyles.inputBorder} ${themeStyles.inputBg} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} ${themeStyles.inputDisabled} focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`}
+                      className={`w-full px-4 py-3 rounded-lg border ${fieldErrors.platform ? t.inputErrorBorder : t.inputBorder
+                        } ${t.inputBg} ${t.inputText} ${t.inputPlaceholder} ${t.inputDisabled} focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`}
                     />
+                    <FieldError error={fieldErrors.platform} />
                   </div>
 
                   {/* Duration */}
-                  <div>
-                    <label
-                      className={`block text-sm font-medium ${themeStyles.textPrimary} mb-2`}
-                    >
-                      Certificate Duration (In weeks){" "}
-                      <span className="text-red-500">*</span>
+                  <div className="space-y-1.5">
+                    <label className={`block text-sm font-medium ${t.textPrimary}`}>
+                      Certificate Duration (in weeks) <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="number"
@@ -536,21 +528,22 @@ const CertificationManager = () => {
                       onChange={handleInputChange}
                       disabled={viewMode}
                       placeholder="e.g., 12"
-                      className={`w-full px-4 py-3 rounded-lg border ${themeStyles.inputBorder} ${themeStyles.inputBg} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} ${themeStyles.inputDisabled} focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`}
+                      min="1"
+                      step="1"
+                      className={`w-full px-4 py-3 rounded-lg border ${fieldErrors.duration ? t.inputErrorBorder : t.inputBorder
+                        } ${t.inputBg} ${t.inputText} ${t.inputPlaceholder} ${t.inputDisabled} focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all`}
                     />
+                    <FieldError error={fieldErrors.duration} />
                   </div>
 
-                  {/* File Upload */}
-                  <div>
-                    <label
-                      className={`block text-sm font-medium ${themeStyles.textPrimary} mb-2`}
-                    >
+                  {/* Certificate Upload */}
+                  <div className="space-y-1.5">
+                    <label className={`block text-sm font-medium ${t.textPrimary}`}>
                       Upload Certificate
+                      <span className={`ml-1.5 text-xs font-normal ${t.textTertiary}`}>(optional)</span>
                     </label>
                     {viewMode ? (
-                      <div
-                        className={`w-full px-4 py-3 rounded-lg border ${themeStyles.inputBorder} ${themeStyles.inputBg} ${themeStyles.textSecondary}`}
-                      >
+                      <div className={`w-full px-4 py-3 rounded-lg border ${t.inputBorder} ${t.inputBg} ${t.textSecondary}`}>
                         {formData.certificate || "No file uploaded"}
                       </div>
                     ) : (
@@ -558,28 +551,23 @@ const CertificationManager = () => {
                         type="file"
                         onChange={handleFileChange}
                         accept=".pdf,.jpg,.jpeg,.png"
-                        className={`w-full px-4 py-3 rounded-lg border ${themeStyles.inputBorder} ${themeStyles.inputBg} ${themeStyles.inputText} file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all`}
+                        className={`w-full px-4 py-3 rounded-lg border ${t.inputBorder} ${t.inputBg} ${t.inputText} file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer cursor-pointer transition-all`}
                       />
                     )}
                     {formData.certificate && (
-                      <p
-                        className={`mt-2 text-sm ${themeStyles.textSecondary}`}
-                      >
+                      <p className={`mt-1 text-sm ${t.textSecondary}`}>
                         Selected: {formData.certificate}
                       </p>
                     )}
                   </div>
                 </div>
 
-                {/* Buttons — reduced padding on mobile */}
+                {/* Action Buttons */}
                 {!viewMode && (
-                  <div className="flex gap-3 p-4 md:p-6">
+                  <div className="flex gap-3 p-4 md:p-6 pt-0">
                     <button
-                      onClick={() => {
-                        setShowModal(false);
-                        resetForm();
-                      }}
-                      className={`flex-1 inline-flex items-center justify-center px-4 py-3 text-sm rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
+                      onClick={() => { setShowModal(false); resetForm(); }}
+                      className={`flex-1 inline-flex items-center justify-center px-4 py-3 text-sm rounded-lg border-2 ${t.buttonBorder} ${t.buttonBg} ${t.buttonHover} ${t.textPrimary} font-medium transition-all`}
                     >
                       Cancel
                     </button>
@@ -596,54 +584,36 @@ const CertificationManager = () => {
           </div>
         )}
 
-        {/* Delete Confirmation Modal */}
+        {/* ── Delete Confirm Modal ──────────────────────────────────────────── */}
         {showDeleteConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-4">
             <div
-              className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm`}
-              onClick={() => {
-                setShowDeleteConfirm(false);
-                setDeleteId(null);
-              }}
+              className={`fixed inset-0 ${t.modalOverlay} backdrop-blur-sm`}
+              onClick={() => { setShowDeleteConfirm(false); setDeleteId(null); }}
             />
-
             <div
-              className={`relative ${themeStyles.cardBg} ${themeStyles.cardBorder} border rounded-2xl shadow-2xl w-full max-w-lg`}
+              className={`relative ${t.cardBg} ${t.cardBorder} border rounded-2xl shadow-2xl w-full max-w-lg`}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between p-4 md:p-6 pb-4">
-                <h2
-                  className={`text-xl md:text-2xl font-semibold ${themeStyles.textPrimary}`}
-                >
+                <h2 className={`text-xl md:text-2xl font-semibold ${t.textPrimary}`}>
                   Confirm Deletion
                 </h2>
                 <button
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setDeleteId(null);
-                  }}
-                  className={`inline-flex items-center justify-center p-1 rounded-lg ${themeStyles.buttonHover} ${themeStyles.textSecondary}`}
+                  onClick={() => { setShowDeleteConfirm(false); setDeleteId(null); }}
+                  className={`inline-flex items-center justify-center p-1 rounded-lg ${t.buttonHover} ${t.textSecondary}`}
                 >
                   <X size={24} />
                 </button>
               </div>
-
               <div className="px-4 md:px-6 pb-4 md:pb-6">
-                <p
-                  className={`${themeStyles.textSecondary} mb-6 md:mb-8 text-base leading-relaxed`}
-                >
-                  Are you sure you want to delete this certification? This
-                  action cannot be undone.
+                <p className={`${t.textSecondary} mb-6 md:mb-8 text-base leading-relaxed`}>
+                  Are you sure you want to delete this certification? This action cannot be undone.
                 </p>
-
-                {/* MOBILE: full-width stacked buttons on very small screens */}
                 <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                   <button
-                    onClick={() => {
-                      setShowDeleteConfirm(false);
-                      setDeleteId(null);
-                    }}
-                    className={`w-full sm:w-auto px-6 py-2.5 rounded-lg ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
+                    onClick={() => { setShowDeleteConfirm(false); setDeleteId(null); }}
+                    className={`w-full sm:w-auto px-6 py-2.5 rounded-lg ${t.buttonBg} ${t.buttonHover} ${t.textPrimary} font-medium transition-all`}
                   >
                     Cancel
                   </button>
@@ -658,6 +628,7 @@ const CertificationManager = () => {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

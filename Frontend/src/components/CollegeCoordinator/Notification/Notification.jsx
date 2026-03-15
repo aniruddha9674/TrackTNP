@@ -53,6 +53,39 @@ const CoordinatorNotifications = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterRecipient, setFilterRecipient] = useState("all");
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  // ── App Modal state (replaces all alert / confirm) ────────────────────────
+  const [appModal, setAppModal] = useState({
+    isOpen: false,
+    type: "alert", // "alert" | "confirm"
+    title: "",
+    message: "",
+    onConfirm: null,
+  });
+
+  const showAlert = (title, message) => {
+    setAppModal({
+      isOpen: true,
+      type: "alert",
+      title,
+      message,
+      onConfirm: () => setAppModal((m) => ({ ...m, isOpen: false })),
+    });
+  };
+
+  const showConfirm = (title, message, onConfirm) => {
+    setAppModal({
+      isOpen: true,
+      type: "confirm",
+      title,
+      message,
+      onConfirm: () => {
+        setAppModal((m) => ({ ...m, isOpen: false }));
+        onConfirm();
+      },
+    });
+  };
 
   // Notification Form State
   const [notificationForm, setNotificationForm] = useState({
@@ -141,6 +174,7 @@ const CoordinatorNotifications = () => {
     textTertiary: "text-slate-400",
     inputBg: "bg-white",
     inputBorder: "border-slate-300",
+    inputErrorBorder: "border-red-400",
     inputDisabled: "disabled:bg-slate-100",
     inputText: "text-slate-900",
     inputPlaceholder: "placeholder:text-slate-400",
@@ -170,6 +204,9 @@ const CoordinatorNotifications = () => {
     notificationCardBorder: "border-gray-100",
     notificationCardHover: "hover:border-gray-200",
     iconGradient: "from-blue-50 to-blue-100",
+    errorText: "text-red-500",
+    errorBg: "bg-red-50",
+    errorBorder: "border-red-200",
   });
 
   // Dark Theme Function
@@ -184,6 +221,7 @@ const CoordinatorNotifications = () => {
     textTertiary: "text-slate-500",
     inputBg: "bg-slate-950",
     inputBorder: "border-slate-600",
+    inputErrorBorder: "border-red-500",
     inputDisabled: "disabled:bg-slate-800",
     inputText: "text-slate-50",
     inputPlaceholder: "placeholder:text-slate-500",
@@ -213,6 +251,9 @@ const CoordinatorNotifications = () => {
     notificationCardBorder: "border-slate-700",
     notificationCardHover: "hover:border-slate-600",
     iconGradient: "from-blue-900/30 to-blue-800/30",
+    errorText: "text-red-400",
+    errorBg: "bg-red-900/20",
+    errorBorder: "border-red-700",
   });
 
   const themeStyles = theme === "dark" ? getDarkTheme() : getLightTheme();
@@ -267,6 +308,7 @@ const CoordinatorNotifications = () => {
       department: "",
       year: "",
     });
+    setFieldErrors((prev) => ({ ...prev, department: "" }));
   };
 
   const buildTargetGroup = () => {
@@ -274,13 +316,10 @@ const CoordinatorNotifications = () => {
 
     if (recipientType === "students") {
       const parts = [];
-
       if (department) parts.push(department);
       else parts.push("All Departments");
-
       if (year) parts.push(year);
       else parts.push("All Years");
-
       return parts.join(" - ");
     } else if (recipientType === "department coordinators") {
       return department || "All Departments";
@@ -288,24 +327,63 @@ const CoordinatorNotifications = () => {
     return "All";
   };
 
-  const handleCreateNotification = () => {
-    if (!notificationForm.title || !notificationForm.message) {
-      alert("Please fill in all required fields");
-      return;
+  // ── Validation ─────────────────────────────────────────────────────────────
+  const validate = () => {
+    const errors = {};
+
+    const title = notificationForm.title.trim();
+    if (!title) {
+      errors.title = "Notification title is required.";
+    } else if (title.length < 5) {
+      errors.title = "Title must be at least 5 characters.";
+    } else if (title.length > 100) {
+      errors.title = "Title must not exceed 100 characters.";
     }
 
-    // Validate based on recipient type
-    if (notificationForm.recipientType === "department coordinators") {
-      if (!notificationForm.department) {
-        alert("Please select a department");
-        return;
-      }
+    const message = notificationForm.message.trim();
+    if (!message) {
+      errors.message = "Message is required.";
+    } else if (message.length < 10) {
+      errors.message = "Message must be at least 10 characters.";
+    } else if (message.length > 1000) {
+      errors.message = "Message must not exceed 1000 characters.";
+    }
+
+    if (
+      notificationForm.recipientType === "department coordinators" &&
+      !notificationForm.department
+    ) {
+      errors.department =
+        "Please select a department for coordinator notifications.";
+    }
+
+    return errors;
+  };
+
+  const handleCloseCreateModal = () => {
+    setShowCreateModal(false);
+    setFieldErrors({});
+    setNotificationForm({
+      title: "",
+      message: "",
+      recipientType: "students",
+      department: "",
+      year: "",
+      category: "general",
+    });
+  };
+
+  const handleCreateNotification = () => {
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
     }
 
     const newNotification = {
       id: notifications.length + 1,
-      title: notificationForm.title,
-      message: notificationForm.message,
+      title: notificationForm.title.trim(),
+      message: notificationForm.message.trim(),
       recipientType: notificationForm.recipientType,
       targetGroup: buildTargetGroup(),
       category: notificationForm.category,
@@ -316,22 +394,19 @@ const CoordinatorNotifications = () => {
     };
 
     setNotifications([newNotification, ...notifications]);
-    setShowCreateModal(false);
-    setNotificationForm({
-      title: "",
-      message: "",
-      recipientType: "students",
-      department: "",
-      year: "",
-      category: "general",
-    });
-    alert("Notification sent successfully!");
+    handleCloseCreateModal();
+    showAlert(
+      "Notification Sent!",
+      "Your notification has been successfully sent to the selected recipients."
+    );
   };
 
   const handleDeleteNotification = (id) => {
-    if (window.confirm("Are you sure you want to delete this notification?")) {
-      setNotifications(notifications.filter((n) => n.id !== id));
-    }
+    showConfirm(
+      "Delete Notification",
+      "Are you sure you want to delete this notification? This action cannot be undone.",
+      () => setNotifications(notifications.filter((n) => n.id !== id))
+    );
   };
 
   const formatDateTime = (dateString) => {
@@ -580,9 +655,9 @@ const CoordinatorNotifications = () => {
                 const readPercentage =
                   notification.status === "sent"
                     ? Math.round(
-                        (notification.readCount / notification.recipientCount) *
-                          100
-                      )
+                      (notification.readCount / notification.recipientCount) *
+                      100
+                    )
                     : 0;
 
                 return (
@@ -709,14 +784,15 @@ const CoordinatorNotifications = () => {
         </div>
       </div>
 
-      {/* Create Notification Modal */}
+      {/* ── Create Notification Modal ─────────────────────────────────────── */}
       {showCreateModal && (
         <div
-          className={`fixed inset-0 ${themeStyles.modalOverlay} flex items-center justify-center p-4 z-50`}
+          className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
         >
           <div
-            className={`${themeStyles.modalBg} rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto`}
+            className={`${themeStyles.modalBg} border ${themeStyles.cardBorder} rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden`}
           >
+            {/* Header */}
             <div
               className={`sticky top-0 ${themeStyles.modalHeader} border-b ${themeStyles.modalHeaderBorder} px-6 py-4 flex items-center justify-between`}
             >
@@ -724,33 +800,73 @@ const CoordinatorNotifications = () => {
                 Create New Notification
               </h2>
               <button
-                onClick={() => setShowCreateModal(false)}
+                onClick={handleCloseCreateModal}
                 className={`p-2 rounded-lg ${themeStyles.buttonHover} transition-colors`}
               >
                 <X className={`h-5 w-5 ${themeStyles.textPrimary}`} />
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            {/* Validation Summary Banner */}
+            {Object.keys(fieldErrors).length > 0 && (
+              <div
+                className={`mx-6 mt-4 flex items-start gap-3 px-4 py-3 rounded-lg border ${themeStyles.errorBg} ${themeStyles.errorBorder}`}
+              >
+                <AlertCircle
+                  className={`h-5 w-5 shrink-0 mt-0.5 ${themeStyles.errorText}`}
+                />
+                <p className={`text-sm ${themeStyles.errorText}`}>
+                  Please fix the highlighted fields before submitting.
+                </p>
+              </div>
+            )}
+
+            <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+
               {/* Title */}
               <div>
                 <label
                   className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
                 >
-                  Notification Title *
+                  Notification Title <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={notificationForm.title}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setNotificationForm({
                       ...notificationForm,
                       title: e.target.value,
-                    })
-                  }
+                    });
+                    if (fieldErrors.title)
+                      setFieldErrors((prev) => ({ ...prev, title: "" }));
+                  }}
                   placeholder="Enter notification title"
-                  className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                  className={`w-full px-4 py-3 border ${fieldErrors.title
+                      ? themeStyles.inputErrorBorder
+                      : themeStyles.inputBorder
+                    } rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
                 />
+                <div className="flex justify-between items-center mt-1.5">
+                  {fieldErrors.title ? (
+                    <p
+                      className={`flex items-center gap-1.5 text-xs ${themeStyles.errorText}`}
+                    >
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                      {fieldErrors.title}
+                    </p>
+                  ) : (
+                    <span />
+                  )}
+                  <span
+                    className={`text-xs ml-auto ${notificationForm.title.length > 100
+                        ? themeStyles.errorText
+                        : themeStyles.textTertiary
+                      }`}
+                  >
+                    {notificationForm.title.length}/100
+                  </span>
+                </div>
               </div>
 
               {/* Message */}
@@ -758,20 +874,45 @@ const CoordinatorNotifications = () => {
                 <label
                   className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
                 >
-                  Message *
+                  Message <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={notificationForm.message}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setNotificationForm({
                       ...notificationForm,
                       message: e.target.value,
-                    })
-                  }
+                    });
+                    if (fieldErrors.message)
+                      setFieldErrors((prev) => ({ ...prev, message: "" }));
+                  }}
                   placeholder="Enter notification message"
                   rows="4"
-                  className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 resize-none`}
+                  className={`w-full px-4 py-3 border ${fieldErrors.message
+                      ? themeStyles.inputErrorBorder
+                      : themeStyles.inputBorder
+                    } rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} ${themeStyles.inputPlaceholder} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 resize-none`}
                 />
+                <div className="flex justify-between items-center mt-1.5">
+                  {fieldErrors.message ? (
+                    <p
+                      className={`flex items-center gap-1.5 text-xs ${themeStyles.errorText}`}
+                    >
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                      {fieldErrors.message}
+                    </p>
+                  ) : (
+                    <span />
+                  )}
+                  <span
+                    className={`text-xs ml-auto ${notificationForm.message.length > 1000
+                        ? themeStyles.errorText
+                        : themeStyles.textTertiary
+                      }`}
+                  >
+                    {notificationForm.message.length}/1000
+                  </span>
+                </div>
               </div>
 
               {/* Recipient Type */}
@@ -779,7 +920,7 @@ const CoordinatorNotifications = () => {
                 <label
                   className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
                 >
-                  Recipient Type *
+                  Recipient Type <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={notificationForm.recipientType}
@@ -798,7 +939,7 @@ const CoordinatorNotifications = () => {
                 <label
                   className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
                 >
-                  Category *
+                  Category <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={notificationForm.category}
@@ -827,62 +968,83 @@ const CoordinatorNotifications = () => {
                   <label
                     className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
                   >
-                    Department *
+                    Department <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={notificationForm.department}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setNotificationForm({
                         ...notificationForm,
                         department: e.target.value,
-                      })
-                    }
-                    className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                      });
+                      if (fieldErrors.department)
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          department: "",
+                        }));
+                    }}
+                    className={`w-full px-4 py-3 border ${fieldErrors.department
+                        ? themeStyles.inputErrorBorder
+                        : themeStyles.inputBorder
+                      } rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
                   >
-                    <option value="">All Departments</option>
+                    <option value="">Select Department</option>
                     {departments.map((dept) => (
                       <option key={dept} value={dept}>
                         {dept}
                       </option>
                     ))}
                   </select>
+                  {fieldErrors.department && (
+                    <p
+                      className={`flex items-center gap-1.5 text-xs mt-1.5 ${themeStyles.errorText}`}
+                    >
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                      {fieldErrors.department}
+                    </p>
+                  )}
                 </div>
               )}
 
               {/* Year Selection - For Both */}
               {(notificationForm.recipientType === "students" ||
                 notificationForm.recipientType ===
-                  "department coordinators") && (
-                <div>
-                  <label
-                    className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
-                  >
-                    Year (Optional)
-                  </label>
-                  <select
-                    value={notificationForm.year}
-                    onChange={(e) =>
-                      setNotificationForm({
-                        ...notificationForm,
-                        year: e.target.value,
-                      })
-                    }
-                    className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
-                  >
-                    <option value="">All Years</option>
-                    {years.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+                "department coordinators") && (
+                  <div>
+                    <label
+                      className={`block text-sm font-semibold ${themeStyles.textPrimary} mb-2`}
+                    >
+                      Year
+                      <span
+                        className={`ml-1.5 text-xs font-normal ${themeStyles.textTertiary}`}
+                      >
+                        (optional)
+                      </span>
+                    </label>
+                    <select
+                      value={notificationForm.year}
+                      onChange={(e) =>
+                        setNotificationForm({
+                          ...notificationForm,
+                          year: e.target.value,
+                        })
+                      }
+                      className={`w-full px-4 py-3 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                    >
+                      <option value="">All Years</option>
+                      {years.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
               {/* Action Buttons */}
               <div className="flex gap-3 pt-4">
                 <button
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={handleCloseCreateModal}
                   className={`flex-1 px-6 py-3 rounded-xl border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} font-semibold ${themeStyles.buttonHover} transition-all`}
                 >
                   Cancel
@@ -895,6 +1057,67 @@ const CoordinatorNotifications = () => {
                   Send Notification
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── App Modal (Alert / Confirm) ───────────────────────────────────── */}
+      {appModal.isOpen && (
+        <div
+          className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-[60]`}
+        >
+          <div
+            className={`w-full max-w-md rounded-2xl shadow-2xl border ${themeStyles.modalBg} ${themeStyles.cardBorder} p-6`}
+          >
+            <div className="flex items-start gap-4 mb-4">
+              <div
+                className={`flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center ${appModal.type === "confirm" ? "bg-red-100" : "bg-blue-100"
+                  }`}
+              >
+                {appModal.type === "confirm" ? (
+                  <Trash2 className="h-5 w-5 text-red-600" />
+                ) : (
+                  <CheckCircle2 className="h-5 w-5 text-blue-600" />
+                )}
+              </div>
+              <div className="flex-1">
+                <h3
+                  className={`text-lg font-bold ${themeStyles.textPrimary} mb-1`}
+                >
+                  {appModal.title}
+                </h3>
+                <p className={`text-sm ${themeStyles.textSecondary}`}>
+                  {appModal.message}
+                </p>
+              </div>
+              <button
+                onClick={() => setAppModal((m) => ({ ...m, isOpen: false }))}
+                className={`p-1 rounded-lg ${themeStyles.buttonHover} ${themeStyles.textSecondary} transition-colors`}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex gap-3 justify-end mt-6">
+              {appModal.type === "confirm" && (
+                <button
+                  onClick={() =>
+                    setAppModal((m) => ({ ...m, isOpen: false }))
+                  }
+                  className={`px-4 py-2 rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
+                >
+                  Cancel
+                </button>
+              )}
+              <button
+                onClick={appModal.onConfirm}
+                className={`px-4 py-2 rounded-lg font-medium transition-all text-white ${appModal.type === "confirm"
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-blue-600 hover:bg-blue-700"
+                  }`}
+              >
+                {appModal.type === "confirm" ? "Delete" : "OK"}
+              </button>
             </div>
           </div>
         </div>

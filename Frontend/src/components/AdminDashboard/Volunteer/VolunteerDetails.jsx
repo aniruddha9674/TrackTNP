@@ -47,7 +47,7 @@ const VolunteerManager = () => {
     const avgSpan =
       volunteers.length > 0
         ? volunteers.reduce((sum, v) => sum + (parseInt(v.driveSpan) || 0), 0) /
-          volunteers.length
+        volunteers.length
         : 0;
 
     return { total, active, totalDrives, avgSpan };
@@ -538,11 +538,10 @@ const VolunteerManager = () => {
                           </td>
                           <td className={`px-6 py-4 whitespace-nowrap`}>
                             <span
-                              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                                status === "Active"
+                              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${status === "Active"
                                   ? `${themeStyles.statusActiveBg} ${themeStyles.statusActiveText}`
                                   : `${themeStyles.statusCompletedBg} ${themeStyles.statusCompletedText}`
-                              }`}
+                                }`}
                             >
                               {status}
                             </span>
@@ -609,8 +608,8 @@ const VolunteerManager = () => {
                   {viewMode
                     ? "Volunteer Details"
                     : editingId
-                    ? "Edit Volunteer"
-                    : "Add New Volunteer"}
+                      ? "Edit Volunteer"
+                      : "Add New Volunteer"}
                 </h2>
                 <button
                   onClick={() => {
@@ -730,6 +729,7 @@ const VolunteerManager = () => {
                       onChange={handleInputChange}
                       disabled={viewMode}
                       required
+                      style={{ colorScheme: theme === "dark" ? "dark" : "light" }}
                       className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${themeStyles.inputDisabled} disabled:cursor-not-allowed ${themeStyles.inputText} transition-all`}
                     />
                   </div>

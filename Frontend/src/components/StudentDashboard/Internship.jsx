@@ -9,8 +9,7 @@ import {
   Calendar,
   TrendingUp,
   Clock,
-  Moon,
-  Sun,
+  AlertCircle,
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
 
@@ -19,7 +18,7 @@ const InternshipManager = () => {
   const [showModal, setShowModal] = useState(false);
   const [viewMode, setViewMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const [formData, setFormData] = useState({
     companyName: "",
     stipend: "",
@@ -27,9 +26,11 @@ const InternshipManager = () => {
     endDate: "",
     offerLetter: null,
   });
+  const [fieldErrors, setFieldErrors] = useState({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
+  // ─── Stats ────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
     const total = internships.length;
     const today = new Date();
@@ -48,29 +49,19 @@ const InternshipManager = () => {
     const avgDuration =
       internships.length > 0
         ? internships.reduce((sum, i) => {
-            const start = new Date(i.startDate);
-            const end = new Date(i.endDate);
-            const months =
-              (end.getFullYear() - start.getFullYear()) * 12 +
-              (end.getMonth() - start.getMonth());
-            return sum + months;
-          }, 0) / internships.length
+          const start = new Date(i.startDate);
+          const end = new Date(i.endDate);
+          const months =
+            (end.getFullYear() - start.getFullYear()) * 12 +
+            (end.getMonth() - start.getMonth());
+          return sum + months;
+        }, 0) / internships.length
         : 0;
 
     return { total, active, totalStipend, avgDuration };
   }, [internships]);
 
-  const handleDelete = (id) => {
-    setDeleteId(id);
-    setShowDeleteConfirm(true);
-  };
-
-  const confirmDelete = () => {
-    setInternships((prev) => prev.filter((member) => member.id !== deleteId));
-    setShowDeleteConfirm(false);
-    setDeleteId(null);
-  };
-
+  // ─── Helpers ──────────────────────────────────────────────────────────────
   const resetForm = () => {
     setFormData({
       companyName: "",
@@ -79,6 +70,7 @@ const InternshipManager = () => {
       endDate: "",
       offerLetter: null,
     });
+    setFieldErrors({});
     setEditingId(null);
     setViewMode(false);
   };
@@ -86,16 +78,69 @@ const InternshipManager = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+    // Also re-validate endDate live when startDate changes
+    if (name === "startDate" && fieldErrors.endDate) {
+      setFieldErrors((prev) => ({ ...prev, endDate: "" }));
+    }
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       setFormData((prev) => ({ ...prev, offerLetter: file.name }));
+      if (fieldErrors.offerLetter) {
+        setFieldErrors((prev) => ({ ...prev, offerLetter: "" }));
+      }
     }
   };
 
+  // ─── Validation ───────────────────────────────────────────────────────────
+  const validate = () => {
+    const errors = {};
+
+    const companyName = formData.companyName.trim();
+    if (!companyName) {
+      errors.companyName = "Company name is required.";
+    } else if (companyName.length < 2) {
+      errors.companyName = "Company name must be at least 2 characters.";
+    }
+
+    const stipend = formData.stipend.toString().trim();
+    if (!stipend) {
+      errors.stipend = "Stipend amount is required.";
+    } else if (isNaN(stipend) || Number(stipend) < 0) {
+      errors.stipend = "Enter a valid non-negative number (e.g. 25000).";
+    } else if (Number(stipend) > 10000000) {
+      errors.stipend = "Stipend amount seems unusually high. Please verify.";
+    }
+
+    if (!formData.startDate) {
+      errors.startDate = "Start date is required.";
+    }
+
+    if (!formData.endDate) {
+      errors.endDate = "End date is required.";
+    } else if (
+      formData.startDate &&
+      new Date(formData.endDate) <= new Date(formData.startDate)
+    ) {
+      errors.endDate = "End date must be after the start date.";
+    }
+
+    return errors;
+  };
+
+  // ─── Submit ───────────────────────────────────────────────────────────────
   const handleSubmit = () => {
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+
     if (editingId !== null) {
       setInternships((prev) =>
         prev.map((intern) =>
@@ -103,13 +148,8 @@ const InternshipManager = () => {
         )
       );
     } else {
-      const newInternship = {
-        ...formData,
-        id: Date.now(),
-      };
-      setInternships((prev) => [...prev, newInternship]);
+      setInternships((prev) => [...prev, { ...formData, id: Date.now() }]);
     }
-
     setShowModal(false);
     resetForm();
   };
@@ -122,6 +162,7 @@ const InternshipManager = () => {
       endDate: internship.endDate,
       offerLetter: internship.offerLetter,
     });
+    setFieldErrors({});
     setEditingId(internship.id);
     setViewMode(false);
     setShowModal(true);
@@ -135,14 +176,25 @@ const InternshipManager = () => {
       endDate: internship.endDate,
       offerLetter: internship.offerLetter,
     });
+    setFieldErrors({});
     setViewMode(true);
     setShowModal(true);
   };
 
+  const handleDelete = (id) => {
+    setDeleteId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    setInternships((prev) => prev.filter((member) => member.id !== deleteId));
+    setShowDeleteConfirm(false);
+    setDeleteId(null);
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -153,13 +205,12 @@ const InternshipManager = () => {
     const today = new Date();
     const start = new Date(startDate);
     const end = new Date(endDate);
-
     if (today < start) return "upcoming";
     if (today > end) return "completed";
     return "active";
   };
 
-  // Light Theme Function
+  // ─── Themes ───────────────────────────────────────────────────────────────
   const getLightTheme = () => ({
     background: "bg-gradient-to-br from-slate-50 to-slate-100",
     cardBg: "bg-white",
@@ -171,6 +222,7 @@ const InternshipManager = () => {
     textTertiary: "text-slate-400",
     inputBg: "bg-white",
     inputBorder: "border-slate-300",
+    inputErrorBorder: "border-red-400",
     inputDisabled: "disabled:bg-slate-100",
     inputText: "text-slate-900",
     inputPlaceholder: "placeholder:text-slate-400",
@@ -201,9 +253,11 @@ const InternshipManager = () => {
     statusUpcomingBg: "bg-blue-500",
     statusCompletedBg: "bg-slate-200",
     statusCompletedText: "text-slate-700",
+    errorText: "text-red-500",
+    errorBg: "bg-red-50",
+    errorBorder: "border-red-200",
   });
 
-  // Dark Theme Function
   const getDarkTheme = () => ({
     background: "bg-gradient-to-br from-slate-950 to-slate-900",
     cardBg: "bg-slate-900",
@@ -215,6 +269,7 @@ const InternshipManager = () => {
     textTertiary: "text-slate-500",
     inputBg: "bg-slate-950",
     inputBorder: "border-slate-600",
+    inputErrorBorder: "border-red-500",
     inputDisabled: "disabled:bg-slate-800",
     inputText: "text-slate-50",
     inputPlaceholder: "placeholder:text-slate-500",
@@ -245,195 +300,124 @@ const InternshipManager = () => {
     statusUpcomingBg: "bg-blue-600",
     statusCompletedBg: "bg-slate-700",
     statusCompletedText: "text-slate-300",
+    errorText: "text-red-400",
+    errorBg: "bg-red-900/20",
+    errorBorder: "border-red-700",
   });
 
-  const themeStyles = theme === "dark" ? getDarkTheme() : getLightTheme();
+  const t = theme === "dark" ? getDarkTheme() : getLightTheme();
 
+  // ─── Reusable field error ──────────────────────────────────────────────────
+  const FieldError = ({ error }) =>
+    error ? (
+      <p className={`flex items-center gap-1.5 text-xs mt-1.5 ${t.errorText}`}>
+        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+        {error}
+      </p>
+    ) : null;
+
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <div
       style={{ fontFamily: "Urbanist, sans-serif" }}
-      className={`min-h-screen ${themeStyles.background}`}
+      className={`min-h-screen ${t.background}`}
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap');
-        * {
-          font-family: 'Urbanist', sans-serif;
-        }
+        * { font-family: 'Urbanist', sans-serif; }
       `}</style>
 
       <div className="max-w-full mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className={`text-3xl font-bold ${themeStyles.textPrimary}`}>
-              Internship
-            </h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => {
-                resetForm();
-                setShowModal(true);
-              }}
-              className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-lg"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Internship
-            </button>
-          </div>
+          <h1 className={`text-3xl font-bold ${t.textPrimary}`}>Internship</h1>
+          <button
+            onClick={() => { resetForm(); setShowModal(true); }}
+            className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-lg"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Internship
+          </button>
         </div>
 
-        {/* Summary Statistics */}
+        {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div
-            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard1Gradient} transition-all`}
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between">
+          {[
+            {
+              label: "Total Internships",
+              value: stats.total,
+              gradient: t.statCard1Gradient,
+              iconBg: t.statIcon1Bg,
+              iconColor: t.statIcon1Text,
+              Icon: Briefcase,
+            },
+            {
+              label: "Active Now",
+              value: stats.active,
+              gradient: t.statCard2Gradient,
+              iconBg: t.statIcon2Bg,
+              iconColor: t.statIcon2Text,
+              Icon: TrendingUp,
+            },
+            {
+              label: "Total Stipend",
+              value: `₹${stats.totalStipend.toLocaleString()}`,
+              gradient: t.statCard3Gradient,
+              iconBg: t.statIcon3Bg,
+              iconColor: t.statIcon3Text,
+              Icon: TrendingUp,
+            },
+            {
+              label: "Avg Duration",
+              value: (
+                <>
+                  {stats.avgDuration.toFixed(1)}
+                  <span className={`text-lg ${t.textSecondary} ml-1`}>mo</span>
+                </>
+              ),
+              gradient: t.statCard4Gradient,
+              iconBg: t.statIcon4Bg,
+              iconColor: t.statIcon4Text,
+              Icon: Clock,
+            },
+          ].map(({ label, value, gradient, iconBg, iconColor, Icon }) => (
+            <div
+              key={label}
+              className={`rounded-xl border ${t.cardBorder} ${t.cardShadow} ${t.cardHoverShadow} bg-gradient-to-br ${gradient} transition-all`}
+            >
+              <div className="p-6 flex items-center justify-between">
                 <div>
-                  <p
-                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
-                  >
-                    Total Internships
-                  </p>
-                  <h3
-                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
-                  >
-                    {stats.total}
-                  </h3>
+                  <p className={`text-sm font-medium ${t.textSecondary}`}>{label}</p>
+                  <h3 className={`text-3xl font-bold ${t.textPrimary} mt-2`}>{value}</h3>
                 </div>
-                <div
-                  className={`h-12 w-12 ${themeStyles.statIcon1Bg} rounded-full flex items-center justify-center`}
-                >
-                  <Briefcase
-                    className={`h-6 w-6 ${themeStyles.statIcon1Text}`}
-                  />
+                <div className={`h-12 w-12 ${iconBg} rounded-full flex items-center justify-center`}>
+                  <Icon className={`h-6 w-6 ${iconColor}`} />
                 </div>
               </div>
             </div>
-          </div>
-
-          <div
-            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard2Gradient} transition-all`}
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p
-                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
-                  >
-                    Active Now
-                  </p>
-                  <h3
-                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
-                  >
-                    {stats.active}
-                  </h3>
-                </div>
-                <div
-                  className={`h-12 w-12 ${themeStyles.statIcon2Bg} rounded-full flex items-center justify-center`}
-                >
-                  <TrendingUp
-                    className={`h-6 w-6 ${themeStyles.statIcon2Text}`}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard3Gradient} transition-all`}
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p
-                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
-                  >
-                    Total Stipend
-                  </p>
-                  <h3
-                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
-                  >
-                    ₹{stats.totalStipend.toLocaleString()}
-                  </h3>
-                </div>
-                <div
-                  className={`h-12 w-12 ${themeStyles.statIcon3Bg} rounded-full flex items-center justify-center`}
-                >
-                  <TrendingUp
-                    className={`h-6 w-6 ${themeStyles.statIcon3Text}`}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${themeStyles.statCard4Gradient} transition-all`}
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p
-                    className={`text-sm font-medium ${themeStyles.textSecondary}`}
-                  >
-                    Avg Duration
-                  </p>
-                  <h3
-                    className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}
-                  >
-                    {stats.avgDuration.toFixed(1)}
-                    <span
-                      className={`text-lg ${themeStyles.textSecondary} ml-1`}
-                    >
-                      mo
-                    </span>
-                  </h3>
-                </div>
-                <div
-                  className={`h-12 w-12 ${themeStyles.statIcon4Bg} rounded-full flex items-center justify-center`}
-                >
-                  <Clock className={`h-6 w-6 ${themeStyles.statIcon4Text}`} />
-                </div>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Internship Cards */}
         <div>
-          <h2
-            className={`text-xl font-semibold ${themeStyles.textPrimary} mb-4`}
-          >
+          <h2 className={`text-xl font-semibold ${t.textPrimary} mb-4`}>
             Your Internships
           </h2>
           {internships.length === 0 ? (
-            <div
-              className={`rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} shadow-sm`}
-            >
+            <div className={`rounded-xl border ${t.cardBg} ${t.cardBorder} shadow-sm`}>
               <div className="p-12 text-center">
-                <div
-                  className={`mx-auto w-24 h-24 ${themeStyles.emptyStateBg} rounded-full flex items-center justify-center mb-4`}
-                >
-                  <Briefcase
-                    className={`h-12 w-12 ${themeStyles.emptyStateIcon}`}
-                  />
+                <div className={`mx-auto w-24 h-24 ${t.emptyStateBg} rounded-full flex items-center justify-center mb-4`}>
+                  <Briefcase className={`h-12 w-12 ${t.emptyStateIcon}`} />
                 </div>
-                <h3
-                  className={`text-xl font-semibold ${themeStyles.textPrimary} mb-2`}
-                >
+                <h3 className={`text-xl font-semibold ${t.textPrimary} mb-2`}>
                   No Internships Yet
                 </h3>
-                <p className={`${themeStyles.textSecondary} mb-6`}>
+                <p className={`${t.textSecondary} mb-6`}>
                   Start building your portfolio by adding your first internship
                 </p>
                 <button
-                  onClick={() => {
-                    resetForm();
-                    setShowModal(true);
-                  }}
-                  className={`inline-flex items-center px-4 py-2 rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
+                  onClick={() => { resetForm(); setShowModal(true); }}
+                  className={`inline-flex items-center px-4 py-2 rounded-lg border ${t.buttonBorder} ${t.buttonBg} ${t.textPrimary} ${t.buttonHover} transition-colors`}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Your First Internship
@@ -443,88 +427,55 @@ const InternshipManager = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {internships.map((internship) => {
-                const status = getStatus(
-                  internship.startDate,
-                  internship.endDate
-                );
+                const status = getStatus(internship.startDate, internship.endDate);
                 return (
                   <div
                     key={internship.id}
-                    className={`rounded-xl border overflow-hidden ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all duration-300`}
+                    className={`rounded-xl border overflow-hidden ${t.cardBg} ${t.cardBorder} ${t.cardShadow} ${t.cardHoverShadow} transition-all duration-300`}
                   >
                     <div className="h-2 bg-gradient-to-r from-blue-600 to-blue-400" />
-
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
-                        <h3
-                          className={`text-xl font-bold ${themeStyles.textPrimary} truncate flex-1 pr-2`}
-                        >
+                        <h3 className={`text-xl font-bold ${t.textPrimary} truncate flex-1 pr-2`}>
                           {internship.companyName}
                         </h3>
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${
-                            status === "active"
-                              ? themeStyles.statusActiveBg
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${status === "active"
+                              ? t.statusActiveBg
                               : status === "upcoming"
-                              ? themeStyles.statusUpcomingBg
-                              : `${themeStyles.statusCompletedBg} ${themeStyles.statusCompletedText}`
-                          }`}
+                                ? t.statusUpcomingBg
+                                : `${t.statusCompletedBg} ${t.statusCompletedText}`
+                            }`}
                         >
                           {status}
                         </span>
                       </div>
 
                       <div className="space-y-3 mb-6">
-                        <div
-                          className={`flex items-center justify-between py-2 border-b ${themeStyles.dividerBorder}`}
-                        >
-                          <span
-                            className={`text-sm ${themeStyles.textSecondary}`}
-                          >
-                            Stipend
-                          </span>
-                          <span
-                            className={`font-semibold ${themeStyles.textPrimary}`}
-                          >
-                            ₹{parseFloat(internship.stipend).toLocaleString()}
-                            /mo
+                        <div className={`flex items-center justify-between py-2 border-b ${t.dividerBorder}`}>
+                          <span className={`text-sm ${t.textSecondary}`}>Stipend</span>
+                          <span className={`font-semibold ${t.textPrimary}`}>
+                            ₹{parseFloat(internship.stipend).toLocaleString()}/mo
                           </span>
                         </div>
-
                         <div className="flex items-center gap-2 text-sm">
-                          <Calendar
-                            className={`h-4 w-4 ${themeStyles.calendarIcon}`}
-                          />
-                          <span className={themeStyles.textSecondary}>
-                            Start:
-                          </span>
-                          <span
-                            className={`font-medium ${themeStyles.textPrimary}`}
-                          >
+                          <Calendar className={`h-4 w-4 ${t.calendarIcon}`} />
+                          <span className={t.textSecondary}>Start:</span>
+                          <span className={`font-medium ${t.textPrimary}`}>
                             {formatDate(internship.startDate)}
                           </span>
                         </div>
-
                         <div className="flex items-center gap-2 text-sm">
-                          <Calendar
-                            className={`h-4 w-4 ${themeStyles.calendarIcon}`}
-                          />
-                          <span className={themeStyles.textSecondary}>
-                            End:
-                          </span>
-                          <span
-                            className={`font-medium ${themeStyles.textPrimary}`}
-                          >
+                          <Calendar className={`h-4 w-4 ${t.calendarIcon}`} />
+                          <span className={t.textSecondary}>End:</span>
+                          <span className={`font-medium ${t.textPrimary}`}>
                             {formatDate(internship.endDate)}
                           </span>
                         </div>
-
                         {internship.offerLetter && (
                           <div className="flex items-center gap-2 text-sm pt-2">
                             <div className="h-2 w-2 rounded-full bg-green-500" />
-                            <span
-                              className={`${themeStyles.offerLetterText} font-medium`}
-                            >
+                            <span className={`${t.offerLetterText} font-medium`}>
                               Offer letter attached
                             </span>
                           </div>
@@ -534,21 +485,19 @@ const InternshipManager = () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleView(internship)}
-                          className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
+                          className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${t.buttonBorder} ${t.buttonBg} ${t.textPrimary} ${t.buttonHover} transition-colors`}
                         >
-                          <Eye className="mr-2 h-4 w-4" />
-                          View
+                          <Eye className="mr-2 h-4 w-4" /> View
                         </button>
                         <button
                           onClick={() => handleEdit(internship)}
-                          className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
+                          className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${t.buttonBorder} ${t.buttonBg} ${t.textPrimary} ${t.buttonHover} transition-colors`}
                         >
-                          <Edit2 className="mr-2 h-4 w-4" />
-                          Edit
+                          <Edit2 className="mr-2 h-4 w-4" /> Edit
                         </button>
                         <button
                           onClick={() => handleDelete(internship.id)}
-                          className={`inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${themeStyles.buttonBorder} text-red-600 hover:bg-red-600 hover:text-white transition-colors`}
+                          className={`inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${t.buttonBorder} text-red-600 hover:bg-red-600 hover:text-white transition-colors`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -561,41 +510,50 @@ const InternshipManager = () => {
           )}
         </div>
 
-        {/* Modal */}
+        {/* ── Add / Edit / View Modal ───────────────────────────────────────── */}
         {showModal && (
           <div
-            className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
+            className={`fixed inset-0 ${t.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
           >
             <div
-              className={`w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-xl border ${themeStyles.cardBg} ${themeStyles.cardBorder}`}
+              className={`w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-xl border ${t.cardBg} ${t.cardBorder}`}
             >
+              {/* Header */}
               <div
-                className={`sticky top-0 ${themeStyles.modalHeader} ${themeStyles.modalHeaderBorder} border-b px-6 py-4 flex justify-between items-center`}
+                className={`sticky top-0 ${t.modalHeader} ${t.modalHeaderBorder} border-b px-6 py-4 flex justify-between items-center`}
               >
-                <h2 className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
+                <h2 className={`text-2xl font-bold ${t.textPrimary}`}>
                   {viewMode
                     ? "Internship Details"
                     : editingId
-                    ? "Edit Internship"
-                    : "Add New Internship"}
+                      ? "Edit Internship"
+                      : "Add New Internship"}
                 </h2>
                 <button
-                  onClick={() => {
-                    setShowModal(false);
-                    resetForm();
-                  }}
-                  className={`p-2 rounded-lg ${themeStyles.buttonHover} transition-colors`}
+                  onClick={() => { setShowModal(false); resetForm(); }}
+                  className={`p-2 rounded-lg ${t.buttonHover} transition-colors`}
                 >
-                  <X className={`h-5 w-5 ${themeStyles.textPrimary}`} />
+                  <X className={`h-5 w-5 ${t.textPrimary}`} />
                 </button>
               </div>
 
-              <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-                <div className="space-y-2">
-                  <label
-                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
-                  >
-                    Company Name <span className="text-red-600">*</span>
+              {/* Validation summary banner */}
+              {!viewMode && Object.keys(fieldErrors).length > 0 && (
+                <div className={`mx-6 mt-4 flex items-start gap-3 px-4 py-3 rounded-lg border ${t.errorBg} ${t.errorBorder}`}>
+                  <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${t.errorText}`} />
+                  <p className={`text-sm ${t.errorText}`}>
+                    Please fix the highlighted fields before submitting.
+                  </p>
+                </div>
+              )}
+
+              {/* Body */}
+              <div className="p-6 space-y-5 overflow-y-auto max-h-[calc(90vh-140px)]">
+
+                {/* Company Name */}
+                <div className="space-y-1.5">
+                  <label className={`block text-sm font-medium ${t.textPrimary}`}>
+                    Company Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -604,16 +562,16 @@ const InternshipManager = () => {
                     onChange={handleInputChange}
                     placeholder="e.g., Google, Microsoft, Meta"
                     disabled={viewMode}
-                    required
-                    className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} disabled:cursor-not-allowed ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
+                    className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.companyName ? t.inputErrorBorder : t.inputBorder
+                      } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${t.inputDisabled} disabled:cursor-not-allowed ${t.inputText} ${t.inputPlaceholder} transition-all`}
                   />
+                  <FieldError error={fieldErrors.companyName} />
                 </div>
 
-                <div className="space-y-2">
-                  <label
-                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
-                  >
-                    Monthly Stipend (₹) <span className="text-red-600">*</span>
+                {/* Stipend */}
+                <div className="space-y-1.5">
+                  <label className={`block text-sm font-medium ${t.textPrimary}`}>
+                    Monthly Stipend (₹) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -622,17 +580,18 @@ const InternshipManager = () => {
                     onChange={handleInputChange}
                     placeholder="e.g., 25000"
                     disabled={viewMode}
-                    required
-                    className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} disabled:cursor-not-allowed ${themeStyles.inputText} ${themeStyles.inputPlaceholder} transition-all`}
+                    min="0"
+                    className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.stipend ? t.inputErrorBorder : t.inputBorder
+                      } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${t.inputDisabled} disabled:cursor-not-allowed ${t.inputText} ${t.inputPlaceholder} transition-all`}
                   />
+                  <FieldError error={fieldErrors.stipend} />
                 </div>
 
+                {/* Dates */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label
-                      className={`block text-sm font-medium ${themeStyles.textPrimary}`}
-                    >
-                      Start Date <span className="text-red-600">*</span>
+                  <div className="space-y-1.5">
+                    <label className={`block text-sm font-medium ${t.textPrimary}`}>
+                      Start Date <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="date"
@@ -640,16 +599,15 @@ const InternshipManager = () => {
                       value={formData.startDate}
                       onChange={handleInputChange}
                       disabled={viewMode}
-                      required
-                      className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} disabled:cursor-not-allowed ${themeStyles.inputText} transition-all`}
+                      className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.startDate ? t.inputErrorBorder : t.inputBorder
+                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${t.inputDisabled} disabled:cursor-not-allowed ${t.inputText} transition-all`}
                     />
+                    <FieldError error={fieldErrors.startDate} />
                   </div>
 
-                  <div className="space-y-2">
-                    <label
-                      className={`block text-sm font-medium ${themeStyles.textPrimary}`}
-                    >
-                      End Date <span className="text-red-600">*</span>
+                  <div className="space-y-1.5">
+                    <label className={`block text-sm font-medium ${t.textPrimary}`}>
+                      End Date <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="date"
@@ -657,22 +615,22 @@ const InternshipManager = () => {
                       value={formData.endDate}
                       onChange={handleInputChange}
                       disabled={viewMode}
-                      required
-                      className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} disabled:cursor-not-allowed ${themeStyles.inputText} transition-all`}
+                      min={formData.startDate || undefined}
+                      className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.endDate ? t.inputErrorBorder : t.inputBorder
+                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${t.inputDisabled} disabled:cursor-not-allowed ${t.inputText} transition-all`}
                     />
+                    <FieldError error={fieldErrors.endDate} />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label
-                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
-                  >
+                {/* Offer Letter */}
+                <div className="space-y-1.5">
+                  <label className={`block text-sm font-medium ${t.textPrimary}`}>
                     Offer Letter
+                    <span className={`ml-1.5 text-xs font-normal ${t.textTertiary}`}>(optional)</span>
                   </label>
                   {viewMode ? (
-                    <div
-                      className={`px-4 py-3 ${themeStyles.emptyStateBg} rounded-lg ${themeStyles.textPrimary}`}
-                    >
+                    <div className={`px-4 py-3 ${t.emptyStateBg} rounded-lg ${t.textPrimary}`}>
                       {formData.offerLetter || "No file uploaded"}
                     </div>
                   ) : (
@@ -680,24 +638,22 @@ const InternshipManager = () => {
                       type="file"
                       onChange={handleFileChange}
                       accept=".pdf,.doc,.docx"
-                      className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer cursor-pointer ${themeStyles.inputText} transition-all`}
+                      className={`w-full px-4 py-3 ${t.inputBg} border ${t.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer cursor-pointer ${t.inputText} transition-all`}
                     />
                   )}
                   {formData.offerLetter && (
-                    <p className={`text-sm ${themeStyles.textSecondary} mt-2`}>
+                    <p className={`text-sm ${t.textSecondary} mt-1`}>
                       Selected: {formData.offerLetter}
                     </p>
                   )}
                 </div>
 
+                {/* Actions */}
                 {!viewMode && (
                   <div className="flex gap-3 pt-4">
                     <button
-                      onClick={() => {
-                        setShowModal(false);
-                        resetForm();
-                      }}
-                      className={`flex-1 px-4 py-2 rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} transition-colors`}
+                      onClick={() => { setShowModal(false); resetForm(); }}
+                      className={`flex-1 px-4 py-2 rounded-lg border ${t.buttonBorder} ${t.buttonBg} ${t.textPrimary} ${t.buttonHover} transition-colors`}
                     >
                       Cancel
                     </button>
@@ -714,39 +670,30 @@ const InternshipManager = () => {
           </div>
         )}
 
-        {/* Delete Confirmation Modal */}
+        {/* ── Delete Confirm Modal ──────────────────────────────────────────── */}
         {showDeleteConfirm && (
           <div
-            className={`fixed inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
+            className={`fixed inset-0 ${t.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
           >
             <div
-              className={`w-full max-w-md rounded-2xl shadow-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} p-6`}
+              className={`w-full max-w-md rounded-2xl shadow-2xl border ${t.cardBg} ${t.cardBorder} p-6`}
             >
               <div className="flex justify-between items-center mb-4">
-                <h2 className={`text-xl font-bold ${themeStyles.textPrimary}`}>
-                  Confirm Deletion
-                </h2>
+                <h2 className={`text-xl font-bold ${t.textPrimary}`}>Confirm Deletion</h2>
                 <button
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setDeleteId(null);
-                  }}
-                  className={`inline-flex items-center justify-center p-2 rounded-lg ${themeStyles.buttonHover} ${themeStyles.textPrimary}`}
+                  onClick={() => { setShowDeleteConfirm(false); setDeleteId(null); }}
+                  className={`inline-flex items-center justify-center p-2 rounded-lg ${t.buttonHover} ${t.textPrimary}`}
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <p className={`${themeStyles.textSecondary} mb-6`}>
-                Are you sure you want to delete this internship details? This
-                action cannot be undone.
+              <p className={`${t.textSecondary} mb-6`}>
+                Are you sure you want to delete this internship? This action cannot be undone.
               </p>
               <div className="flex gap-3 justify-end">
                 <button
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setDeleteId(null);
-                  }}
-                  className={`inline-flex items-center justify-center px-4 py-2 rounded-lg border-2 ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
+                  onClick={() => { setShowDeleteConfirm(false); setDeleteId(null); }}
+                  className={`inline-flex items-center justify-center px-4 py-2 rounded-lg border-2 ${t.buttonBorder} ${t.buttonBg} ${t.buttonHover} ${t.textPrimary} font-medium transition-all`}
                 >
                   Cancel
                 </button>

@@ -17,7 +17,7 @@ import {
   Moon,
   User,
   Bell,
-  X, // ← was missing; caused runtime error that broke the mobile sidebar toggle
+  X,
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
 
@@ -140,57 +140,57 @@ const Dashboard = () => {
 
   const navItems = [
     {
-      icon: <Home className="w-6 h-6" />,
+      icon: <Home className="w-5 h-5" />,
       name: "Overview",
       path: "/studentdashboard",
     },
     {
-      icon: <Building className="w-6 h-6" />,
+      icon: <Building className="w-5 h-5" />,
       name: "Company Registration",
       path: "/studentdashboard/companyregistration",
     },
     {
-      icon: <Bell className="w-6 h-6" />,
+      icon: <Bell className="w-5 h-5" />,
       name: "Notifications",
       path: "/studentdashboard/notifications",
     },
     {
-      icon: <FileText className="w-6 h-6" />,
+      icon: <FileText className="w-5 h-5" />,
       name: "Offer Letter",
       path: "/studentdashboard/offerletter",
     },
     {
-      icon: <Briefcase className="w-6 h-6" />,
+      icon: <Briefcase className="w-5 h-5" />,
       name: "Internship Details",
       path: "/studentdashboard/internshipdetails",
     },
     {
-      icon: <Award className="w-6 h-6" />,
+      icon: <Award className="w-5 h-5" />,
       name: "Certification Details",
       path: "/studentdashboard/certificationdetails",
     },
     {
-      icon: <Folder className="w-6 h-6" />,
+      icon: <Folder className="w-5 h-5" />,
       name: "Project Details",
       path: "/studentdashboard/projectdetails",
     },
     {
-      icon: <MessageSquare className="w-6 h-6" />,
+      icon: <MessageSquare className="w-5 h-5" />,
       name: "Feedback",
       path: "/studentdashboard/feedback",
     },
     {
-      icon: <Calendar className="w-6 h-6" />,
+      icon: <Calendar className="w-5 h-5" />,
       name: "Calendar",
       path: "/studentdashboard/calender",
     },
     {
-      icon: <List className="w-6 h-6" />,
+      icon: <List className="w-5 h-5" />,
       name: "Resume",
       path: "/studentdashboard/resume",
     },
     {
-      icon: <Settings className="w-6 h-6" />,
+      icon: <Settings className="w-5 h-5" />,
       name: "Settings",
       path: "/studentdashboard/profilesettings",
     },
@@ -267,7 +267,7 @@ const Dashboard = () => {
           {/* Logo */}
           <div
             className={`flex items-center h-16 px-6 border-b ${themeStyles.border
-              } ${!sidebarExpanded && "justify-center"}`}
+              } ${!sidebarExpanded && "justify-center"} shrink-0`}
           >
             <img
               src={isDarkTheme ? DarkLogo : LightLogo}
@@ -277,80 +277,79 @@ const Dashboard = () => {
             />
             <div
               className={`text-2xl font-bold pl-1 ${sidebarExpanded
-                  ? themeStyles.sidebarLogoText
-                  : themeStyles.sidebarLogoTextCollapsed
+                ? themeStyles.sidebarLogoText
+                : themeStyles.sidebarLogoTextCollapsed
                 } ${!sidebarExpanded && "hidden"}`}
             >
               TRACKTNP
             </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 overflow-y-auto">
-            <div className="mb-2">
-              <ul className="space-y-1">
-                {navItems.map((item) => (
-                  <li key={item.name}>
-                    <Link
-                      to={item.path}
-                      onClick={() => setSidebarOpen(false)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-base border-2
+          {/* Navigation — flex-1 + flex col + justify-evenly fills the
+              available height so all items are visible without scrolling */}
+          <nav className="flex-1 px-4 py-3 flex flex-col min-h-0">
+            <ul className="flex flex-col flex-1 justify-evenly">
+              {navItems.map((item) => (
+                <li key={item.name}>
+                  <Link
+                    to={item.path}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200 text-sm border-2
                       ${isActive(item.path)
-                          ? `${themeStyles.sidebarNavItemActive} border-2`
-                          : `${themeStyles.sidebarNavItem} ${themeStyles.sidebarNavItemInactive} border-transparent`
-                        }
+                        ? `${themeStyles.sidebarNavItemActive} border-2`
+                        : `${themeStyles.sidebarNavItem} ${themeStyles.sidebarNavItemInactive} border-transparent`
+                      }
                       ${!sidebarExpanded && themeStyles.sidebarNavItemCollapsed
+                      }`}
+                  >
+                    <div
+                      className={`transition-transform duration-300 shrink-0
+                        ${sidebarExpanded
+                          ? themeStyles.sidebarNavItemIconExpanded
+                          : themeStyles.sidebarNavItemIconCollapsed
+                        }
+                        ${isActive(item.path)
+                          ? themeStyles.sidebarNavItemIconActive
+                          : themeStyles.sidebarNavItemIcon
                         }`}
                     >
-                      <div
-                        className={`transition-transform duration-300
-                        ${sidebarExpanded
-                            ? themeStyles.sidebarNavItemIconExpanded
-                            : themeStyles.sidebarNavItemIconCollapsed
-                          }
-                        ${isActive(item.path)
-                            ? themeStyles.sidebarNavItemIconActive
-                            : themeStyles.sidebarNavItemIcon
+                      {item.icon}
+                    </div>
+                    {sidebarExpanded && (
+                      <span
+                        className={`font-medium transition-opacity duration-200 truncate
+                          ${isActive(item.path)
+                            ? themeStyles.activeText
+                            : themeStyles.textPrimary
                           }`}
                       >
-                        {item.icon}
-                      </div>
-                      {sidebarExpanded && (
-                        <span
-                          className={`font-medium text-base transition-opacity duration-200
-                          ${isActive(item.path)
-                              ? themeStyles.activeText
-                              : themeStyles.textPrimary
-                            }`}
-                        >
-                          {item.name}
-                        </span>
-                      )}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                        {item.name}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </nav>
 
           {/* Logout Button */}
-          <div className={`p-4 border-t ${themeStyles.border}`}>
+          <div className={`p-4 border-t ${themeStyles.border} shrink-0`}>
             <button
               onClick={() => setShowLogoutModal(true)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${themeStyles.sidebarLogout
+              className={`w-full flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200 ${themeStyles.sidebarLogout
                 } ${themeStyles.sidebarNavItemInactive} border-transparent ${!sidebarExpanded && themeStyles.sidebarNavItemCollapsed
                 }`}
             >
               <div
                 className={`transition-transform duration-300 ${sidebarExpanded
-                    ? themeStyles.sidebarNavItemIconExpanded
-                    : themeStyles.sidebarNavItemIconCollapsed
+                  ? themeStyles.sidebarNavItemIconExpanded
+                  : themeStyles.sidebarNavItemIconCollapsed
                   } ${themeStyles.sidebarNavItemIcon}`}
               >
-                <LogOut className="w-6 h-6" />
+                <LogOut className="w-5 h-5" />
               </div>
               {sidebarExpanded && (
-                <span className="font-medium text-base transition-opacity duration-200">
+                <span className="font-medium text-sm transition-opacity duration-200">
                   Logout
                 </span>
               )}
