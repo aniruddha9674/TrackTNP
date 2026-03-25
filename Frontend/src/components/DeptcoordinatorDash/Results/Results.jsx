@@ -16,15 +16,62 @@ import {
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
 
-// Add Urbanist font
-const style = document.createElement("style");
-style.textContent = `
-  @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap');
-  * {
-    font-family: 'Urbanist', sans-serif;
-  }
-`;
-document.head.appendChild(style);
+// Add Urbanist font and custom animations
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
+  style.textContent = `
+    @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap');
+    * {
+      font-family: 'Urbanist', sans-serif;
+    }
+    @keyframes progress-indeterminate {
+        0% { transform: translateX(-100%) scaleX(0.2); }
+        50% { transform: translateX(0%) scaleX(0.5); }
+        100% { transform: translateX(100%) scaleX(0.2); }
+    }
+    .animate-progress-indeterminate {
+        animation: progress-indeterminate 2s infinite linear;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// Reusable Modal Component
+const Modal = ({ isOpen, onClose, title, children, themeStyles }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm`}>
+      <div
+        className={`w-full max-w-md transform overflow-hidden rounded-2xl ${themeStyles.cardBg} border ${themeStyles.cardBorder} p-6 text-left align-middle shadow-2xl transition-all`}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className={`text-xl font-bold leading-6 ${themeStyles.textPrimary}`}>
+            {title}
+          </h3>
+          <button
+            onClick={onClose}
+            className={`rounded-lg p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors`}
+          >
+            <X className={`h-5 w-5 ${themeStyles.textSecondary}`} />
+          </button>
+        </div>
+        <div className="mt-2 text-sm">
+          {children}
+        </div>
+        <div className="mt-6 flex justify-end">
+          <button
+            type="button"
+            className="inline-flex justify-center rounded-xl border border-transparent bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-all shadow-lg hover:shadow-blue-500/20"
+            onClick={onClose}
+          >
+            Got it, thanks!
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ResultsPageVolunteer = () => {
   const { theme } = useTheme();
@@ -61,6 +108,15 @@ const ResultsPageVolunteer = () => {
     statCard4Gradient: "from-white to-amber-50",
     statCard3Gradient: "from-white to-purple-50",
     filterBadge: "bg-blue-100 text-blue-700 border-blue-200",
+    // Icon background + color tokens (matching OfferLetterManager)
+    statIcon1Bg: "bg-blue-100",
+    statIcon1Text: "text-blue-600",
+    statIcon2Bg: "bg-green-100",
+    statIcon2Text: "text-green-600",
+    statIcon3Bg: "bg-purple-100",
+    statIcon3Text: "text-purple-600",
+    statIcon4Bg: "bg-amber-100",
+    statIcon4Text: "text-amber-600",
   });
 
   const getDarkTheme = () => ({
@@ -93,6 +149,15 @@ const ResultsPageVolunteer = () => {
     statCard4Gradient: "from-slate-800 to-amber-900/30",
     statCard3Gradient: "from-slate-800 to-purple-900/30",
     filterBadge: "bg-blue-900/30 text-blue-400 border-blue-900/20",
+    // Icon background + color tokens (matching OfferLetterManager)
+    statIcon1Bg: "bg-blue-900/30",
+    statIcon1Text: "text-blue-400",
+    statIcon2Bg: "bg-green-900/30",
+    statIcon2Text: "text-green-400",
+    statIcon3Bg: "bg-purple-900/30",
+    statIcon3Text: "text-purple-400",
+    statIcon4Bg: "bg-amber-900/30",
+    statIcon4Text: "text-amber-400",
   });
 
   const themeStyles = isDarkTheme ? getDarkTheme() : getLightTheme();
@@ -215,6 +280,7 @@ const ResultsPageVolunteer = () => {
   const [filterCompany, setFilterCompany] = useState("all");
   const [filterResult, setFilterResult] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
+  const [downloadModal, setDownloadModal] = useState({ isOpen: false, reportType: "" });
 
   // Filtered results
   const filteredResults = useMemo(() => {
@@ -234,7 +300,7 @@ const ResultsPageVolunteer = () => {
     const rejected = data.filter(r => r.result === "Rejected").length;
     const waiting = data.filter(r => r.result === "Waiting").length;
     const total = data.length;
-    
+
     // Calculate average package
     const packagesWithValues = data
       .filter(r => r.result === "Selected" && r.package !== "-")
@@ -278,10 +344,7 @@ const ResultsPageVolunteer = () => {
   };
 
   const handleDownload = (type) => {
-    const message = type === "selected"
-      ? "Downloading selected students list..."
-      : "Downloading full results...";
-    alert(message);
+    setDownloadModal({ isOpen: true, reportType: type });
   };
 
   const clearFilters = () => {
@@ -298,6 +361,47 @@ const ResultsPageVolunteer = () => {
 
   const uniqueCompanies = [...new Set(resultsData.map(r => r.company))];
 
+  // Stat card definitions — layout mirrors OfferLetterManager
+  const statCards = [
+    {
+      label: "Selected",
+      value: stats.selected,
+      Icon: CheckCircle2,
+      gradient: themeStyles.statCard1Gradient,
+      iconBg: themeStyles.statIcon1Bg,
+      iconColor: themeStyles.statIcon1Text,
+    },
+    {
+      label: "Rejected",
+      value: stats.rejected,
+      Icon: XCircle,
+      gradient: themeStyles.statCard2Gradient,
+      iconBg: themeStyles.statIcon2Bg,
+      iconColor: themeStyles.statIcon2Text,
+    },
+    {
+      label: "Total",
+      value: stats.total,
+      Icon: Users,
+      gradient: themeStyles.statCard3Gradient,
+      iconBg: themeStyles.statIcon3Bg,
+      iconColor: themeStyles.statIcon3Text,
+    },
+    {
+      label: "Avg Package",
+      value: (
+        <>
+          ₹{stats.avgPackage}
+          <span className={`text-lg ${themeStyles.textSecondary} ml-1`}>LPA</span>
+        </>
+      ),
+      Icon: Award,
+      gradient: themeStyles.statCard4Gradient,
+      iconBg: themeStyles.statIcon4Bg,
+      iconColor: themeStyles.statIcon4Text,
+    },
+  ];
+
   return (
     <div className={`min-h-screen ${themeStyles.background} p-6`}>
       <div className="max-w-7xl mx-auto">
@@ -313,38 +417,25 @@ const ResultsPageVolunteer = () => {
           </div>
         </div>
 
-  
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {[
-            { icon: CheckCircle2, label: "Selected", value: stats.selected, color: themeStyles.iconGreen, percentage: `${((stats.selected / stats.total) * 100).toFixed(1)}%`, gradient: themeStyles.statCard1Gradient },
-            { icon: XCircle, label: "Rejected", value: stats.rejected, color: themeStyles.iconRed, percentage: `${((stats.rejected / stats.total) * 100).toFixed(1)}%`, gradient: themeStyles.statCard2Gradient },
-            { icon: Users, label: "Total", value: stats.total, color: themeStyles.iconBlue, percentage: "100%", gradient: themeStyles.statCard4Gradient },
-            { icon: Award, label: "Avg Package", value: `₹${stats.avgPackage}`, color: themeStyles.iconAmber, percentage: "LPA", gradient: themeStyles.statCard3Gradient },
-          ].map((stat, idx) => (
+        {/* Stats Grid — layout matches OfferLetterManager */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {statCards.map(({ label, value, Icon, gradient, iconBg, iconColor }) => (
             <div
-              key={idx}
-              className={`rounded-2xl border ${themeStyles.cardBorder} p-6 ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all duration-300 backdrop-blur-sm bg-gradient-to-br ${stat.gradient}`}
+              key={label}
+              className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} bg-gradient-to-br ${gradient} transition-all`}
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className={`h-12 w-12 bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0`}>
-                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
+              <div className="p-6 flex items-center justify-between">
+                <div>
+                  <p className={`text-sm font-medium ${themeStyles.textSecondary}`}>{label}</p>
+                  <h3 className={`text-3xl font-bold ${themeStyles.textPrimary} mt-2`}>{value}</h3>
                 </div>
-                <span className={`text-sm font-medium ${themeStyles.textSecondary}`}>
-                  {stat.percentage}
-                </span>
+                <div className={`h-12 w-12 ${iconBg} rounded-full flex items-center justify-center flex-shrink-0`}>
+                  <Icon className={`h-6 w-6 ${iconColor}`} />
+                </div>
               </div>
-              <p className={`text-sm font-medium ${themeStyles.textSecondary}`}>
-                {stat.label}
-              </p>
-              <h3 className={`text-3xl font-bold ${themeStyles.textPrimary} mt-1`}>
-                {stat.value}
-              </h3>
             </div>
           ))}
         </div>
-
-       
 
         {/* Search and Filters */}
         <div className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-2xl p-6 ${themeStyles.cardShadow} mb-6`}>
@@ -376,20 +467,20 @@ const ResultsPageVolunteer = () => {
             </button>
 
             {/* Download Buttons */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               <button
                 onClick={() => handleDownload("selected")}
-                className={`flex items-center gap-2 px-4 py-2.5 ${themeStyles.buttonSuccess} rounded-lg transition-all font-medium`}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 ${themeStyles.buttonSuccess} rounded-lg transition-all font-medium text-sm sm:text-base`}
               >
                 <Download size={18} />
-                <span className="hidden sm:inline">Selected</span>
+                <span className="inline">Selected</span>
               </button>
               <button
                 onClick={() => handleDownload("full")}
-                className={`flex items-center gap-2 px-4 py-2.5 ${themeStyles.buttonPrimary} rounded-lg transition-all font-medium`}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 ${themeStyles.buttonPrimary} rounded-lg transition-all font-medium text-sm sm:text-base`}
               >
                 <Download size={18} />
-                <span className="hidden sm:inline">Full Results</span>
+                <span className="inline">Full Results</span>
               </button>
             </div>
           </div>
@@ -430,7 +521,6 @@ const ResultsPageVolunteer = () => {
                     <option value="all">All Results</option>
                     <option value="Selected">Selected</option>
                     <option value="Rejected">Rejected</option>
-                   
                   </select>
                 </div>
 
@@ -538,6 +628,29 @@ const ResultsPageVolunteer = () => {
             </div>
           )}
         </div>
+
+        {/* Export Modal */}
+        <Modal
+          isOpen={downloadModal.isOpen}
+          onClose={() => setDownloadModal({ ...downloadModal, isOpen: false })}
+          title="Exporting Report"
+          themeStyles={themeStyles}
+        >
+          <div className="flex flex-col items-center py-4">
+            <div className={`h-16 w-16 ${themeStyles.statIcon2Bg} rounded-full flex items-center justify-center mb-4`}>
+              <Download className={`h-8 w-8 ${themeStyles.statIcon2Text}`} />
+            </div>
+            <p className={`text-base font-semibold ${themeStyles.textPrimary} text-center`}>
+              Generating {downloadModal.reportType === "selected" ? "Department Selection" : "Complete Department Results"} Report
+            </p>
+            <p className={`text-sm ${themeStyles.textSecondary} text-center mt-2 px-4`}>
+              Your department's data is being refined and exported. Please wait a few seconds.
+            </p>
+            <div className="w-full mt-6 bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+              <div className="bg-green-600 h-full rounded-full animate-progress-indeterminate w-full origin-left"></div>
+            </div>
+          </div>
+        </Modal>
       </div>
     </div>
   );

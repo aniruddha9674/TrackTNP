@@ -18,6 +18,8 @@ import {
   LogOut,
   ChevronDown,
   Bell,
+  UserCheck,
+  GraduationCap,
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
 
@@ -153,7 +155,7 @@ const Dashboard = () => {
       ],
     },
     {
-      icon: <User className="w-6 h-6" />,
+      icon: <UserCheck className="w-6 h-6" />,
       name: "Volunteer Details",
       path: "/admindashboard/volunteerdetails",
     },
@@ -163,14 +165,17 @@ const Dashboard = () => {
       path: "/admindashboard/staff",
     },
     {
-      icon: <User className="w-6 h-6" />,
+      icon: <GraduationCap className="w-6 h-6" />,
       name: "Students",
       children: [
         {
           name: "Add Students",
           path: "/admindashboard/student/add",
         },
-        { name: "Student Details", path: "/admindashboard/student/details" },
+        {
+          name: "Student Details",
+          path: "/admindashboard/student/details",
+        },
       ],
     },
     {
@@ -348,8 +353,8 @@ const Dashboard = () => {
             />
             <div
               className={`text-2xl font-bold pl-1 ${sidebarExpanded
-                  ? themeStyles.sidebarLogoText
-                  : themeStyles.sidebarLogoTextCollapsed
+                ? themeStyles.sidebarLogoText
+                : themeStyles.sidebarLogoTextCollapsed
                 } ${!sidebarExpanded && "hidden"}`}
             >
               TRACKTNP
@@ -396,8 +401,8 @@ const Dashboard = () => {
                         {sidebarExpanded && (
                           <span
                             className={`font-medium ${isActive(item.path)
-                                ? themeStyles.activeText
-                                : themeStyles.textPrimary
+                              ? themeStyles.activeText
+                              : themeStyles.textPrimary
                               }`}
                           >
                             {item.name}
@@ -421,8 +426,8 @@ const Dashboard = () => {
             >
               <div
                 className={`transition-transform duration-300 ${sidebarExpanded
-                    ? themeStyles.sidebarNavItemIconExpanded
-                    : themeStyles.sidebarNavItemIconCollapsed
+                  ? themeStyles.sidebarNavItemIconExpanded
+                  : themeStyles.sidebarNavItemIconCollapsed
                   } ${themeStyles.sidebarNavItemIcon}`}
               >
                 <LogOut className="w-6 h-6" />

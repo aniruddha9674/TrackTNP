@@ -12,10 +12,61 @@ import {
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
 
-// Mock Theme Context (replace with actual import)
+// Inject custom animations
+if (typeof document !== "undefined") {
+    const style = document.createElement("style");
+    style.textContent = `
+        @keyframes progress-indeterminate {
+            0% { transform: translateX(-100%) scaleX(0.2); }
+            50% { transform: translateX(0%) scaleX(0.5); }
+            100% { transform: translateX(100%) scaleX(0.2); }
+        }
+        .animate-progress-indeterminate {
+            animation: progress-indeterminate 2s infinite linear;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Reusable Modal Component
+const Modal = ({ isOpen, onClose, title, children, themeStyles }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm`}>
+            <div
+                className={`w-full max-w-md transform overflow-hidden rounded-2xl ${themeStyles.cardBg} border ${themeStyles.cardBorder} p-6 text-left align-middle shadow-2xl transition-all`}
+            >
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className={`text-xl font-bold leading-6 ${themeStyles.textPrimary}`}>
+                        {title}
+                    </h3>
+                    <button
+                        onClick={onClose}
+                        className={`rounded-lg p-1.5 ${themeStyles.buttonHover} transition-colors`}
+                    >
+                        <X className={`h-5 w-5 ${themeStyles.textSecondary}`} />
+                    </button>
+                </div>
+                <div className="mt-2 text-sm">
+                    {children}
+                </div>
+                <div className="mt-6 flex justify-end">
+                    <button
+                        type="button"
+                        className="inline-flex justify-center rounded-xl border border-transparent bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-all shadow-lg hover:shadow-blue-500/20"
+                        onClick={onClose}
+                    >
+                        Got it, thanks!
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 
-const Badge = ({ children, variant = "default", className = "", ...props }) => {
+const Badge = ({ children, variant, className = "", ...props }) => {
     const baseStyles =
         "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold transition-colors shadow-sm";
 
@@ -28,8 +79,10 @@ const Badge = ({ children, variant = "default", className = "", ...props }) => {
         purple: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
     };
 
+    const variantClass = variant ? variants[variant] : "";
+
     return (
-        <span className={`${baseStyles} ${variants[variant]} ${className}`} {...props}>
+        <span className={`${baseStyles} ${variantClass} ${className}`} {...props}>
             {children}
         </span>
     );
@@ -41,6 +94,7 @@ const CoordinatorOfferLetters = () => {
     const [filterDivision, setFilterDivision] = useState("all");
     const [letterType, setLetterType] = useState("offer"); // "offer" or "final"
     const [showMobileFilters, setShowMobileFilters] = useState(false);
+    const [downloadModal, setDownloadModal] = useState({ isOpen: false, studentName: "", fileName: "" });
     const { theme } = useTheme();
 
     const getLightTheme = () => ({
@@ -61,18 +115,25 @@ const CoordinatorOfferLetters = () => {
         statCard1Gradient: "from-white to-blue-50",
         statCard2Gradient: "from-white to-green-50",
         statCard3Gradient: "from-white to-purple-50",
+        statCard4Gradient: "from-white to-amber-50",
         statIcon1Bg: "bg-blue-100",
         statIcon1Text: "text-blue-600",
         statIcon2Bg: "bg-green-100",
         statIcon2Text: "text-green-600",
         statIcon3Bg: "bg-purple-100",
         statIcon3Text: "text-purple-600",
+        statIcon4Bg: "bg-amber-100",
+        statIcon4Text: "text-amber-600",
         buttonBg: "bg-white",
         buttonBorder: "border-slate-300",
         tableBg: "bg-white",
         tableHeaderBg: "bg-slate-50",
         tableRowHover: "hover:bg-slate-50",
         tableBorder: "border-slate-200",
+        divisionBadgeBg: "bg-green-600",
+        divisionBadgeText: "text-white",
+        offerBadgeBg: "bg-blue-600",
+        offerBadgeText: "text-white",
     });
 
     const getDarkTheme = () => ({
@@ -93,18 +154,25 @@ const CoordinatorOfferLetters = () => {
         statCard1Gradient: "from-slate-800 to-blue-900/30",
         statCard2Gradient: "from-slate-800 to-green-900/30",
         statCard3Gradient: "from-slate-800 to-purple-900/30",
+        statCard4Gradient: "from-slate-800 to-amber-900/30",
         statIcon1Bg: "bg-blue-900/30",
         statIcon1Text: "text-blue-400",
         statIcon2Bg: "bg-green-900/30",
         statIcon2Text: "text-green-400",
         statIcon3Bg: "bg-purple-900/30",
         statIcon3Text: "text-purple-400",
+        statIcon4Bg: "bg-amber-900/30",
+        statIcon4Text: "text-amber-400",
         buttonBg: "bg-slate-700",
         buttonBorder: "border-slate-600",
         tableBg: "bg-slate-900",
         tableHeaderBg: "bg-slate-800",
         tableRowHover: "hover:bg-slate-800",
         tableBorder: "border-slate-700",
+        divisionBadgeBg: "bg-indigo-900/40",
+        divisionBadgeText: "text-indigo-300",
+        offerBadgeBg: "bg-emerald-900/40",
+        offerBadgeText: "text-emerald-300",
     });
 
     const themeStyles = theme === "dark" ? getDarkTheme() : getLightTheme();
@@ -236,8 +304,7 @@ const CoordinatorOfferLetters = () => {
     }, [students, searchQuery, filterYear, filterDivision, letterType]);
 
     const handleDownload = (studentName, fileName) => {
-        alert(`Downloading ${fileName} for ${studentName}`);
-        // Implement actual download logic here
+        setDownloadModal({ isOpen: true, studentName, fileName });
     };
 
     return (
@@ -338,7 +405,7 @@ const CoordinatorOfferLetters = () => {
                     </div>
 
                     <div
-                        className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} bg-gradient-to-br ${themeStyles.statCard1Gradient} transition-all`}
+                        className={`rounded-xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} bg-gradient-to-br ${themeStyles.statCard4Gradient} transition-all`}
                     >
                         <div className="p-4 sm:p-6">
                             <div className="flex items-center justify-between">
@@ -355,49 +422,22 @@ const CoordinatorOfferLetters = () => {
                                     </h3>
                                 </div>
                                 <div
-                                    className={`h-8 w-8 sm:h-12 sm:w-12 ${themeStyles.statIcon1Bg} rounded-xl flex items-center justify-center`}
+                                    className={`h-8 w-8 sm:h-12 sm:w-12 ${themeStyles.statIcon4Bg} rounded-xl flex items-center justify-center`}
                                 >
-                                    <Award className={`h-4 w-4 sm:h-6 sm:w-6 ${themeStyles.statIcon1Text}`} />
+                                    <Award className={`h-4 w-4 sm:h-6 sm:w-6 ${themeStyles.statIcon4Text}`} />
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Letter Type Toggle */}
-                <div
-                    className={`rounded-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow}`}
-                >
-                    <div className="p-4">
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setLetterType("offer")}
-                                className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${letterType === "offer"
-                                        ? "bg-blue-600 text-white shadow-lg"
-                                        : `${themeStyles.buttonBg} ${themeStyles.textPrimary} border ${themeStyles.buttonBorder}`
-                                    }`}
-                            >
-                                Offer Letters
-                            </button>
-                            <button
-                                onClick={() => setLetterType("final")}
-                                className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${letterType === "final"
-                                        ? "bg-green-600 text-white shadow-lg"
-                                        : `${themeStyles.buttonBg} ${themeStyles.textPrimary} border ${themeStyles.buttonBorder}`
-                                    }`}
-                            >
-                                Final Offer Letters
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Search and Filter Bar */}
+                {/* Search and Filter Bar with Letter Type Toggle */}
                 <div
                     className={`rounded-2xl border ${themeStyles.cardBg} ${themeStyles.cardBorder} ${themeStyles.cardShadow}`}
                 >
                     <div className="p-4">
                         <div className="flex flex-col gap-4">
+                            {/* Search Bar */}
                             <div className="relative">
                                 <Search
                                     className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${themeStyles.textTertiary} h-4 w-4`}
@@ -411,20 +451,23 @@ const CoordinatorOfferLetters = () => {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {/* Filters and Letter Type Toggle */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                                {/* Mobile Filter Button */}
                                 <button
                                     onClick={() => setShowMobileFilters(!showMobileFilters)}
-                                    className={`sm:hidden px-4 py-2.5 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} flex items-center justify-center gap-2`}
+                                    className={`sm:hidden px-4 py-2.5 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} flex items-center justify-center gap-2 font-medium`}
                                 >
                                     <Filter className="h-4 w-4" />
                                     <span>Filters</span>
                                 </button>
 
+                                {/* Year Filter */}
                                 <div className="hidden sm:block">
                                     <select
                                         value={filterYear}
                                         onChange={(e) => setFilterYear(e.target.value)}
-                                        className={`w-full px-4 py-2.5 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-sm sm:text-base`}
+                                        className={`w-full px-4 py-2.5 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-sm sm:text-base font-medium`}
                                     >
                                         <option value="all">All Years</option>
                                         <option value="Third Year">Third Year</option>
@@ -432,11 +475,12 @@ const CoordinatorOfferLetters = () => {
                                     </select>
                                 </div>
 
+                                {/* Division Filter */}
                                 <div className="hidden sm:block">
                                     <select
                                         value={filterDivision}
                                         onChange={(e) => setFilterDivision(e.target.value)}
-                                        className={`w-full px-4 py-2.5 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-sm sm:text-base`}
+                                        className={`w-full px-4 py-2.5 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-sm sm:text-base font-medium`}
                                     >
                                         <option value="all">All Divisions</option>
                                         <option value="A">Division A</option>
@@ -445,22 +489,47 @@ const CoordinatorOfferLetters = () => {
                                     </select>
                                 </div>
 
-                                <div className="hidden sm:block">
+                                {/* Letter Type Toggle */}
+                                <div className="lg:col-span-2">
+                                    <div className="flex gap-2 h-full">
+                                        <button
+                                            onClick={() => setLetterType("offer")}
+                                            className={`flex-1 px-3 py-2.5 rounded-xl font-semibold transition-all text-sm sm:text-base ${letterType === "offer"
+                                                ? "bg-blue-600 text-white shadow-lg"
+                                                : `${themeStyles.buttonBg} ${themeStyles.textPrimary} border ${themeStyles.buttonBorder}`
+                                                }`}
+                                        >
+                                            Offer Letters
+                                        </button>
+                                        <button
+                                            onClick={() => setLetterType("final")}
+                                            className={`flex-1 px-3 py-2.5 rounded-xl font-semibold transition-all text-sm sm:text-base ${letterType === "final"
+                                                ? "bg-green-600 text-white shadow-lg"
+                                                : `${themeStyles.buttonBg} ${themeStyles.textPrimary} border ${themeStyles.buttonBorder}`
+                                                }`}
+                                        >
+                                            Final Offers
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Results Count */}
+                                <div className="hidden lg:flex">
                                     <span
-                                        className={`block px-4 py-2.5 text-center ${themeStyles.textSecondary} text-sm`}
+                                        className={`flex items-center px-4 py-2.5 text-center ${themeStyles.textSecondary} text-sm font-medium rounded-xl ${themeStyles.emptyStateBg}`}
                                     >
-                                        {filteredStudents.length} students found
+                                        {filteredStudents.length} found
                                     </span>
                                 </div>
                             </div>
 
                             {/* Mobile Filters */}
                             {showMobileFilters && (
-                                <div className="sm:hidden space-y-3">
+                                <div className="sm:hidden space-y-3 pt-2 border-t border-slate-200">
                                     <select
                                         value={filterYear}
                                         onChange={(e) => setFilterYear(e.target.value)}
-                                        className={`w-full px-4 py-2.5 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                                        className={`w-full px-4 py-2.5 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 font-medium`}
                                     >
                                         <option value="all">All Years</option>
                                         <option value="Third Year">Third Year</option>
@@ -470,13 +539,16 @@ const CoordinatorOfferLetters = () => {
                                     <select
                                         value={filterDivision}
                                         onChange={(e) => setFilterDivision(e.target.value)}
-                                        className={`w-full px-4 py-2.5 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500`}
+                                        className={`w-full px-4 py-2.5 border ${themeStyles.inputBorder} rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 font-medium`}
                                     >
                                         <option value="all">All Divisions</option>
                                         <option value="A">Division A</option>
                                         <option value="B">Division B</option>
                                         <option value="C">Division C</option>
                                     </select>
+                                    <div className={`text-center text-sm font-medium ${themeStyles.textSecondary} py-2.5 bg-slate-50 rounded-xl`}>
+                                        {filteredStudents.length} students found
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -507,12 +579,12 @@ const CoordinatorOfferLetters = () => {
                                         Email
                                     </th>
                                     <th
-                                        className={`px-4 py-4 text-left text-xs font-semibold ${themeStyles.textSecondary} uppercase tracking-wider hidden lg:table-cell`}
+                                        className={`px-4 py-4 text-left text-xs font-semibold ${themeStyles.textSecondary} uppercase tracking-wider hidden md:table-cell`}
                                     >
                                         Year
                                     </th>
                                     <th
-                                        className={`px-4 py-4 text-left text-xs font-semibold ${themeStyles.textSecondary} uppercase tracking-wider hidden lg:table-cell`}
+                                        className={`px-4 py-4 text-left text-xs font-semibold ${themeStyles.textSecondary} uppercase tracking-wider`}
                                     >
                                         Division
                                     </th>
@@ -555,37 +627,47 @@ const CoordinatorOfferLetters = () => {
                                             {student.email}
                                         </td>
                                         <td
-                                            className={`px-4 py-4 ${themeStyles.textSecondary} hidden lg:table-cell`}
+                                            className={`px-4 py-4 ${themeStyles.textSecondary} hidden md:table-cell`}
                                         >
                                             {student.year}
                                         </td>
-                                        <td
-                                            className={`px-4 py-4 ${themeStyles.textSecondary} hidden lg:table-cell`}
-                                        >
-                                            <Badge variant="info">{student.division}</Badge>
+                                        <td className={`px-4 py-4`}>
+                                            <Badge
+                                                className={`${themeStyles.divisionBadgeBg} ${themeStyles.divisionBadgeText} font-bold`}
+                                            >
+                                                {student.division}
+                                            </Badge>
                                         </td>
                                         <td className={`px-4 py-4`}>
                                             {letterType === "offer" ? (
-                                                <div className="flex flex-wrap gap-1">
+                                                <div className="flex flex-wrap gap-2">
                                                     {student.offerLetters.map((offer) => (
-                                                        <Badge key={offer.id} variant="success">
+                                                        <Badge
+                                                            key={offer.id}
+                                                            className={`${themeStyles.offerBadgeBg} ${themeStyles.offerBadgeText} font-bold`}
+                                                        >
                                                             {offer.company}
                                                         </Badge>
                                                     ))}
                                                 </div>
                                             ) : student.finalOffer ? (
-                                                <div className="flex items-center gap-2">
-                                                    <Badge variant="purple">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <Badge
+                                                        className={theme === "dark"
+                                                            ? "bg-purple-900/30 text-purple-300"
+                                                            : `${themeStyles.offerBadgeBg} ${themeStyles.offerBadgeText} font-bold`
+                                                        }
+                                                    >
                                                         {student.finalOffer.company}
                                                     </Badge>
                                                     <span
-                                                        className={`text-sm ${themeStyles.textSecondary}`}
+                                                        className={`text-sm font-semibold ${themeStyles.textPrimary}`}
                                                     >
                                                         {student.finalOffer.package}
                                                     </span>
                                                 </div>
                                             ) : (
-                                                <span className={`text-sm ${themeStyles.textTertiary}`}>
+                                                <span className={`text-sm font-medium ${themeStyles.textTertiary}`}>
                                                     Not submitted
                                                 </span>
                                             )}
@@ -643,6 +725,29 @@ const CoordinatorOfferLetters = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Download Modal */}
+                <Modal
+                    isOpen={downloadModal.isOpen}
+                    onClose={() => setDownloadModal({ ...downloadModal, isOpen: false })}
+                    title="Download Progress"
+                    themeStyles={themeStyles}
+                >
+                    <div className="flex flex-col items-center py-4">
+                        <div className={`h-16 w-16 ${themeStyles.statIcon2Bg} rounded-full flex items-center justify-center mb-4`}>
+                            <Download className={`h-8 w-8 ${themeStyles.statIcon2Text}`} />
+                        </div>
+                        <p className={`text-base font-semibold ${themeStyles.textPrimary} text-center`}>
+                            Preparing your document
+                        </p>
+                        <p className={`text-sm ${themeStyles.textSecondary} text-center mt-2 px-4`}>
+                            Your file <span className="font-bold text-blue-600">{downloadModal.fileName}</span> for <span className="font-bold text-blue-600">{downloadModal.studentName}</span> is being prepared for download.
+                        </p>
+                        <div className="w-full mt-6 bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div className="bg-blue-600 h-full rounded-full animate-progress-indeterminate w-full origin-left"></div>
+                        </div>
+                    </div>
+                </Modal>
             </div>
         </div>
     );
