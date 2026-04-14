@@ -618,31 +618,6 @@ const DepartmentOverview = () => {
                         </div>
                     </div>
                 </div>
-
-                {/* Quick Actions */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {[
-                        { icon: Building2, label: "View Drives", color: "blue" },
-                        { icon: Users, label: "Student List", color: "green" },
-                        { icon: FileText, label: "View Results", color: "purple" },
-                        { icon: Download, label: "Download Reports", color: "amber" },
-                    ].map((action, idx) => (
-                        <button
-                            key={idx}
-                            className={`${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-xl p-6 ${themeStyles.cardShadow} ${themeStyles.cardHoverShadow} transition-all hover:scale-105 flex items-center justify-between group`}
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className={`h-10 w-10 bg-${action.color}-100 rounded-lg flex items-center justify-center`}>
-                                    <action.icon className={`h-5 w-5 text-${action.color}-600`} />
-                                </div>
-                                <span className={`font-semibold ${themeStyles.textPrimary}`}>
-                                    {action.label}
-                                </span>
-                            </div>
-                            <ArrowRight className={`h-5 w-5 ${themeStyles.textTertiary} group-hover:translate-x-1 transition-transform`} />
-                        </button>
-                    ))}
-                </div>
             </div>
         </div>
     );

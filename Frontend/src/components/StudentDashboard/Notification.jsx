@@ -21,7 +21,7 @@ export default function VolunteerNotifications({ userType = 'student' }) {
     emptyStateBg: "bg-slate-800/50",
     emptyStateIcon: "text-slate-600",
   } : {
-    background: "bg-gradient-to-br from-slate-50 to-slate-100",
+    background: "bg-gradient-to-br ",
     cardBg: "bg-white",
     cardBorder: "border-slate-200",
     cardShadow: "shadow-md",

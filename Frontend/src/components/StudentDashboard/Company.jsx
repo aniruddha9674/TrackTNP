@@ -49,6 +49,7 @@ const CompanyRegistration = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [modalMode, setModalMode] = useState(null); // 'confirm' | 'success' | null
 
   // Sample companies data
   const [companies, setCompanies] = useState([
@@ -346,9 +347,7 @@ const CompanyRegistration = () => {
         c.id === selectedCompany.id ? { ...c, hasApplied: true } : c
       )
     );
-    alert("Application submitted successfully!");
-    setShowDetailsModal(false);
-    setSelectedCompany(null);
+    setModalMode("success");
   };
 
   const formatDate = (dateString) => {
@@ -989,7 +988,7 @@ const CompanyRegistration = () => {
                   Back to List
                 </button>
                 <button
-                  onClick={handleApply}
+                  onClick={() => setModalMode("confirm")}
                   disabled={
                     !selectedCompany?.isEligible || selectedCompany?.hasApplied
                   }
@@ -1024,6 +1023,87 @@ const CompanyRegistration = () => {
                     </p>
                   </div>
                 </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation & Success Modal Overlay */}
+      {modalMode && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className={`absolute inset-0 ${themeStyles.modalOverlay} backdrop-blur-sm transition-opacity duration-300`}
+            onClick={() => (modalMode === "success" ? setModalMode(null) : null)}
+          />
+          <div
+            className={`relative w-full max-w-md ${themeStyles.cardBg} ${themeStyles.cardBorder} border rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300`}
+          >
+            <div className="p-8 text-center">
+              {modalMode === "confirm" ? (
+                <>
+                  <div
+                    className={`h-20 w-20 ${themeStyles.statIcon1Bg} rounded-full flex items-center justify-center mx-auto mb-6`}
+                  >
+                    <Send
+                      className={`h-10 w-10 ${themeStyles.statIcon1Text}`}
+                    />
+                  </div>
+                  <h3
+                    className={`text-2xl font-bold ${themeStyles.textPrimary} mb-2`}
+                  >
+                    Confirm Application
+                  </h3>
+                  <p className={`${themeStyles.textSecondary} mb-8`}>
+                    Are you sure you want to apply to{" "}
+                    <strong>{selectedCompany?.name}</strong> for the{" "}
+                    <strong>{selectedCompany?.role}</strong> position?
+                  </p>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => setModalMode(null)}
+                      className={`flex-1 px-6 py-3 rounded-2xl border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.textPrimary} ${themeStyles.buttonHover} font-semibold transition-all`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleApply}
+                      className="flex-1 px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all shadow-lg shadow-blue-500/30"
+                    >
+                      Apply Now
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div
+                    className={`h-20 w-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce`}
+                  >
+                    <CheckCircle2
+                      className={`h-10 w-10 text-green-600 dark:text-green-400`}
+                    />
+                  </div>
+                  <h3
+                    className={`text-2xl font-bold ${themeStyles.textPrimary} mb-2`}
+                  >
+                    Success!
+                  </h3>
+                  <p className={`${themeStyles.textSecondary} mb-8`}>
+                    Your application for{" "}
+                    <strong>{selectedCompany?.name}</strong> has been submitted
+                    successfully.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setModalMode(null);
+                      setShowDetailsModal(false);
+                      setSelectedCompany(null);
+                    }}
+                    className="w-full px-6 py-3 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-semibold transition-all shadow-lg shadow-green-500/30"
+                  >
+                    Great!
+                  </button>
+                </>
               )}
             </div>
           </div>
