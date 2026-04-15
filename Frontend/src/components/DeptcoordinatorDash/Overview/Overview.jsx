@@ -94,7 +94,7 @@ const DepartmentOverview = () => {
     });
 
     const themeStyles = isDarkTheme ? getDarkTheme() : getLightTheme();
-
+    
     // Sample data
     const overviewStats = {
         totalDrives: 12,
