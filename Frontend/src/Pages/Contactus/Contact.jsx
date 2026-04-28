@@ -24,7 +24,7 @@ const Footer = ({ themeStyles }) => (
   >
     <div className="max-w-7xl mx-auto text-center">
       <p className={themeStyles.textSecondary}>
-        © 2024 TRACKTNP. All rights reserved.
+        © 2026 TRACKTNP. All rights reserved.
       </p>
     </div>
   </footer>

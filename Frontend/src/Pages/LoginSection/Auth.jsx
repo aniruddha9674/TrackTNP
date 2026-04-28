@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChevronLeft, Eye, EyeOff, Moon, Sun } from "lucide-react";
 
 function ThemeToggleButton({ theme, toggleTheme }) {
@@ -18,6 +19,7 @@ export default function AuthApp() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [role, setRole] = useState("student");
+  const navigateTo = useNavigate();
   const LightLogo = "/src/assets/LightLogo.png";
 
   useEffect(() => {
@@ -51,11 +53,35 @@ export default function AuthApp() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(
-      `${
-        currentPage === "signin" ? "Sign In" : "Sign Up"
-      } as ${role} successful!`
-    );
+    if (currentPage === "signin") {
+      switch (role) {
+        case "student":
+          navigateTo("/studentdashboard");
+          break;
+        case "volunteer":
+          navigateTo("/volunteerdashboard");
+          break;
+        case "Staff":
+        case "dept_coord":
+          navigateTo("/departmentcoordinatordashboard");
+          break;
+        case "college_coord":
+          navigateTo("/collegecoordinatordashboard");
+          break;
+        case "admin":
+          navigateTo("/admindashboard");
+          break;
+        default:
+          navigateTo("/");
+      }
+    } else {
+      // Assuming signup also redirects to dashboard or firstlogin
+      if (role === "student") {
+        navigateTo("/firstlogin");
+      } else {
+        navigateTo("/");
+      }
+    }
   };
 
   const renderSignInForm = () => (
@@ -139,42 +165,27 @@ export default function AuthApp() {
                 </span>
               </div>
             </div>
-            <div className="flex items-center w-full mb-6 bg-[var(--surface)] rounded-lg p-2">
-              <button
-                type="button"
-                onClick={() => setRole("student")}
-                className={`flex-1 py-2 rounded-lg transition text-sm ${
-                  role === "student"
-                    ? "bg-[var(--brand)] text-white"
-                    : "text-[var(--text-primary)]"
-                }`}
-              >
-                Student
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setRole("Staff")}
-                className={`flex-1 py-2 rounded-lg transition text-sm ${
-                  role === "Staff"
-                    ? "bg-[var(--brand)] text-white"
-                    : "text-[var(--text-primary)]"
-                }`}
-              >
-                Staff
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setRole("admin")}
-                className={`flex-1 py-2 rounded-lg transition text-sm ${
-                  role === "admin"
-                    ? "bg-[var(--brand)] text-white"
-                    : "text-[var(--text-primary)]"
-                }`}
-              >
-                Admin
-              </button>
+            <div className="flex flex-wrap gap-2 mb-6 bg-[var(--surface)] rounded-xl p-1.5 shadow-sm border border-[var(--surface)]/50">
+              {[
+                { id: "student", label: "Student" },
+                { id: "volunteer", label: "Volunteer" },
+                { id: "Staff", label: "Staff" },
+                { id: "dept_coord", label: "Dept Coord" },
+                { id: "college_coord", label: "College Coord" },
+                { id: "admin", label: "Admin" },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setRole(item.id)}
+                  className={`flex-1 min-w-[100px] py-2.5 px-4 rounded-lg transition-all duration-200 text-xs sm:text-sm font-medium whitespace-nowrap shadow-sm ${role === item.id
+                      ? "bg-[var(--brand)] text-white ring-2 ring-white/20 scale-[1.02] shadow-md"
+                      : "text-[var(--text-primary)] hover:bg-white/10"
+                    }`}
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
 
             <form onSubmit={handleSubmit}>
@@ -272,9 +283,9 @@ export default function AuthApp() {
                 </div>
               </div>
             </form>
-            <div className="mt-5">
+            <div className="flex justify-center mt-2">
               <p
-                className="text-sm font-normal text-center sm:text-start"
+                className="text-sm font-normal text-center"
                 style={{ color: "var(--text-primary)" }}
               >
                 Don't have an account?{" "}
@@ -505,7 +516,7 @@ export default function AuthApp() {
                 </div>
               </div>
             </form>
-            <div className="mt-5">
+            <div className="justify-center flex mt-5">
               <p
                 className="text-sm font-normal text-center sm:text-start"
                 style={{ color: "var(--text-primary)" }}

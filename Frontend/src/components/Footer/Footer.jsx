@@ -158,7 +158,7 @@ function Footer({ themeStyles }) {
         <div className={`pt-8 border-t ${themeStyles.cardBorder}`}>
           <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0">
             <p className={`${themeStyles.textSecondary} text-sm`}>
-              © 2025 TRACKTNP. All rights reserved.
+              © 2026 TRACKTNP. All rights reserved.
             </p>
           </div>
           <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0">

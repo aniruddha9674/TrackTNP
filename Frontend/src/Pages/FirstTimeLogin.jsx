@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Upload, User, Sun, Moon, ChevronLeft, ChevronRight, UserCircle, FileText, GraduationCap, Award, Briefcase, Code } from "lucide-react";
 
 const FirstTimeLogin = () => {
@@ -6,6 +7,7 @@ const FirstTimeLogin = () => {
   const [profileImage, setProfileImage] = useState(null);
   const [qualificationType, setQualificationType] = useState("hsc");
   const [theme, setTheme] = useState("light");
+  const navigateTo = useNavigate();
 
   const totalSteps = 6;
   const isDarkTheme = theme === "dark";
@@ -312,7 +314,7 @@ const FirstTimeLogin = () => {
   const handleSubmit = () => {
     // Validate step 6 before submitting
     if (validateStep(6)) {
-      alert("Form submitted successfully!");
+      navigateTo("/studentdashboard");
       console.log("Form Data:", {
         profileData,
         personalInfo,
