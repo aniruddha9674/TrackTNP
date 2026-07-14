@@ -31,6 +31,7 @@ import Settings from "./components/AdminDashboard/Settings";
 import StaffDetailsManager from "./components/AdminDashboard/Staff/AddStaff";
 import AddCompany from "./components/AdminDashboard/Company/AddCompany";
 import CompanyDrivesManager from "./components/AdminDashboard/Company/CompanyDrives";
+import DriveOverview from "./components/AdminDashboard/Company/DriveOverview";
 import PlacementResultsManager from "./components/AdminDashboard/Result/Result";
 import Overview from "./components/AdminDashboard/Overview/Overview";
 import StudentDetails from "./components/AdminDashboard/Student/StudentDetails";
@@ -113,6 +114,7 @@ function App() {
         <Route path="volunteerdetails" element={<VolunteerManager />} />
         <Route path="company/add" element={<AddCompany />} />
         <Route path="company/drive" element={<CompanyDrivesManager />} />
+        <Route path="company/drive/overview" element={<DriveOverview />} />
         <Route path="results" element={<PlacementResultsManager />} />
         <Route path="student/details" element={<StudentDetails />} />
         <Route path="student/add" element={<Addstudent />} />

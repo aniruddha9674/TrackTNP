@@ -564,7 +564,23 @@ const ProjectManager = () => {
                   )}
                   <FieldError error={fieldErrors.description} />
                 </div>
-
+{/* Project Title */}
+                <div className="space-y-1.5">
+                  <label className={`block text-sm font-medium ${t.textPrimary}`}>
+                    Project Link/Github Link <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="projectLink"
+                    value={formData.projectTitle}
+                    onChange={handleInputChange}
+                    placeholder="Enter Project Link"
+                    disabled={viewMode}
+                    className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.projectTitle ? t.inputErrorBorder : t.inputBorder
+                      } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${t.inputDisabled} ${t.inputText} ${t.inputPlaceholder} transition-all`}
+                  />
+                  <FieldError error={fieldErrors.projectTitle} />
+                </div>
                 {/* Actions */}
                 {!viewMode && (
                   <div className="flex gap-3 pt-2">

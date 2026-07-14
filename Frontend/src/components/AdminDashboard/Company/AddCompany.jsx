@@ -941,98 +941,11 @@ const CompanyManager = () => {
 
                 <FormSection title="Compensation" themeStyles={themeStyles}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField label="Salary Offered" name="salaryOffered" placeholder="e.g., 6.0 LPA" {...fieldProps} />
+                    <InputField label="Expected Salary " name="salaryOffered" placeholder="e.g., 6.0 LPA" {...fieldProps} />
                     <InputField label="Internship Stipend" name="internshipStipend" placeholder="e.g., 15000/month" {...fieldProps} />
                   </div>
                   <InputField label="Company Bond" name="companyBond" placeholder="Bond details if any" {...fieldProps} />
-                </FormSection>
-
-                <FormSection title="Participation Data" themeStyles={themeStyles}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField label="Total Registered" name="totalRegistered" type="number" placeholder="Number of registrations" {...fieldProps} />
-                    <InputField label="Candidates Present" name="candidatesPresent" type="number" placeholder="Students who attended" {...fieldProps} />
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <InputField label="PCCOE Present" name="pccoePresent" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="PCCOER Present" name="pccoerPresent" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="NMIET Present" name="nmietPresent" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="NCER Present" name="ncerPresent" type="number" placeholder="0" {...fieldProps} />
-                  </div>
-                </FormSection>
-
-                <FormSection title="Selection Results - College-wise" themeStyles={themeStyles}>
-                  <InputField label="Total Selected" name="totalSelected" type="number" placeholder="Total students selected" {...fieldProps} />
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <InputField label="PCCOE Selected" name="totalSelectedPCCOE" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="PCCOER Selected" name="totalSelectedPCCOER" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="NMIET Selected" name="totalSelectedNMIET" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="NCER Selected" name="totalSelectedNCER" type="number" placeholder="0" {...fieldProps} />
-                  </div>
-                </FormSection>
-
-                <FormSection title="PCCOE - Branch-wise Selection" themeStyles={themeStyles}>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <InputField label="Computer Eng." name="pccoeComputerSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="AI & ML" name="pccoeAIMLSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="Computer (Regional)" name="pccoeComputerRegionalSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="IT" name="pccoeITSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="EnTC" name="pccoeEnTCSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="Mechanical" name="pccoeMechanicalSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="Civil" name="pccoeCivilSelected" type="number" placeholder="0" {...fieldProps} />
-                  </div>
-                </FormSection>
-
-                <FormSection title="PCCOER - Branch-wise Selection" themeStyles={themeStyles}>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <InputField label="Computer Eng." name="pccoerComputerSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="IT" name="pccoerITSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="EnTC" name="pccoerEnTCSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="Mechanical" name="pccoerMechanicalSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="Civil" name="pccoerCivilSelected" type="number" placeholder="0" {...fieldProps} />
-                  </div>
-                </FormSection>
-
-                <FormSection title="NMIET - Branch-wise Selection" themeStyles={themeStyles}>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <InputField label="Computer Eng." name="nmietComputerSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="IT" name="nmietITSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="EnTC" name="nmietEnTCSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="Mechanical" name="nmietMechanicalSelected" type="number" placeholder="0" {...fieldProps} />
-                  </div>
-                </FormSection>
-
-                <FormSection title="NCER - Branch-wise Selection" themeStyles={themeStyles}>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <InputField label="Computer Eng." name="ncerComputerSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="AI & ML" name="ncerAIMLSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="EnTC" name="ncerEnTCSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="Mechanical" name="ncerMechanicalSelected" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="Automobile" name="ncerAutomobileSelected" type="number" placeholder="0" {...fieldProps} />
-                  </div>
-                </FormSection>
-
-                <FormSection title="Internship Selection Data" themeStyles={themeStyles}>
-                  <InputField label="Total Internship Selected" name="totalInternshipSelected" type="number" placeholder="Total internships" {...fieldProps} />
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <InputField label="PCCOE" name="totalInternshipSelectedPCCOE" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="PCCOER" name="totalInternshipSelectedPCCOER" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="NMIET" name="totalInternshipSelectedNMIET" type="number" placeholder="0" {...fieldProps} />
-                    <InputField label="NCER" name="totalInternshipSelectedNCER" type="number" placeholder="0" {...fieldProps} />
-                  </div>
-                </FormSection>
-
-                <FormSection title="Student PRNs" themeStyles={themeStyles}>
-                  <InputField label="Placed Student PRNs (comma-separated)" name="placedStudentPRN" type="textarea" placeholder="Enter PRNs separated by commas, e.g., PRN001, PRN002, PRN003" {...fieldProps} />
-                  <InputField label="Internship Selected PRNs (comma-separated)" name="internshipSelectedPRN" type="textarea" placeholder="Enter PRNs separated by commas" {...fieldProps} />
-                </FormSection>
-
-                <FormSection title="Expenditure" themeStyles={themeStyles}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField label="Approved Expenditure" name="approvedExpenditure" type="number" placeholder="Approved amount" {...fieldProps} />
-                    <InputField label="Actual Expenditure" name="actualExpenditure" type="number" placeholder="Actual amount spent" {...fieldProps} />
-                  </div>
-                </FormSection>
-
+                </FormSection>  
                 <FormSection title="Drive Status" themeStyles={themeStyles}>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <SelectField label="Resume Required" name="resumeRequired" options={[

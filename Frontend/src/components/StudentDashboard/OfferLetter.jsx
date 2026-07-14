@@ -54,6 +54,7 @@ const OfferLetterManager = () => {
       companyName: "",
       packageValue: "",
       companyType: "",
+      offerType: "",
       offerLetterFile: null,
       joiningLetterFile: null,
     });
@@ -156,6 +157,7 @@ const OfferLetterManager = () => {
       companyName: offer.companyName,
       packageValue: offer.packageValue,
       companyType: offer.companyType,
+      offerType: offer.offerType,
       offerLetterFile: offer.offerLetterFile,
       joiningLetterFile: offer.joiningLetterFile || null,
     });
@@ -171,6 +173,7 @@ const OfferLetterManager = () => {
       companyName: offer.companyName,
       packageValue: offer.packageValue,
       companyType: offer.companyType,
+      offerType: offer.offerType,
       offerLetterFile: offer.offerLetterFile,
       joiningLetterFile: offer.joiningLetterFile || null,
     });
@@ -196,6 +199,7 @@ const OfferLetterManager = () => {
       companyName: offer.companyName,
       packageValue: offer.packageValue,
       companyType: offer.companyType,
+      offerType: offer.offerType,
       offerLetterFile: offer.offerLetterFile,
       joiningLetterFile: null,
     });
@@ -665,7 +669,30 @@ const OfferLetterManager = () => {
                   )}
                   <FieldError error={fieldErrors.companyType} />
                 </div>
-
+                     {/* Offer Type */}
+<div className="space-y-1.5">
+  <label className={`block text-sm font-medium ${t.textPrimary}`}>
+    Offer Type <span className="text-red-500">*</span>
+  </label> 
+  {viewMode ? (
+    <div className={`px-4 py-3 ${t.emptyStateBg} rounded-lg ${t.textPrimary}`}>
+      {formData.offerType || "Not specified"}
+    </div>
+  ) : (
+    <CustomSelect
+      value={formData.offerType}
+      onChange={(value) => {
+        setFormData((prev) => ({ ...prev, offerType: value }));
+        if (fieldErrors.offerType)
+          setFieldErrors((prev) => ({ ...prev, offerType: "" }));
+      }}
+      disabled={viewMode}
+      hasError={!!fieldErrors.offerType}
+      options={["Full-Time", "Internship", "Apprenticeship", "PPO", "Contract", "Part-Time"]}
+    />
+  )}
+  <FieldError error={fieldErrors.offerType} />
+</div>
                 {/* Offer Letter Upload */}
                 <div className="space-y-1.5">
                   <label className={`block text-sm font-medium ${t.textPrimary}`}>

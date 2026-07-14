@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   Plus,
   Eye,
@@ -10,18 +10,75 @@ import {
   TrendingUp,
   Clock,
   AlertCircle,
+  ChevronDown,
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
 
+// ─── CustomSelect ─────────────────────────────────────────────────────────────
+const CustomSelect = ({ value, onChange, options, hasError, disabled, t }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && setOpen((o) => !o)}
+        className={`w-full px-4 py-3 text-left flex items-center justify-between rounded-lg border
+          ${hasError ? t.inputErrorBorder : t.inputBorder}
+          ${t.inputBg} ${t.inputDisabled} disabled:cursor-not-allowed
+          focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`}
+      >
+        <span className={`${t.inputText} ${!value ? t.inputPlaceholder : ""}`}>
+          {value || "Select an option"}
+        </span>
+        <ChevronDown
+          className={`h-4 w-4 ${t.textTertiary} transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open && (
+        <ul className={`absolute z-50 mt-1 w-full rounded-lg border ${t.cardBorder} ${t.cardBg} shadow-xl overflow-hidden`}>
+          {options.map((opt) => (
+            <li
+              key={opt}
+              onClick={() => { onChange(opt); setOpen(false); }}
+              className={`px-4 py-2.5 text-sm cursor-pointer transition-colors
+                ${value === opt
+                  ? `bg-blue-50 text-blue-600 font-semibold`
+                  : `${t.textPrimary} ${t.buttonHover}`
+                }`}
+            >
+              {opt}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+// ─── InternshipManager ────────────────────────────────────────────────────────
 const InternshipManager = () => {
   const [internships, setInternships] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [viewMode, setViewMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const { theme } = useTheme();
+
   const [formData, setFormData] = useState({
     companyName: "",
     stipend: "",
+    companyType: "",
     startDate: "",
     endDate: "",
     offerLetter: null,
@@ -30,7 +87,7 @@ const InternshipManager = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  // ─── Stats ────────────────────────────────────────────────────────────────
+  // ─── Stats ──────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
     const total = internships.length;
     const today = new Date();
@@ -49,23 +106,24 @@ const InternshipManager = () => {
     const avgDuration =
       internships.length > 0
         ? internships.reduce((sum, i) => {
-          const start = new Date(i.startDate);
-          const end = new Date(i.endDate);
-          const months =
-            (end.getFullYear() - start.getFullYear()) * 12 +
-            (end.getMonth() - start.getMonth());
-          return sum + months;
-        }, 0) / internships.length
+            const start = new Date(i.startDate);
+            const end = new Date(i.endDate);
+            const months =
+              (end.getFullYear() - start.getFullYear()) * 12 +
+              (end.getMonth() - start.getMonth());
+            return sum + months;
+          }, 0) / internships.length
         : 0;
 
     return { total, active, totalStipend, avgDuration };
   }, [internships]);
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
+  // ─── Helpers ─────────────────────────────────────────────────────────────────
   const resetForm = () => {
     setFormData({
       companyName: "",
       stipend: "",
+      companyType: "",
       startDate: "",
       endDate: "",
       offerLetter: null,
@@ -78,62 +136,51 @@ const InternshipManager = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (fieldErrors[name]) {
-      setFieldErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-    // Also re-validate endDate live when startDate changes
-    if (name === "startDate" && fieldErrors.endDate) {
+    if (fieldErrors[name]) setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+    if (name === "startDate" && fieldErrors.endDate)
       setFieldErrors((prev) => ({ ...prev, endDate: "" }));
-    }
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       setFormData((prev) => ({ ...prev, offerLetter: file.name }));
-      if (fieldErrors.offerLetter) {
+      if (fieldErrors.offerLetter)
         setFieldErrors((prev) => ({ ...prev, offerLetter: "" }));
-      }
     }
   };
 
-  // ─── Validation ───────────────────────────────────────────────────────────
+  // ─── Validation ──────────────────────────────────────────────────────────────
   const validate = () => {
     const errors = {};
 
     const companyName = formData.companyName.trim();
-    if (!companyName) {
-      errors.companyName = "Company name is required.";
-    } else if (companyName.length < 2) {
+    if (!companyName) errors.companyName = "Company name is required.";
+    else if (companyName.length < 2)
       errors.companyName = "Company name must be at least 2 characters.";
-    }
 
     const stipend = formData.stipend.toString().trim();
-    if (!stipend) {
-      errors.stipend = "Stipend amount is required.";
-    } else if (isNaN(stipend) || Number(stipend) < 0) {
+    if (!stipend) errors.stipend = "Stipend amount is required.";
+    else if (isNaN(stipend) || Number(stipend) < 0)
       errors.stipend = "Enter a valid non-negative number (e.g. 25000).";
-    } else if (Number(stipend) > 10000000) {
+    else if (Number(stipend) > 10000000)
       errors.stipend = "Stipend amount seems unusually high. Please verify.";
-    }
 
-    if (!formData.startDate) {
-      errors.startDate = "Start date is required.";
-    }
+    if (!formData.companyType) errors.companyType = "Company type is required.";
 
-    if (!formData.endDate) {
-      errors.endDate = "End date is required.";
-    } else if (
+    if (!formData.startDate) errors.startDate = "Start date is required.";
+
+    if (!formData.endDate) errors.endDate = "End date is required.";
+    else if (
       formData.startDate &&
       new Date(formData.endDate) <= new Date(formData.startDate)
-    ) {
+    )
       errors.endDate = "End date must be after the start date.";
-    }
 
     return errors;
   };
 
-  // ─── Submit ───────────────────────────────────────────────────────────────
+  // ─── Submit ──────────────────────────────────────────────────────────────────
   const handleSubmit = () => {
     const errors = validate();
     if (Object.keys(errors).length > 0) {
@@ -158,6 +205,7 @@ const InternshipManager = () => {
     setFormData({
       companyName: internship.companyName,
       stipend: internship.stipend,
+      companyType: internship.companyType || "",
       startDate: internship.startDate,
       endDate: internship.endDate,
       offerLetter: internship.offerLetter,
@@ -172,6 +220,7 @@ const InternshipManager = () => {
     setFormData({
       companyName: internship.companyName,
       stipend: internship.stipend,
+      companyType: internship.companyType || "",
       startDate: internship.startDate,
       endDate: internship.endDate,
       offerLetter: internship.offerLetter,
@@ -210,7 +259,7 @@ const InternshipManager = () => {
     return "active";
   };
 
-  // ─── Themes ───────────────────────────────────────────────────────────────
+  // ─── Themes ──────────────────────────────────────────────────────────────────
   const getLightTheme = () => ({
     background: "bg-gradient-to-br from-slate-50 to-slate-100",
     cardBg: "bg-white",
@@ -307,7 +356,6 @@ const InternshipManager = () => {
 
   const t = theme === "dark" ? getDarkTheme() : getLightTheme();
 
-  // ─── Reusable field error ──────────────────────────────────────────────────
   const FieldError = ({ error }) =>
     error ? (
       <p className={`flex items-center gap-1.5 text-xs mt-1.5 ${t.errorText}`}>
@@ -316,7 +364,7 @@ const InternshipManager = () => {
       </p>
     ) : null;
 
-  // ─── Render ───────────────────────────────────────────────────────────────
+  // ─── Render ──────────────────────────────────────────────────────────────────
   return (
     <div
       style={{ fontFamily: "Urbanist, sans-serif" }}
@@ -343,48 +391,16 @@ const InternshipManager = () => {
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            {
-              label: "Total Internships",
-              value: stats.total,
-              gradient: t.statCard1Gradient,
-              iconBg: t.statIcon1Bg,
-              iconColor: t.statIcon1Text,
-              Icon: Briefcase,
-            },
-            {
-              label: "Active Now",
-              value: stats.active,
-              gradient: t.statCard2Gradient,
-              iconBg: t.statIcon2Bg,
-              iconColor: t.statIcon2Text,
-              Icon: TrendingUp,
-            },
-            {
-              label: "Total Stipend",
-              value: `₹${stats.totalStipend.toLocaleString()}`,
-              gradient: t.statCard3Gradient,
-              iconBg: t.statIcon3Bg,
-              iconColor: t.statIcon3Text,
-              Icon: TrendingUp,
-            },
+            { label: "Total Internships", value: stats.total, gradient: t.statCard1Gradient, iconBg: t.statIcon1Bg, iconColor: t.statIcon1Text, Icon: Briefcase },
+            { label: "Active Now", value: stats.active, gradient: t.statCard2Gradient, iconBg: t.statIcon2Bg, iconColor: t.statIcon2Text, Icon: TrendingUp },
+            { label: "Total Stipend", value: `₹${stats.totalStipend.toLocaleString()}`, gradient: t.statCard3Gradient, iconBg: t.statIcon3Bg, iconColor: t.statIcon3Text, Icon: TrendingUp },
             {
               label: "Avg Duration",
-              value: (
-                <>
-                  {stats.avgDuration.toFixed(1)}
-                  <span className={`text-lg ${t.textSecondary} ml-1`}>mo</span>
-                </>
-              ),
-              gradient: t.statCard4Gradient,
-              iconBg: t.statIcon4Bg,
-              iconColor: t.statIcon4Text,
-              Icon: Clock,
+              value: (<>{stats.avgDuration.toFixed(1)}<span className={`text-lg ${t.textSecondary} ml-1`}>mo</span></>),
+              gradient: t.statCard4Gradient, iconBg: t.statIcon4Bg, iconColor: t.statIcon4Text, Icon: Clock
             },
           ].map(({ label, value, gradient, iconBg, iconColor, Icon }) => (
-            <div
-              key={label}
-              className={`rounded-xl border ${t.cardBorder} ${t.cardShadow} ${t.cardHoverShadow} bg-gradient-to-br ${gradient} transition-all`}
-            >
+            <div key={label} className={`rounded-xl border ${t.cardBorder} ${t.cardShadow} ${t.cardHoverShadow} bg-gradient-to-br ${gradient} transition-all`}>
               <div className="p-6 flex items-center justify-between">
                 <div>
                   <p className={`text-sm font-medium ${t.textSecondary}`}>{label}</p>
@@ -400,21 +416,15 @@ const InternshipManager = () => {
 
         {/* Internship Cards */}
         <div>
-          <h2 className={`text-xl font-semibold ${t.textPrimary} mb-4`}>
-            Your Internships
-          </h2>
+          <h2 className={`text-xl font-semibold ${t.textPrimary} mb-4`}>Your Internships</h2>
           {internships.length === 0 ? (
             <div className={`rounded-xl border ${t.cardBg} ${t.cardBorder} shadow-sm`}>
               <div className="p-12 text-center">
                 <div className={`mx-auto w-24 h-24 ${t.emptyStateBg} rounded-full flex items-center justify-center mb-4`}>
                   <Briefcase className={`h-12 w-12 ${t.emptyStateIcon}`} />
                 </div>
-                <h3 className={`text-xl font-semibold ${t.textPrimary} mb-2`}>
-                  No Internships Yet
-                </h3>
-                <p className={`${t.textSecondary} mb-6`}>
-                  Start building your portfolio by adding your first internship
-                </p>
+                <h3 className={`text-xl font-semibold ${t.textPrimary} mb-2`}>No Internships Yet</h3>
+                <p className={`${t.textSecondary} mb-6`}>Start building your portfolio by adding your first internship</p>
                 <button
                   onClick={() => { resetForm(); setShowModal(true); }}
                   className={`inline-flex items-center px-4 py-2 rounded-lg border ${t.buttonBorder} ${t.buttonBg} ${t.textPrimary} ${t.buttonHover} transition-colors`}
@@ -429,24 +439,19 @@ const InternshipManager = () => {
               {internships.map((internship) => {
                 const status = getStatus(internship.startDate, internship.endDate);
                 return (
-                  <div
-                    key={internship.id}
-                    className={`rounded-xl border overflow-hidden ${t.cardBg} ${t.cardBorder} ${t.cardShadow} ${t.cardHoverShadow} transition-all duration-300`}
-                  >
+                  <div key={internship.id} className={`rounded-xl border overflow-hidden ${t.cardBg} ${t.cardBorder} ${t.cardShadow} ${t.cardHoverShadow} transition-all duration-300`}>
                     <div className="h-2 bg-gradient-to-r from-blue-600 to-blue-400" />
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
-                        <h3 className={`text-xl font-bold ${t.textPrimary} truncate flex-1 pr-2`}>
-                          {internship.companyName}
-                        </h3>
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${status === "active"
-                              ? t.statusActiveBg
-                              : status === "upcoming"
-                                ? t.statusUpcomingBg
-                                : `${t.statusCompletedBg} ${t.statusCompletedText}`
-                            }`}
-                        >
+                        <div className="flex-1 pr-2">
+                          <h3 className={`text-xl font-bold ${t.textPrimary} truncate`}>{internship.companyName}</h3>
+                          {internship.companyType && (
+                            <span className={`text-xs font-medium ${t.textSecondary} mt-0.5 block`}>{internship.companyType}</span>
+                          )}
+                        </div>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${
+                          status === "active" ? t.statusActiveBg : status === "upcoming" ? t.statusUpcomingBg : `${t.statusCompletedBg} ${t.statusCompletedText}`
+                        }`}>
                           {status}
                         </span>
                       </div>
@@ -454,51 +459,34 @@ const InternshipManager = () => {
                       <div className="space-y-3 mb-6">
                         <div className={`flex items-center justify-between py-2 border-b ${t.dividerBorder}`}>
                           <span className={`text-sm ${t.textSecondary}`}>Stipend</span>
-                          <span className={`font-semibold ${t.textPrimary}`}>
-                            ₹{parseFloat(internship.stipend).toLocaleString()}/mo
-                          </span>
+                          <span className={`font-semibold ${t.textPrimary}`}>₹{parseFloat(internship.stipend).toLocaleString()}/mo</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                           <Calendar className={`h-4 w-4 ${t.calendarIcon}`} />
                           <span className={t.textSecondary}>Start:</span>
-                          <span className={`font-medium ${t.textPrimary}`}>
-                            {formatDate(internship.startDate)}
-                          </span>
+                          <span className={`font-medium ${t.textPrimary}`}>{formatDate(internship.startDate)}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                           <Calendar className={`h-4 w-4 ${t.calendarIcon}`} />
                           <span className={t.textSecondary}>End:</span>
-                          <span className={`font-medium ${t.textPrimary}`}>
-                            {formatDate(internship.endDate)}
-                          </span>
+                          <span className={`font-medium ${t.textPrimary}`}>{formatDate(internship.endDate)}</span>
                         </div>
                         {internship.offerLetter && (
                           <div className="flex items-center gap-2 text-sm pt-2">
                             <div className="h-2 w-2 rounded-full bg-green-500" />
-                            <span className={`${t.offerLetterText} font-medium`}>
-                              Offer letter attached
-                            </span>
+                            <span className={`${t.offerLetterText} font-medium`}>Offer letter attached</span>
                           </div>
                         )}
                       </div>
 
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => handleView(internship)}
-                          className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${t.buttonBorder} ${t.buttonBg} ${t.textPrimary} ${t.buttonHover} transition-colors`}
-                        >
+                        <button onClick={() => handleView(internship)} className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${t.buttonBorder} ${t.buttonBg} ${t.textPrimary} ${t.buttonHover} transition-colors`}>
                           <Eye className="mr-2 h-4 w-4" /> View
                         </button>
-                        <button
-                          onClick={() => handleEdit(internship)}
-                          className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${t.buttonBorder} ${t.buttonBg} ${t.textPrimary} ${t.buttonHover} transition-colors`}
-                        >
+                        <button onClick={() => handleEdit(internship)} className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${t.buttonBorder} ${t.buttonBg} ${t.textPrimary} ${t.buttonHover} transition-colors`}>
                           <Edit2 className="mr-2 h-4 w-4" /> Edit
                         </button>
-                        <button
-                          onClick={() => handleDelete(internship.id)}
-                          className={`inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${t.buttonBorder} text-red-600 hover:bg-red-600 hover:text-white transition-colors`}
-                        >
+                        <button onClick={() => handleDelete(internship.id)} className={`inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg border ${t.buttonBorder} text-red-600 hover:bg-red-600 hover:text-white transition-colors`}>
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -510,40 +498,26 @@ const InternshipManager = () => {
           )}
         </div>
 
-        {/* ── Add / Edit / View Modal ───────────────────────────────────────── */}
+        {/* ── Add / Edit / View Modal ─────────────────────────────────────────── */}
         {showModal && (
-          <div
-            className={`fixed inset-0 ${t.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
-          >
-            <div
-              className={`w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-xl border ${t.cardBg} ${t.cardBorder}`}
-            >
+          <div className={`fixed inset-0 ${t.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
+            <div className={`w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-xl border ${t.cardBg} ${t.cardBorder}`}>
+
               {/* Header */}
-              <div
-                className={`sticky top-0 ${t.modalHeader} ${t.modalHeaderBorder} border-b px-6 py-4 flex justify-between items-center`}
-              >
+              <div className={`sticky top-0 ${t.modalHeader} ${t.modalHeaderBorder} border-b px-6 py-4 flex justify-between items-center`}>
                 <h2 className={`text-2xl font-bold ${t.textPrimary}`}>
-                  {viewMode
-                    ? "Internship Details"
-                    : editingId
-                      ? "Edit Internship"
-                      : "Add New Internship"}
+                  {viewMode ? "Internship Details" : editingId ? "Edit Internship" : "Add New Internship"}
                 </h2>
-                <button
-                  onClick={() => { setShowModal(false); resetForm(); }}
-                  className={`p-2 rounded-lg ${t.buttonHover} transition-colors`}
-                >
+                <button onClick={() => { setShowModal(false); resetForm(); }} className={`p-2 rounded-lg ${t.buttonHover} transition-colors`}>
                   <X className={`h-5 w-5 ${t.textPrimary}`} />
                 </button>
               </div>
 
-              {/* Validation summary banner */}
+              {/* Validation banner */}
               {!viewMode && Object.keys(fieldErrors).length > 0 && (
                 <div className={`mx-6 mt-4 flex items-start gap-3 px-4 py-3 rounded-lg border ${t.errorBg} ${t.errorBorder}`}>
                   <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${t.errorText}`} />
-                  <p className={`text-sm ${t.errorText}`}>
-                    Please fix the highlighted fields before submitting.
-                  </p>
+                  <p className={`text-sm ${t.errorText}`}>Please fix the highlighted fields before submitting.</p>
                 </div>
               )}
 
@@ -562,8 +536,7 @@ const InternshipManager = () => {
                     onChange={handleInputChange}
                     placeholder="e.g., Google, Microsoft, Meta"
                     disabled={viewMode}
-                    className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.companyName ? t.inputErrorBorder : t.inputBorder
-                      } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${t.inputDisabled} disabled:cursor-not-allowed ${t.inputText} ${t.inputPlaceholder} transition-all`}
+                    className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.companyName ? t.inputErrorBorder : t.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${t.inputDisabled} disabled:cursor-not-allowed ${t.inputText} ${t.inputPlaceholder} transition-all`}
                   />
                   <FieldError error={fieldErrors.companyName} />
                 </div>
@@ -581,10 +554,34 @@ const InternshipManager = () => {
                     placeholder="e.g., 25000"
                     disabled={viewMode}
                     min="0"
-                    className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.stipend ? t.inputErrorBorder : t.inputBorder
-                      } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${t.inputDisabled} disabled:cursor-not-allowed ${t.inputText} ${t.inputPlaceholder} transition-all`}
+                    className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.stipend ? t.inputErrorBorder : t.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${t.inputDisabled} disabled:cursor-not-allowed ${t.inputText} ${t.inputPlaceholder} transition-all`}
                   />
                   <FieldError error={fieldErrors.stipend} />
+                </div>
+
+                {/* Company Type */}
+                <div className="space-y-1.5">
+                  <label className={`block text-sm font-medium ${t.textPrimary}`}>
+                    Company Type <span className="text-red-500">*</span>
+                  </label>
+                  {viewMode ? (
+                    <div className={`px-4 py-3 ${t.emptyStateBg} rounded-lg ${t.textPrimary}`}>
+                      {formData.companyType || "Not specified"}
+                    </div>
+                  ) : (
+                    <CustomSelect
+                      value={formData.companyType}
+                      onChange={(value) => {
+                        setFormData((prev) => ({ ...prev, companyType: value }));
+                        if (fieldErrors.companyType)
+                          setFieldErrors((prev) => ({ ...prev, companyType: "" }));
+                      }}
+                      hasError={!!fieldErrors.companyType}
+                      options={["Core", "Service", "Product", "Other"]}
+                      t={t}
+                    />
+                  )}
+                  <FieldError error={fieldErrors.companyType} />
                 </div>
 
                 {/* Dates */}
@@ -599,12 +596,10 @@ const InternshipManager = () => {
                       value={formData.startDate}
                       onChange={handleInputChange}
                       disabled={viewMode}
-                      className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.startDate ? t.inputErrorBorder : t.inputBorder
-                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${t.inputDisabled} disabled:cursor-not-allowed ${t.inputText} transition-all`}
+                      className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.startDate ? t.inputErrorBorder : t.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${t.inputDisabled} disabled:cursor-not-allowed ${t.inputText} transition-all`}
                     />
                     <FieldError error={fieldErrors.startDate} />
                   </div>
-
                   <div className="space-y-1.5">
                     <label className={`block text-sm font-medium ${t.textPrimary}`}>
                       End Date <span className="text-red-500">*</span>
@@ -616,8 +611,7 @@ const InternshipManager = () => {
                       onChange={handleInputChange}
                       disabled={viewMode}
                       min={formData.startDate || undefined}
-                      className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.endDate ? t.inputErrorBorder : t.inputBorder
-                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${t.inputDisabled} disabled:cursor-not-allowed ${t.inputText} transition-all`}
+                      className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.endDate ? t.inputErrorBorder : t.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${t.inputDisabled} disabled:cursor-not-allowed ${t.inputText} transition-all`}
                     />
                     <FieldError error={fieldErrors.endDate} />
                   </div>
@@ -642,9 +636,7 @@ const InternshipManager = () => {
                     />
                   )}
                   {formData.offerLetter && (
-                    <p className={`text-sm ${t.textSecondary} mt-1`}>
-                      Selected: {formData.offerLetter}
-                    </p>
+                    <p className={`text-sm ${t.textSecondary} mt-1`}>Selected: {formData.offerLetter}</p>
                   )}
                 </div>
 
@@ -670,14 +662,10 @@ const InternshipManager = () => {
           </div>
         )}
 
-        {/* ── Delete Confirm Modal ──────────────────────────────────────────── */}
+        {/* ── Delete Confirm Modal ────────────────────────────────────────────── */}
         {showDeleteConfirm && (
-          <div
-            className={`fixed inset-0 ${t.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}
-          >
-            <div
-              className={`w-full max-w-md rounded-2xl shadow-2xl border ${t.cardBg} ${t.cardBorder} p-6`}
-            >
+          <div className={`fixed inset-0 ${t.modalOverlay} backdrop-blur-sm flex items-center justify-center p-4 z-50`}>
+            <div className={`w-full max-w-md rounded-2xl shadow-2xl border ${t.cardBg} ${t.cardBorder} p-6`}>
               <div className="flex justify-between items-center mb-4">
                 <h2 className={`text-xl font-bold ${t.textPrimary}`}>Confirm Deletion</h2>
                 <button

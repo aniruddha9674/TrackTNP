@@ -152,6 +152,7 @@ const Dashboard = () => {
       children: [
         { name: "Company Details", path: "/admindashboard/company/add" },
         { name: "Company Drive", path: "/admindashboard/company/drive" },
+           { name: "Drive Overview", path: "/admindashboard/company/drive/overview" },
       ],
     },
     {

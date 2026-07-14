@@ -186,11 +186,11 @@ const CertificationManager = () => {
     if (!duration) {
       errors.duration = "Duration is required.";
     } else if (isNaN(duration) || Number(duration) <= 0) {
-      errors.duration = "Enter a valid positive number of weeks (e.g. 12).";
+      errors.duration = "Enter a valid positive number of hours (e.g. 100).";
     } else if (!Number.isInteger(Number(duration))) {
-      errors.duration = "Duration must be a whole number of weeks.";
-    } else if (Number(duration) > 260) {
-      errors.duration = "Duration seems too long (max 260 weeks / 5 years). Please verify.";
+      errors.duration = "Duration must be a whole number of hours.";
+    } else if (Number(duration) > 1000) {
+      errors.duration = "Duration seems too long (max 1000 hours). Please verify.";
     }
 
     return errors;
@@ -311,7 +311,7 @@ const CertificationManager = () => {
             {
               Icon: Clock,
               label: "Avg Duration",
-              value: `${stats.avgDuration.toFixed(1)} wks`,
+              value: `${stats.avgDuration.toFixed(1)} hrs`,
               gradient: t.statCard4Gradient,
               iconBg: t.statIcon4Bg,
               iconColor: t.statIcon4Text,
@@ -373,7 +373,7 @@ const CertificationManager = () => {
                     </h3>
                     <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
                       <Clock size={14} className="mr-1" />
-                      {certification.duration} wks
+                      {certification.duration} Hrs
                     </div>
                   </div>
                 </div>
@@ -389,7 +389,7 @@ const CertificationManager = () => {
                   <div className="flex items-center">
                     <Clock size={16} className={`${t.textSecondary} mr-2 shrink-0`} />
                     <span className={`text-sm ${t.textSecondary}`}>
-                      Duration: {certification.duration} weeks
+                      Duration: {certification.duration} Hours
                     </span>
                   </div>
                 </div>
@@ -519,7 +519,7 @@ const CertificationManager = () => {
                   {/* Duration */}
                   <div className="space-y-1.5">
                     <label className={`block text-sm font-medium ${t.textPrimary}`}>
-                      Certificate Duration (in weeks) <span className="text-red-500">*</span>
+                      Certificate Duration (in Hours) <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="number"
