@@ -374,8 +374,16 @@ class CompanyFile(models.Model):
 
 # Student Internships
 class Internship(models.Model):
+    COMPANY_TYPE_CHOICES = [
+        ('core', 'Core'),
+        ('service', 'Service'),
+        ('product', 'Product'),
+        ('other', 'Other'),
+    ]
+
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='internships')
     company_name = models.CharField(max_length=200)
+    company_type = models.CharField(max_length=20, choices=COMPANY_TYPE_CHOICES, blank=True)
     stipend = models.DecimalField(max_digits=10, decimal_places=2)
     start_date = models.DateField()
     end_date = models.DateField()

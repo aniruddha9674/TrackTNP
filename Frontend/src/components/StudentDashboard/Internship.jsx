@@ -11,8 +11,38 @@ import {
   Clock,
   AlertCircle,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
+import {
+  fetchInternships,
+  createInternship,
+  updateInternship,
+  deleteInternship,
+} from "../../Utils/api/internshipApi";
+
+// ─── company_type mapping: backend uses lowercase codes, UI shows labels ─────
+const COMPANY_TYPE_OPTIONS = [
+  { value: "core", label: "Core" },
+  { value: "service", label: "Service" },
+  { value: "product", label: "Product" },
+  { value: "other", label: "Other" },
+];
+const labelForType = (value) =>
+  COMPANY_TYPE_OPTIONS.find((o) => o.value === value)?.label || "";
+const valueForLabel = (label) =>
+  COMPANY_TYPE_OPTIONS.find((o) => o.label === label)?.value || "";
+
+// map a backend internship object -> the shape this component works with
+const fromApi = (i) => ({
+  id: i.id,
+  companyName: i.company_name,
+  companyType: labelForType(i.company_type),
+  stipend: i.stipend,
+  startDate: i.start_date,
+  endDate: i.end_date,
+  offerLetter: i.offer_letter, // Cloudinary URL string, or null
+});
 
 // ─── CustomSelect ─────────────────────────────────────────────────────────────
 const CustomSelect = ({ value, onChange, options, hasError, disabled, t }) => {
@@ -70,6 +100,11 @@ const CustomSelect = ({ value, onChange, options, hasError, disabled, t }) => {
 // ─── InternshipManager ────────────────────────────────────────────────────────
 const InternshipManager = () => {
   const [internships, setInternships] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+
   const [showModal, setShowModal] = useState(false);
   const [viewMode, setViewMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -81,11 +116,30 @@ const InternshipManager = () => {
     companyType: "",
     startDate: "",
     endDate: "",
-    offerLetter: null,
+    offerLetter: null, // File object (new upload) or existing Cloudinary URL string
   });
   const [fieldErrors, setFieldErrors] = useState({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // ─── Load internships from backend on mount ──────────────────────────────────
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      setLoadError("");
+      try {
+        const data = await fetchInternships();
+        setInternships(data.map(fromApi));
+      } catch (err) {
+        console.error("Failed to load internships", err);
+        setLoadError("Couldn't load your internships. Please refresh the page.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   // ─── Stats ──────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
@@ -129,6 +183,7 @@ const InternshipManager = () => {
       offerLetter: null,
     });
     setFieldErrors({});
+    setSaveError("");
     setEditingId(null);
     setViewMode(false);
   };
@@ -144,7 +199,8 @@ const InternshipManager = () => {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFormData((prev) => ({ ...prev, offerLetter: file.name }));
+      // store the real File object so it can be uploaded as multipart/form-data
+      setFormData((prev) => ({ ...prev, offerLetter: file }));
       if (fieldErrors.offerLetter)
         setFieldErrors((prev) => ({ ...prev, offerLetter: "" }));
     }
@@ -181,24 +237,46 @@ const InternshipManager = () => {
   };
 
   // ─── Submit ──────────────────────────────────────────────────────────────────
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const errors = validate();
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
     }
 
-    if (editingId !== null) {
-      setInternships((prev) =>
-        prev.map((intern) =>
-          intern.id === editingId ? { ...formData, id: editingId } : intern
-        )
-      );
-    } else {
-      setInternships((prev) => [...prev, { ...formData, id: Date.now() }]);
+    setSaving(true);
+    setSaveError("");
+
+    const payload = new FormData();
+    payload.append("company_name", formData.companyName.trim());
+    payload.append("company_type", valueForLabel(formData.companyType));
+    payload.append("stipend", formData.stipend);
+    payload.append("start_date", formData.startDate);
+    payload.append("end_date", formData.endDate);
+    // only attach the file field if a new File was actually chosen —
+    // avoids overwriting an existing Cloudinary file with nothing on edit
+    if (formData.offerLetter instanceof File) {
+      payload.append("offer_letter", formData.offerLetter);
     }
-    setShowModal(false);
-    resetForm();
+
+    try {
+      if (editingId !== null) {
+        const updated = await updateInternship(editingId, payload);
+        setInternships((prev) =>
+          prev.map((intern) => (intern.id === editingId ? fromApi(updated) : intern))
+        );
+      } else {
+        const created = await createInternship(payload);
+        setInternships((prev) => [...prev, fromApi(created)]);
+      }
+      setShowModal(false);
+      resetForm();
+    } catch (err) {
+      console.error("Save failed", err);
+      setSaveError("Something went wrong while saving. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleEdit = (internship) => {
@@ -208,9 +286,10 @@ const InternshipManager = () => {
       companyType: internship.companyType || "",
       startDate: internship.startDate,
       endDate: internship.endDate,
-      offerLetter: internship.offerLetter,
+      offerLetter: internship.offerLetter, // existing Cloudinary URL (string) until replaced
     });
     setFieldErrors({});
+    setSaveError("");
     setEditingId(internship.id);
     setViewMode(false);
     setShowModal(true);
@@ -235,10 +314,18 @@ const InternshipManager = () => {
     setShowDeleteConfirm(true);
   };
 
-  const confirmDelete = () => {
-    setInternships((prev) => prev.filter((member) => member.id !== deleteId));
-    setShowDeleteConfirm(false);
-    setDeleteId(null);
+  const confirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await deleteInternship(deleteId);
+      setInternships((prev) => prev.filter((i) => i.id !== deleteId));
+      setShowDeleteConfirm(false);
+      setDeleteId(null);
+    } catch (err) {
+      console.error("Delete failed", err);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -388,6 +475,14 @@ const InternshipManager = () => {
           </button>
         </div>
 
+        {/* Load error banner */}
+        {loadError && (
+          <div className={`flex items-start gap-3 px-4 py-3 rounded-lg border ${t.errorBg} ${t.errorBorder}`}>
+            <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${t.errorText}`} />
+            <p className={`text-sm ${t.errorText}`}>{loadError}</p>
+          </div>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
@@ -417,7 +512,15 @@ const InternshipManager = () => {
         {/* Internship Cards */}
         <div>
           <h2 className={`text-xl font-semibold ${t.textPrimary} mb-4`}>Your Internships</h2>
-          {internships.length === 0 ? (
+
+          {loading ? (
+            <div className={`rounded-xl border ${t.cardBg} ${t.cardBorder} shadow-sm`}>
+              <div className="p-12 text-center flex flex-col items-center">
+                <Loader2 className={`h-8 w-8 animate-spin ${t.textTertiary} mb-3`} />
+                <p className={t.textSecondary}>Loading your internships...</p>
+              </div>
+            </div>
+          ) : internships.length === 0 ? (
             <div className={`rounded-xl border ${t.cardBg} ${t.cardBorder} shadow-sm`}>
               <div className="p-12 text-center">
                 <div className={`mx-auto w-24 h-24 ${t.emptyStateBg} rounded-full flex items-center justify-center mb-4`}>
@@ -472,10 +575,15 @@ const InternshipManager = () => {
                           <span className={`font-medium ${t.textPrimary}`}>{formatDate(internship.endDate)}</span>
                         </div>
                         {internship.offerLetter && (
-                          <div className="flex items-center gap-2 text-sm pt-2">
+                          <a
+                            href={internship.offerLetter}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-sm pt-2 hover:underline w-fit"
+                          >
                             <div className="h-2 w-2 rounded-full bg-green-500" />
-                            <span className={`${t.offerLetterText} font-medium`}>Offer letter attached</span>
-                          </div>
+                            <span className={`${t.offerLetterText} font-medium`}>View offer letter</span>
+                          </a>
                         )}
                       </div>
 
@@ -518,6 +626,14 @@ const InternshipManager = () => {
                 <div className={`mx-6 mt-4 flex items-start gap-3 px-4 py-3 rounded-lg border ${t.errorBg} ${t.errorBorder}`}>
                   <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${t.errorText}`} />
                   <p className={`text-sm ${t.errorText}`}>Please fix the highlighted fields before submitting.</p>
+                </div>
+              )}
+
+              {/* Save error banner */}
+              {!viewMode && saveError && (
+                <div className={`mx-6 mt-4 flex items-start gap-3 px-4 py-3 rounded-lg border ${t.errorBg} ${t.errorBorder}`}>
+                  <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${t.errorText}`} />
+                  <p className={`text-sm ${t.errorText}`}>{saveError}</p>
                 </div>
               )}
 
@@ -577,7 +693,7 @@ const InternshipManager = () => {
                           setFieldErrors((prev) => ({ ...prev, companyType: "" }));
                       }}
                       hasError={!!fieldErrors.companyType}
-                      options={["Core", "Service", "Product", "Other"]}
+                      options={COMPANY_TYPE_OPTIONS.map((o) => o.label)}
                       t={t}
                     />
                   )}
@@ -625,7 +741,18 @@ const InternshipManager = () => {
                   </label>
                   {viewMode ? (
                     <div className={`px-4 py-3 ${t.emptyStateBg} rounded-lg ${t.textPrimary}`}>
-                      {formData.offerLetter || "No file uploaded"}
+                      {formData.offerLetter ? (
+                        <a
+                          href={formData.offerLetter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline"
+                        >
+                          View uploaded offer letter
+                        </a>
+                      ) : (
+                        "No file uploaded"
+                      )}
                     </div>
                   ) : (
                     <input
@@ -636,7 +763,11 @@ const InternshipManager = () => {
                     />
                   )}
                   {formData.offerLetter && (
-                    <p className={`text-sm ${t.textSecondary} mt-1`}>Selected: {formData.offerLetter}</p>
+                    <p className={`text-sm ${t.textSecondary} mt-1`}>
+                      {formData.offerLetter instanceof File
+                        ? `Selected: ${formData.offerLetter.name}`
+                        : "Existing file on record — choose a new one to replace it."}
+                    </p>
                   )}
                 </div>
 
@@ -645,15 +776,18 @@ const InternshipManager = () => {
                   <div className="flex gap-3 pt-4">
                     <button
                       onClick={() => { setShowModal(false); resetForm(); }}
-                      className={`flex-1 px-4 py-2 rounded-lg border ${t.buttonBorder} ${t.buttonBg} ${t.textPrimary} ${t.buttonHover} transition-colors`}
+                      disabled={saving}
+                      className={`flex-1 px-4 py-2 rounded-lg border ${t.buttonBorder} ${t.buttonBg} ${t.textPrimary} ${t.buttonHover} transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleSubmit}
-                      className="flex-1 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                      disabled={saving}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      {editingId ? "Update Internship" : "Add Internship"}
+                      {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                      {saving ? "Saving..." : editingId ? "Update Internship" : "Add Internship"}
                     </button>
                   </div>
                 )}
@@ -670,7 +804,8 @@ const InternshipManager = () => {
                 <h2 className={`text-xl font-bold ${t.textPrimary}`}>Confirm Deletion</h2>
                 <button
                   onClick={() => { setShowDeleteConfirm(false); setDeleteId(null); }}
-                  className={`inline-flex items-center justify-center p-2 rounded-lg ${t.buttonHover} ${t.textPrimary}`}
+                  disabled={deleting}
+                  className={`inline-flex items-center justify-center p-2 rounded-lg ${t.buttonHover} ${t.textPrimary} disabled:opacity-60`}
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -681,15 +816,18 @@ const InternshipManager = () => {
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={() => { setShowDeleteConfirm(false); setDeleteId(null); }}
-                  className={`inline-flex items-center justify-center px-4 py-2 rounded-lg border-2 ${t.buttonBorder} ${t.buttonBg} ${t.buttonHover} ${t.textPrimary} font-medium transition-all`}
+                  disabled={deleting}
+                  className={`inline-flex items-center justify-center px-4 py-2 rounded-lg border-2 ${t.buttonBorder} ${t.buttonBg} ${t.buttonHover} ${t.textPrimary} font-medium transition-all disabled:opacity-60`}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium transition-all"
+                  disabled={deleting}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium transition-all disabled:opacity-60"
                 >
-                  Delete
+                  {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {deleting ? "Deleting..." : "Delete"}
                 </button>
               </div>
             </div>

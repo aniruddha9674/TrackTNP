@@ -1,0 +1,34 @@
+from rest_framework import viewsets, permissions
+from api.models import Internship, Student
+from api.serializers import InternshipSerializer
+
+# ---------------------------------------------------------------------
+# TEMP DEV SWITCH — remove this whole block once real auth is wired in.
+# Set to the PK of any Student row in your DB so you can test locally.
+# ---------------------------------------------------------------------
+DEV_HARDCODED_STUDENT_ID = 1
+   
+
+def get_current_student(request):
+    """ 
+    Single source of truth for 'which student is making this request'.
+    TODO(auth): once JWT auth is live, replace this function's body with:
+
+        return Student.objects.get(user=request.user)
+
+    Nothing else in this file needs to change.
+    """
+    return Student.objects.get(pk=DEV_HARDCODED_STUDENT_ID)
+
+
+class InternshipViewSet(viewsets.ModelViewSet):
+    serializer_class = InternshipSerializer
+    permission_classes = [permissions.AllowAny]  # TODO(auth): swap to IsAuthenticated
+
+    def get_queryset(self):
+        student = get_current_student(self.request)
+        return Internship.objects.filter(student=student)
+
+    def perform_create(self, serializer):
+        student = get_current_student(self.request)
+        serializer.save(student=student)
