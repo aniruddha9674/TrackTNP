@@ -1,6 +1,6 @@
 from rest_framework import viewsets, permissions
-from api.models import Internship, Student, Certification
-from api.serializers import InternshipSerializer, CertificationSerializer
+from api.models import Internship, Student, Certification, OfferLetter
+from api.serializers import InternshipSerializer, CertificationSerializer, OfferLetterSerializer
 
 # ---------------------------------------------------------------------
 # TEMP DEV SWITCH — remove this whole block once real auth is wired in.
@@ -46,3 +46,13 @@ class CertificationViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         student = get_current_student(self.request)
         serializer.save(student=student)
+
+class OfferLetterViewSet(viewsets.ModelViewSet):
+    serializer_class = OfferLetterSerializer
+    permission_classes = [permissions.AllowAny]  # TODO(auth): IsAuthenticated
+
+    def get_queryset(self):
+        return OfferLetter.objects.filter(student=get_current_student(self.request))
+
+    def perform_create(self, serializer):
+        serializer.save(student=get_current_student(self.request))

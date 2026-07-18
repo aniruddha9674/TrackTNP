@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Plus,
   Eye,
@@ -12,11 +12,55 @@ import {
   ArrowRight,
   ChevronDown,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
+import {
+  fetchOfferLetters,
+  createOfferLetter,
+  updateOfferLetter,
+  deleteOfferLetter,
+} from "../../Utils/api/offerLetterApi";
+
+// ─── backend uses lowercase codes, UI shows labels ───────────────────────────
+const COMPANY_TYPE_OPTIONS = [
+  { value: "product", label: "Product" },
+  { value: "service", label: "Service" },
+  { value: "startup", label: "Startup" },
+  { value: "mnc", label: "MNC" },
+  { value: "government", label: "Government" },
+];
+const OFFER_TYPE_OPTIONS = [
+  { value: "full_time", label: "Full-Time" },
+  { value: "internship", label: "Internship" },
+  { value: "apprenticeship", label: "Apprenticeship" },
+  { value: "ppo", label: "PPO" },
+  { value: "contract", label: "Contract" },
+  { value: "part_time", label: "Part-Time" },
+];
+const labelFor = (options, value) => options.find((o) => o.value === value)?.label || "";
+const valueFor = (options, label) => options.find((o) => o.label === label)?.value || "";
+
+// map a backend offer letter object -> the shape this component works with
+const fromApi = (o) => ({
+  id: o.id,
+  companyName: o.company_name,
+  packageValue: o.package_value,
+  companyType: labelFor(COMPANY_TYPE_OPTIONS, o.company_type),
+  offerType: labelFor(OFFER_TYPE_OPTIONS, o.offer_type),
+  status: o.status, // "offer" | "final"
+  offerLetterFile: o.offer_letter_file, // Cloudinary URL or null
+  joiningLetterFile: o.joining_letter_file, // Cloudinary URL or null
+});
 
 const OfferLetterManager = () => {
   const [offers, setOffers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
   const [showModal, setShowModal] = useState(false);
   const [viewMode, setViewMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -26,12 +70,31 @@ const OfferLetterManager = () => {
     companyName: "",
     packageValue: "",
     companyType: "",
+    offerType: "",
     offerLetterFile: null,
     joiningLetterFile: null,
   });
   const [fieldErrors, setFieldErrors] = useState({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+
+  // ─── Load offers from backend on mount ───────────────────────────────────
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      setLoadError("");
+      try {
+        const data = await fetchOfferLetters();
+        setOffers(data.map(fromApi));
+      } catch (err) {
+        console.error("Failed to load offer letters", err);
+        setLoadError("Couldn't load your offer letters. Please refresh the page.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   // ─── Stats ────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
@@ -59,6 +122,7 @@ const OfferLetterManager = () => {
       joiningLetterFile: null,
     });
     setFieldErrors({});
+    setSaveError("");
     setEditingId(null);
     setViewMode(false);
   };
@@ -66,7 +130,6 @@ const OfferLetterManager = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear the error for this field as soon as the user types
     if (fieldErrors[name]) {
       setFieldErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -75,7 +138,8 @@ const OfferLetterManager = () => {
   const handleFileChange = (e, fieldName) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFormData((prev) => ({ ...prev, [fieldName]: file.name }));
+      // store the real File object so it can be uploaded as multipart/form-data
+      setFormData((prev) => ({ ...prev, [fieldName]: file }));
       if (fieldErrors[fieldName]) {
         setFieldErrors((prev) => ({ ...prev, [fieldName]: "" }));
       }
@@ -93,7 +157,7 @@ const OfferLetterManager = () => {
       errors.companyName = "Company name must be at least 2 characters.";
     }
 
-    const pkg = formData.packageValue.trim();
+    const pkg = formData.packageValue.toString().trim();
     if (!pkg) {
       errors.packageValue = "Package value is required.";
     } else if (isNaN(pkg) || Number(pkg) <= 0) {
@@ -104,6 +168,10 @@ const OfferLetterManager = () => {
 
     if (!formData.companyType) {
       errors.companyType = "Please select a company type.";
+    }
+
+    if (!formData.offerType) {
+      errors.offerType = "Please select an offer type.";
     }
 
     if (!formData.offerLetterFile) {
@@ -119,37 +187,48 @@ const OfferLetterManager = () => {
   };
 
   // ─── Submit ───────────────────────────────────────────────────────────────
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const errors = validate();
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
     }
 
-    if (editingId !== null) {
-      setOffers((prev) =>
-        prev.map((offer) =>
-          offer.id === editingId
-            ? {
-              ...formData,
-              id: editingId,
-              status: modalType,
-              createdAt: offer.createdAt,
-            }
-            : offer
-        )
-      );
-    } else {
-      const newOffer = {
-        ...formData,
-        id: Date.now(),
-        status: modalType,
-        createdAt: new Date(),
-      };
-      setOffers((prev) => [...prev, newOffer]);
+    setSaving(true);
+    setSaveError("");
+
+    const payload = new FormData();
+    payload.append("company_name", formData.companyName.trim());
+    payload.append("package_value", formData.packageValue);
+    payload.append("company_type", valueFor(COMPANY_TYPE_OPTIONS, formData.companyType));
+    payload.append("offer_type", valueFor(OFFER_TYPE_OPTIONS, formData.offerType));
+    payload.append("status", modalType); // "offer" | "final"
+
+    if (formData.offerLetterFile instanceof File) {
+      payload.append("offer_letter_file", formData.offerLetterFile);
     }
-    setShowModal(false);
-    resetForm();
+    if (formData.joiningLetterFile instanceof File) {
+      payload.append("joining_letter_file", formData.joiningLetterFile);
+    }
+
+    try {
+      if (editingId !== null) {
+        const updated = await updateOfferLetter(editingId, payload);
+        setOffers((prev) =>
+          prev.map((offer) => (offer.id === editingId ? fromApi(updated) : offer))
+        );
+      } else {
+        const created = await createOfferLetter(payload);
+        setOffers((prev) => [...prev, fromApi(created)]);
+      }
+      setShowModal(false);
+      resetForm();
+    } catch (err) {
+      console.error("Save failed", err);
+      setSaveError("Something went wrong while saving. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleEdit = (offer) => {
@@ -158,10 +237,11 @@ const OfferLetterManager = () => {
       packageValue: offer.packageValue,
       companyType: offer.companyType,
       offerType: offer.offerType,
-      offerLetterFile: offer.offerLetterFile,
+      offerLetterFile: offer.offerLetterFile, // existing URL until replaced
       joiningLetterFile: offer.joiningLetterFile || null,
     });
     setFieldErrors({});
+    setSaveError("");
     setEditingId(offer.id);
     setModalType(offer.status);
     setViewMode(false);
@@ -188,10 +268,18 @@ const OfferLetterManager = () => {
     setShowDeleteConfirm(true);
   };
 
-  const confirmDelete = () => {
-    setOffers((prev) => prev.filter((cert) => cert.id !== deleteId));
-    setShowDeleteConfirm(false);
-    setDeleteId(null);
+  const confirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await deleteOfferLetter(deleteId);
+      setOffers((prev) => prev.filter((o) => o.id !== deleteId));
+      setShowDeleteConfirm(false);
+      setDeleteId(null);
+    } catch (err) {
+      console.error("Delete failed", err);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleConvertToFinal = (offer) => {
@@ -200,10 +288,11 @@ const OfferLetterManager = () => {
       packageValue: offer.packageValue,
       companyType: offer.companyType,
       offerType: offer.offerType,
-      offerLetterFile: offer.offerLetterFile,
+      offerLetterFile: offer.offerLetterFile, // keep existing, not re-uploaded
       joiningLetterFile: null,
     });
     setFieldErrors({});
+    setSaveError("");
     setEditingId(offer.id);
     setModalType("final");
     setViewMode(false);
@@ -400,6 +489,14 @@ const OfferLetterManager = () => {
           </div>
         </div>
 
+        {/* Load error banner */}
+        {loadError && (
+          <div className={`flex items-start gap-3 px-4 py-3 rounded-lg border ${t.errorBg} ${t.errorBorder}`}>
+            <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${t.errorText}`} />
+            <p className={`text-sm ${t.errorText}`}>{loadError}</p>
+          </div>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
@@ -463,7 +560,15 @@ const OfferLetterManager = () => {
           <h2 className={`text-xl font-semibold ${t.textPrimary} mb-4`}>
             Your Offer Letters
           </h2>
-          {offers.length === 0 ? (
+
+          {loading ? (
+            <div className={`rounded-xl border ${t.cardBg} ${t.cardBorder} shadow-sm`}>
+              <div className="p-12 text-center flex flex-col items-center">
+                <Loader2 className={`h-8 w-8 animate-spin ${t.textTertiary} mb-3`} />
+                <p className={t.textSecondary}>Loading your offer letters...</p>
+              </div>
+            </div>
+          ) : offers.length === 0 ? (
             <div className={`rounded-xl border ${t.cardBg} ${t.cardBorder} shadow-sm`}>
               <div className="p-12 text-center">
                 <div className={`mx-auto w-24 h-24 ${t.emptyStateBg} rounded-full flex items-center justify-center mb-4`}>
@@ -519,16 +624,26 @@ const OfferLetterManager = () => {
                         <span className={`font-medium ${t.textPrimary}`}>{offer.companyType}</span>
                       </div>
                       {offer.offerLetterFile && (
-                        <div className="flex items-center gap-2 text-sm pt-2">
+                        <a
+                          href={offer.offerLetterFile}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-sm pt-2 hover:underline w-fit"
+                        >
                           <div className="h-2 w-2 rounded-full bg-green-500" />
-                          <span className={`${t.offerLetterText} font-medium`}>Offer letter attached</span>
-                        </div>
+                          <span className={`${t.offerLetterText} font-medium`}>View offer letter</span>
+                        </a>
                       )}
                       {offer.joiningLetterFile && (
-                        <div className="flex items-center gap-2 text-sm">
+                        <a
+                          href={offer.joiningLetterFile}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-sm hover:underline w-fit"
+                        >
                           <div className="h-2 w-2 rounded-full bg-green-500" />
-                          <span className={`${t.offerLetterText} font-medium`}>Joining letter attached</span>
-                        </div>
+                          <span className={`${t.offerLetterText} font-medium`}>View joining letter</span>
+                        </a>
                       )}
                     </div>
                     <div className="flex flex-col gap-2">
@@ -596,13 +711,21 @@ const OfferLetterManager = () => {
                 </button>
               </div>
 
-              {/* Validation summary banner — shown when there are errors */}
+              {/* Validation summary banner */}
               {!viewMode && Object.keys(fieldErrors).length > 0 && (
                 <div className={`mx-6 mt-4 flex items-start gap-3 px-4 py-3 rounded-lg border ${t.errorBg} ${t.errorBorder}`}>
                   <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${t.errorText}`} />
                   <p className={`text-sm ${t.errorText}`}>
                     Please fix the highlighted fields before submitting.
                   </p>
+                </div>
+              )}
+
+              {/* Save error banner */}
+              {!viewMode && saveError && (
+                <div className={`mx-6 mt-4 flex items-start gap-3 px-4 py-3 rounded-lg border ${t.errorBg} ${t.errorBorder}`}>
+                  <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${t.errorText}`} />
+                  <p className={`text-sm ${t.errorText}`}>{saveError}</p>
                 </div>
               )}
 
@@ -664,35 +787,37 @@ const OfferLetterManager = () => {
                       }}
                       disabled={viewMode}
                       hasError={!!fieldErrors.companyType}
-                      options={["Product", "Service", "Startup", "MNC", "Government"]}
+                      options={COMPANY_TYPE_OPTIONS.map((o) => o.label)}
                     />
                   )}
                   <FieldError error={fieldErrors.companyType} />
                 </div>
-                     {/* Offer Type */}
-<div className="space-y-1.5">
-  <label className={`block text-sm font-medium ${t.textPrimary}`}>
-    Offer Type <span className="text-red-500">*</span>
-  </label> 
-  {viewMode ? (
-    <div className={`px-4 py-3 ${t.emptyStateBg} rounded-lg ${t.textPrimary}`}>
-      {formData.offerType || "Not specified"}
-    </div>
-  ) : (
-    <CustomSelect
-      value={formData.offerType}
-      onChange={(value) => {
-        setFormData((prev) => ({ ...prev, offerType: value }));
-        if (fieldErrors.offerType)
-          setFieldErrors((prev) => ({ ...prev, offerType: "" }));
-      }}
-      disabled={viewMode}
-      hasError={!!fieldErrors.offerType}
-      options={["Full-Time", "Internship", "Apprenticeship", "PPO", "Contract", "Part-Time"]}
-    />
-  )}
-  <FieldError error={fieldErrors.offerType} />
-</div>
+
+                {/* Offer Type */}
+                <div className="space-y-1.5">
+                  <label className={`block text-sm font-medium ${t.textPrimary}`}>
+                    Offer Type <span className="text-red-500">*</span>
+                  </label>
+                  {viewMode ? (
+                    <div className={`px-4 py-3 ${t.emptyStateBg} rounded-lg ${t.textPrimary}`}>
+                      {formData.offerType || "Not specified"}
+                    </div>
+                  ) : (
+                    <CustomSelect
+                      value={formData.offerType}
+                      onChange={(value) => {
+                        setFormData((prev) => ({ ...prev, offerType: value }));
+                        if (fieldErrors.offerType)
+                          setFieldErrors((prev) => ({ ...prev, offerType: "" }));
+                      }}
+                      disabled={viewMode}
+                      hasError={!!fieldErrors.offerType}
+                      options={OFFER_TYPE_OPTIONS.map((o) => o.label)}
+                    />
+                  )}
+                  <FieldError error={fieldErrors.offerType} />
+                </div>
+
                 {/* Offer Letter Upload */}
                 <div className="space-y-1.5">
                   <label className={`block text-sm font-medium ${t.textPrimary}`}>
@@ -700,7 +825,18 @@ const OfferLetterManager = () => {
                   </label>
                   {viewMode ? (
                     <div className={`px-4 py-3 ${t.emptyStateBg} rounded-lg ${t.textPrimary}`}>
-                      {formData.offerLetterFile || "No file uploaded"}
+                      {formData.offerLetterFile ? (
+                        <a
+                          href={formData.offerLetterFile}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline"
+                        >
+                          View uploaded offer letter
+                        </a>
+                      ) : (
+                        "No file uploaded"
+                      )}
                     </div>
                   ) : (
                     <input
@@ -713,7 +849,9 @@ const OfferLetterManager = () => {
                   )}
                   {formData.offerLetterFile && !fieldErrors.offerLetterFile && (
                     <p className={`text-sm ${t.textSecondary} mt-1`}>
-                      Selected: {formData.offerLetterFile}
+                      {formData.offerLetterFile instanceof File
+                        ? `Selected: ${formData.offerLetterFile.name}`
+                        : "Existing file on record — choose a new one to replace it."}
                     </p>
                   )}
                   <FieldError error={fieldErrors.offerLetterFile} />
@@ -727,7 +865,18 @@ const OfferLetterManager = () => {
                     </label>
                     {viewMode ? (
                       <div className={`px-4 py-3 ${t.emptyStateBg} rounded-lg ${t.textPrimary}`}>
-                        {formData.joiningLetterFile || "No file uploaded"}
+                        {formData.joiningLetterFile ? (
+                          <a
+                            href={formData.joiningLetterFile}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            View uploaded joining letter
+                          </a>
+                        ) : (
+                          "No file uploaded"
+                        )}
                       </div>
                     ) : (
                       <input
@@ -740,7 +889,9 @@ const OfferLetterManager = () => {
                     )}
                     {formData.joiningLetterFile && !fieldErrors.joiningLetterFile && (
                       <p className={`text-sm ${t.textSecondary} mt-1`}>
-                        Selected: {formData.joiningLetterFile}
+                        {formData.joiningLetterFile instanceof File
+                          ? `Selected: ${formData.joiningLetterFile.name}`
+                          : "Existing file on record — choose a new one to replace it."}
                       </p>
                     )}
                     <FieldError error={fieldErrors.joiningLetterFile} />
@@ -752,16 +903,20 @@ const OfferLetterManager = () => {
                   <div className="flex gap-3 pt-4">
                     <button
                       onClick={() => { setShowModal(false); resetForm(); }}
-                      className={`flex-1 px-4 py-2 rounded-lg border ${t.buttonBorder} ${t.buttonBg} ${t.textPrimary} ${t.buttonHover} transition-colors`}
+                      disabled={saving}
+                      className={`flex-1 px-4 py-2 rounded-lg border ${t.buttonBorder} ${t.buttonBg} ${t.textPrimary} ${t.buttonHover} transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleSubmit}
-                      className="flex-1 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                      disabled={saving}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      {editingId ? "Update" : "Add"}{" "}
-                      {modalType === "final" ? "Final Offer" : "Offer Letter"}
+                      {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                      {saving
+                        ? "Saving..."
+                        : `${editingId ? "Update" : "Add"} ${modalType === "final" ? "Final Offer" : "Offer Letter"}`}
                     </button>
                   </div>
                 )}
@@ -782,7 +937,8 @@ const OfferLetterManager = () => {
                 <h2 className={`text-xl font-bold ${t.textPrimary}`}>Confirm Deletion</h2>
                 <button
                   onClick={() => { setShowDeleteConfirm(false); setDeleteId(null); }}
-                  className={`inline-flex items-center justify-center p-2 rounded-lg ${t.buttonHover} ${t.textPrimary}`}
+                  disabled={deleting}
+                  className={`inline-flex items-center justify-center p-2 rounded-lg ${t.buttonHover} ${t.textPrimary} disabled:opacity-60`}
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -793,15 +949,18 @@ const OfferLetterManager = () => {
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={() => { setShowDeleteConfirm(false); setDeleteId(null); }}
-                  className={`inline-flex items-center justify-center px-4 py-2 rounded-lg border-2 ${t.buttonBorder} ${t.buttonBg} ${t.buttonHover} ${t.textPrimary} font-medium transition-all`}
+                  disabled={deleting}
+                  className={`inline-flex items-center justify-center px-4 py-2 rounded-lg border-2 ${t.buttonBorder} ${t.buttonBg} ${t.buttonHover} ${t.textPrimary} font-medium transition-all disabled:opacity-60`}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={confirmDelete}
-                  className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium transition-all"
+                  disabled={deleting}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium transition-all disabled:opacity-60"
                 >
-                  Delete
+                  {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {deleting ? "Deleting..." : "Delete"}
                 </button>
               </div>
             </div>

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Internship, Certification
+from api.models import Internship, Certification, OfferLetter
 
 
 class InternshipSerializer(serializers.ModelSerializer):
@@ -40,3 +40,28 @@ class CertificationSerializer(serializers.ModelSerializer):
         if value <= 0:
             raise serializers.ValidationError("Duration must be greater than 0.")
         return value
+    
+class OfferLetterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OfferLetter
+        fields = [
+            'id', 'student', 'company', 'company_name', 'company_type',
+            'offer_type', 'package_value', 'status',
+            'offer_letter_file', 'joining_letter_file',
+            'joining_date', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'student', 'created_at', 'updated_at']
+
+    def validate_package_value(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Package value must be greater than 0.")
+        return value
+
+    def validate(self, data):
+        status = data.get('status') or getattr(self.instance, 'status', 'offer')
+        joining_letter = data.get('joining_letter_file') or getattr(self.instance, 'joining_letter_file', None)
+        if status == 'final' and not joining_letter:
+            raise serializers.ValidationError(
+                {"joining_letter_file": "Joining letter is required for a final offer."}
+            )
+        return data

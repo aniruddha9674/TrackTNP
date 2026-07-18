@@ -1,10 +1,11 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path, include
-from api.views import InternshipViewSet, CertificationViewSet
+from api.views import InternshipViewSet, CertificationViewSet, OfferLetterViewSet
 
 router = DefaultRouter()
 router.register(r'internships', InternshipViewSet, basename='internship')
 router.register(r'certifications', CertificationViewSet, basename='certification')
+router.register(r'offer-letters',OfferLetterViewSet,basename='offerletter')
 
 urlpatterns = [
     path('', include(router.urls)),

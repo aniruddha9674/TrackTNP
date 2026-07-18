@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from cloudinary_storage.storage import RawMediaCloudinaryStorage
 # User Management
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -456,19 +456,54 @@ class Notification(models.Model):
 
 # Offer Letters
 class OfferLetter(models.Model):
+    COMPANY_TYPE_CHOICES = [
+        ('product', 'Product'),
+        ('service', 'Service'),
+        ('startup', 'Startup'),
+        ('mnc', 'MNC'),
+        ('government', 'Government'),
+    ]
+    OFFER_TYPE_CHOICES = [
+        ('full_time', 'Full-Time'),
+        ('internship', 'Internship'),
+        ('apprenticeship', 'Apprenticeship'),
+        ('ppo', 'PPO'),
+        ('contract', 'Contract'),
+        ('part_time', 'Part-Time'),
+    ]
+    STATUS_CHOICES = [
+        ('offer', 'Offer'),
+        ('final', 'Final'),
+    ]
+
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='offer_letters')
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='offer_letters')
-    offer_letter_file = models.FileField(upload_to='offer_letters/')
-    salary_package = models.CharField(max_length=100)
+    company = models.ForeignKey(
+        Company, on_delete=models.CASCADE, related_name='offer_letters',
+        null=True, blank=True
+    )
+    company_name = models.CharField(max_length=200)
+    company_type = models.CharField(max_length=20, choices=COMPANY_TYPE_CHOICES)
+    offer_type = models.CharField(max_length=20, choices=OFFER_TYPE_CHOICES)
+    package_value = models.DecimalField(max_digits=6, decimal_places=2, help_text='Package in LPA')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='offer')
+    offer_letter_file = models.FileField(
+        upload_to='offer_letters/',
+        storage=RawMediaCloudinaryStorage(),
+    )
+    joining_letter_file = models.FileField(
+        upload_to='joining_letters/',
+        storage=RawMediaCloudinaryStorage(),
+        null=True, blank=True,  # only required when status='final', enforced in serializer
+    )
     joining_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'offer_letters'
-    
+
     def __str__(self):
-        return f"{self.student.prn_number} - {self.company.company_name}"
+        return f"{self.student.prn_number} - {self.company_name}"
 
 # Calendar Events
 class CalendarEvent(models.Model):
