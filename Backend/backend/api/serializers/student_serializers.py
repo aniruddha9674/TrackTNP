@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Internship
+from api.models import Internship, Certification
 
 
 class InternshipSerializer(serializers.ModelSerializer):
@@ -25,3 +25,18 @@ class InternshipSerializer(serializers.ModelSerializer):
         if start and end and end < start:
             raise serializers.ValidationError("end_date cannot be before start_date.")
         return data
+    
+
+class CertificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Certification
+        fields = [
+            'id', 'student', 'certification_name', 'platform',
+            'duration', 'certificate_file', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'student', 'created_at', 'updated_at']
+
+    def validate_duration(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Duration must be greater than 0.")
+        return value

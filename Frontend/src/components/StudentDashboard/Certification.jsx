@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Plus,
   Eye,
@@ -11,14 +11,36 @@ import {
   Clock,
   ArrowLeft,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
+import {
+  fetchCertifications,
+  createCertification,
+  updateCertification,
+  deleteCertification,
+} from "../../Utils/api/certificationApi";
+
+// map a backend certification object -> the shape this component works with
+const fromApi = (c) => ({
+  id: c.id,
+  certificationName: c.certification_name,
+  platform: c.platform,
+  duration: c.duration,
+  certificate: c.certificate_file, // Cloudinary URL string, or null
+});
 
 const CertificationManager = () => {
   const { theme } = useTheme();
   const isDarkTheme = theme === "dark";
 
   const [certifications, setCertifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
   const [showModal, setShowModal] = useState(false);
   const [viewMode, setViewMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -28,9 +50,27 @@ const CertificationManager = () => {
     certificationName: "",
     platform: "",
     duration: "",
-    certificate: null,
+    certificate: null, // File object (new upload) or existing Cloudinary URL string
   });
   const [fieldErrors, setFieldErrors] = useState({});
+
+  // ─── Load certifications from backend on mount ───────────────────────────
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      setLoadError("");
+      try {
+        const data = await fetchCertifications();
+        setCertifications(data.map(fromApi));
+      } catch (err) {
+        console.error("Failed to load certifications", err);
+        setLoadError("Couldn't load your certifications. Please refresh the page.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   // ─── Themes ───────────────────────────────────────────────────────────────
   const getLightTheme = () => ({
@@ -132,19 +172,20 @@ const CertificationManager = () => {
   // ─── Stats ────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
     const total = certifications.length;
-    const totalWeeks = certifications.reduce(
+    const totalHours = certifications.reduce(
       (sum, cert) => sum + (parseFloat(cert.duration) || 0),
       0
     );
     const platforms = new Set(certifications.map((c) => c.platform)).size;
-    const avgDuration = total > 0 ? totalWeeks / total : 0;
-    return { total, totalWeeks, platforms, avgDuration };
+    const avgDuration = total > 0 ? totalHours / total : 0;
+    return { total, totalHours, platforms, avgDuration };
   }, [certifications]);
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
   const resetForm = () => {
     setFormData({ certificationName: "", platform: "", duration: "", certificate: null });
     setFieldErrors({});
+    setSaveError("");
     setEditingId(null);
     setViewMode(false);
   };
@@ -160,7 +201,8 @@ const CertificationManager = () => {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFormData((prev) => ({ ...prev, certificate: file.name }));
+      // store the real File object so it can be uploaded as multipart/form-data
+      setFormData((prev) => ({ ...prev, certificate: file }));
     }
   };
 
@@ -197,24 +239,44 @@ const CertificationManager = () => {
   };
 
   // ─── Submit ───────────────────────────────────────────────────────────────
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const errors = validate();
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
     }
 
-    if (editingId !== null) {
-      setCertifications((prev) =>
-        prev.map((cert) =>
-          cert.id === editingId ? { ...formData, id: editingId } : cert
-        )
-      );
-    } else {
-      setCertifications((prev) => [...prev, { ...formData, id: Date.now() }]);
+    setSaving(true);
+    setSaveError("");
+
+    const payload = new FormData();
+    payload.append("certification_name", formData.certificationName.trim());
+    payload.append("platform", formData.platform.trim());
+    payload.append("duration", formData.duration);
+    // only attach the file field if a new File was actually chosen —
+    // avoids overwriting an existing Cloudinary file with nothing on edit
+    if (formData.certificate instanceof File) {
+      payload.append("certificate_file", formData.certificate);
     }
-    setShowModal(false);
-    resetForm();
+
+    try {
+      if (editingId !== null) {
+        const updated = await updateCertification(editingId, payload);
+        setCertifications((prev) =>
+          prev.map((cert) => (cert.id === editingId ? fromApi(updated) : cert))
+        );
+      } else {
+        const created = await createCertification(payload);
+        setCertifications((prev) => [...prev, fromApi(created)]);
+      }
+      setShowModal(false);
+      resetForm();
+    } catch (err) {
+      console.error("Save failed", err);
+      setSaveError("Something went wrong while saving. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleEdit = (certification) => {
@@ -222,9 +284,10 @@ const CertificationManager = () => {
       certificationName: certification.certificationName,
       platform: certification.platform,
       duration: certification.duration,
-      certificate: certification.certificate,
+      certificate: certification.certificate, // existing Cloudinary URL until replaced
     });
     setFieldErrors({});
+    setSaveError("");
     setEditingId(certification.id);
     setViewMode(false);
     setShowModal(true);
@@ -247,10 +310,18 @@ const CertificationManager = () => {
     setShowDeleteConfirm(true);
   };
 
-  const confirmDelete = () => {
-    setCertifications((prev) => prev.filter((cert) => cert.id !== deleteId));
-    setShowDeleteConfirm(false);
-    setDeleteId(null);
+  const confirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await deleteCertification(deleteId);
+      setCertifications((prev) => prev.filter((cert) => cert.id !== deleteId));
+      setShowDeleteConfirm(false);
+      setDeleteId(null);
+    } catch (err) {
+      console.error("Delete failed", err);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   // ─── Reusable field error ──────────────────────────────────────────────────
@@ -281,6 +352,14 @@ const CertificationManager = () => {
           </button>
         </div>
 
+        {/* Load error banner */}
+        {loadError && (
+          <div className={`flex items-start gap-3 px-4 py-3 rounded-lg border ${t.errorBg} ${t.errorBorder}`}>
+            <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${t.errorText}`} />
+            <p className={`text-sm ${t.errorText}`}>{loadError}</p>
+          </div>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {[
@@ -303,7 +382,7 @@ const CertificationManager = () => {
             {
               Icon: TrendingUp,
               label: "Total Learning Time",
-              value: `${stats.totalWeeks} wks`,
+              value: `${stats.totalHours} hrs`,
               gradient: t.statCard3Gradient,
               iconBg: t.statIcon3Bg,
               iconColor: t.statIcon3Text,
@@ -340,7 +419,14 @@ const CertificationManager = () => {
         </h2>
 
         {/* Certification Cards */}
-        {certifications.length === 0 ? (
+        {loading ? (
+          <div className={`${t.cardBg} ${t.cardBorder} border ${t.cardShadow} rounded-xl p-4 md:p-6`}>
+            <div className="p-8 md:p-12 text-center flex flex-col items-center">
+              <Loader2 className={`h-8 w-8 animate-spin ${t.textTertiary} mb-3`} />
+              <p className={t.textSecondary}>Loading your certifications...</p>
+            </div>
+          </div>
+        ) : certifications.length === 0 ? (
           <div className={`${t.cardBg} ${t.cardBorder} border ${t.cardShadow} rounded-xl p-4 md:p-6`}>
             <div className={`${t.emptyStateBg} ${t.cardBorder} rounded-xl p-8 md:p-12 text-center`}>
               <Award className={`${t.emptyStateIcon} mx-auto mb-4`} size={64} />
@@ -395,11 +481,16 @@ const CertificationManager = () => {
                 </div>
 
                 {certification.certificate && (
-                  <div className={`mb-4 p-3 rounded-lg ${t.inputBg} border ${t.inputBorder}`}>
+                  <a
+                    href={certification.certificate}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`block mb-4 p-3 rounded-lg ${t.inputBg} border ${t.inputBorder} hover:underline`}
+                  >
                     <p className={`text-xs ${t.offerLetterText} font-medium`}>
-                      📄 Certificate attached
+                      📄 View attached certificate
                     </p>
-                  </div>
+                  </a>
                 )}
 
                 <div className="flex gap-2">
@@ -477,6 +568,14 @@ const CertificationManager = () => {
                   </div>
                 )}
 
+                {/* Save error banner */}
+                {!viewMode && saveError && (
+                  <div className={`mx-4 md:mx-6 mt-4 flex items-start gap-3 px-4 py-3 rounded-lg border ${t.errorBg} ${t.errorBorder}`}>
+                    <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${t.errorText}`} />
+                    <p className={`text-sm ${t.errorText}`}>{saveError}</p>
+                  </div>
+                )}
+
                 {/* Body */}
                 <div className="p-4 md:p-6 space-y-4 md:space-y-5">
 
@@ -544,7 +643,18 @@ const CertificationManager = () => {
                     </label>
                     {viewMode ? (
                       <div className={`w-full px-4 py-3 rounded-lg border ${t.inputBorder} ${t.inputBg} ${t.textSecondary}`}>
-                        {formData.certificate || "No file uploaded"}
+                        {formData.certificate ? (
+                          <a
+                            href={formData.certificate}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            View uploaded certificate
+                          </a>
+                        ) : (
+                          "No file uploaded"
+                        )}
                       </div>
                     ) : (
                       <input
@@ -556,7 +666,9 @@ const CertificationManager = () => {
                     )}
                     {formData.certificate && (
                       <p className={`mt-1 text-sm ${t.textSecondary}`}>
-                        Selected: {formData.certificate}
+                        {formData.certificate instanceof File
+                          ? `Selected: ${formData.certificate.name}`
+                          : "Existing file on record — choose a new one to replace it."}
                       </p>
                     )}
                   </div>
@@ -567,15 +679,18 @@ const CertificationManager = () => {
                   <div className="flex gap-3 p-4 md:p-6 pt-0">
                     <button
                       onClick={() => { setShowModal(false); resetForm(); }}
-                      className={`flex-1 inline-flex items-center justify-center px-4 py-3 text-sm rounded-lg border-2 ${t.buttonBorder} ${t.buttonBg} ${t.buttonHover} ${t.textPrimary} font-medium transition-all`}
+                      disabled={saving}
+                      className={`flex-1 inline-flex items-center justify-center px-4 py-3 text-sm rounded-lg border-2 ${t.buttonBorder} ${t.buttonBg} ${t.buttonHover} ${t.textPrimary} font-medium transition-all disabled:opacity-60 disabled:cursor-not-allowed`}
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleSubmit}
-                      className="flex-1 inline-flex items-center justify-center px-4 py-3 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium transition-all shadow-lg"
+                      disabled={saving}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium transition-all shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      {editingId ? "Update Certification" : "Add Certification"}
+                      {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                      {saving ? "Saving..." : editingId ? "Update Certification" : "Add Certification"}
                     </button>
                   </div>
                 )}
@@ -601,7 +716,8 @@ const CertificationManager = () => {
                 </h2>
                 <button
                   onClick={() => { setShowDeleteConfirm(false); setDeleteId(null); }}
-                  className={`inline-flex items-center justify-center p-1 rounded-lg ${t.buttonHover} ${t.textSecondary}`}
+                  disabled={deleting}
+                  className={`inline-flex items-center justify-center p-1 rounded-lg ${t.buttonHover} ${t.textSecondary} disabled:opacity-60`}
                 >
                   <X size={24} />
                 </button>
@@ -613,15 +729,18 @@ const CertificationManager = () => {
                 <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                   <button
                     onClick={() => { setShowDeleteConfirm(false); setDeleteId(null); }}
-                    className={`w-full sm:w-auto px-6 py-2.5 rounded-lg ${t.buttonBg} ${t.buttonHover} ${t.textPrimary} font-medium transition-all`}
+                    disabled={deleting}
+                    className={`w-full sm:w-auto px-6 py-2.5 rounded-lg ${t.buttonBg} ${t.buttonHover} ${t.textPrimary} font-medium transition-all disabled:opacity-60`}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={confirmDelete}
-                    className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium transition-all"
+                    disabled={deleting}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium transition-all disabled:opacity-60"
                   >
-                    Delete
+                    {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {deleting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>
