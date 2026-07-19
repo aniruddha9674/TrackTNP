@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { getProjects, createProject, updateProject, deleteProject } from "../../Utils/api/projectApi";
 import {
   Plus,
   Eye,
@@ -17,6 +18,7 @@ import { useTheme } from "../../Utils/context/ThemeContext";
 const ProjectManager = () => {
   const { theme } = useTheme();
   const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [viewMode, setViewMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -27,8 +29,36 @@ const ProjectManager = () => {
     technologies: "",
     groupMembers: "",
     description: "",
+    projectLink: "",
   });
   const [fieldErrors, setFieldErrors] = useState({});
+  const [submitError, setSubmitError] = useState("");
+
+  // ─── Load projects on mount ─────────────────────────────────────────────
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const loadProjects = async () => {
+    setLoading(true);
+    try {
+      const data = await getProjects(); // calls the imported axios function
+      // Map backend snake_case -> frontend camelCase
+      const mapped = data.map((p) => ({
+        id: p.id,
+        projectTitle: p.project_title,
+        technologies: p.technologies,
+        groupMembers: p.group_members,
+        description: p.description,
+        projectLink: p.project_link,
+      }));
+      setProjects(mapped);
+    } catch (err) {
+      console.error("Failed to fetch projects:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ─── Themes ───────────────────────────────────────────────────────────────
   const getLightTheme = () => ({
@@ -150,8 +180,9 @@ const ProjectManager = () => {
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
   const resetForm = () => {
-    setFormData({ projectTitle: "", technologies: "", groupMembers: "", description: "" });
+    setFormData({ projectTitle: "", technologies: "", groupMembers: "", description: "", projectLink: "" });
     setFieldErrors({});
+    setSubmitError("");
     setEditingId(null);
     setViewMode(false);
   };
@@ -203,28 +234,45 @@ const ProjectManager = () => {
       errors.description = "Description must be at least 20 characters.";
     }
 
+    const link = formData.projectLink.trim();
+    if (!link) {
+      errors.projectLink = "Project link is required.";
+    }
+
     return errors;
   };
 
-  // ─── Submit ───────────────────────────────────────────────────────────────
-  const handleSubmit = () => {
+  // ─── Submit (Create or Update) ─────────────────────────────────────────────
+  const handleSubmit = async () => {
     const errors = validate();
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
     }
 
-    if (editingId !== null) {
-      setProjects((prev) =>
-        prev.map((project) =>
-          project.id === editingId ? { ...formData, id: editingId } : project
-        )
-      );
-    } else {
-      setProjects((prev) => [...prev, { ...formData, id: Date.now() }]);
+    setSubmitError("");
+
+    const payload = {
+      project_title: formData.projectTitle,
+      technologies: formData.technologies,
+      group_members: Number(formData.groupMembers),
+      description: formData.description,
+      project_link: formData.projectLink,
+    };
+
+    try {
+      if (editingId) {
+        await updateProject(editingId, payload);
+      } else {
+        await createProject(payload);
+      }
+      await loadProjects(); // refresh list from backend
+      setShowModal(false);
+      resetForm();
+    } catch (err) {
+      console.error("Failed to submit project:", err.response?.data || err);
+      setSubmitError("Failed to save project. Please check the fields.");
     }
-    setShowModal(false);
-    resetForm();
   };
 
   const handleEdit = (project) => {
@@ -233,6 +281,7 @@ const ProjectManager = () => {
       technologies: project.technologies,
       groupMembers: project.groupMembers,
       description: project.description,
+      projectLink: project.projectLink,
     });
     setFieldErrors({});
     setEditingId(project.id);
@@ -246,6 +295,7 @@ const ProjectManager = () => {
       technologies: project.technologies,
       groupMembers: project.groupMembers,
       description: project.description,
+      projectLink: project.projectLink,
     });
     setFieldErrors({});
     setViewMode(true);
@@ -257,10 +307,16 @@ const ProjectManager = () => {
     setShowDeleteConfirm(true);
   };
 
-  const confirmDelete = () => {
-    setProjects((prev) => prev.filter((member) => member.id !== deleteId));
-    setShowDeleteConfirm(false);
-    setDeleteId(null);
+  const confirmDelete = async () => {
+    try {
+      await deleteProject(deleteId);
+      await loadProjects();
+    } catch (err) {
+      console.error("Failed to delete project:", err);
+    } finally {
+      setShowDeleteConfirm(false);
+      setDeleteId(null);
+    }
   };
 
   const getTechBadges = (technologies) =>
@@ -346,11 +402,23 @@ const ProjectManager = () => {
           ))}
         </div>
 
+        {/* Submit error banner (network / server errors) */}
+        {submitError && (
+          <div className={`mb-6 flex items-start gap-3 px-4 py-3 rounded-lg border ${t.errorBg} ${t.errorBorder}`}>
+            <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${t.errorText}`} />
+            <p className={`text-sm ${t.errorText}`}>{submitError}</p>
+          </div>
+        )}
+
         {/* Project Cards */}
         <div>
           <h2 className={`text-xl font-semibold ${t.textPrimary} mb-4`}>Your Projects</h2>
 
-          {projects.length === 0 ? (
+          {loading ? (
+            <div className={`rounded-2xl border ${t.projectCardBorder} ${t.cardShadow} ${t.emptyStateBg} p-12 text-center`}>
+              <p className={`${t.textSecondary}`}>Loading projects…</p>
+            </div>
+          ) : projects.length === 0 ? (
             <div className={`rounded-2xl border ${t.projectCardBorder} ${t.cardShadow} ${t.emptyStateBg}`}>
               <div className="p-12 text-center">
                 <div className={`mx-auto w-24 h-24 ${t.emptyStateBg} rounded-full flex items-center justify-center mb-4`}>
@@ -564,7 +632,8 @@ const ProjectManager = () => {
                   )}
                   <FieldError error={fieldErrors.description} />
                 </div>
-{/* Project Title */}
+
+                {/* Project Link */}
                 <div className="space-y-1.5">
                   <label className={`block text-sm font-medium ${t.textPrimary}`}>
                     Project Link/Github Link <span className="text-red-500">*</span>
@@ -572,15 +641,16 @@ const ProjectManager = () => {
                   <input
                     type="text"
                     name="projectLink"
-                    value={formData.projectTitle}
+                    value={formData.projectLink}
                     onChange={handleInputChange}
                     placeholder="Enter Project Link"
                     disabled={viewMode}
-                    className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.projectTitle ? t.inputErrorBorder : t.inputBorder
+                    className={`w-full px-4 py-3 ${t.inputBg} border ${fieldErrors.projectLink ? t.inputErrorBorder : t.inputBorder
                       } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${t.inputDisabled} ${t.inputText} ${t.inputPlaceholder} transition-all`}
                   />
-                  <FieldError error={fieldErrors.projectTitle} />
+                  <FieldError error={fieldErrors.projectLink} />
                 </div>
+
                 {/* Actions */}
                 {!viewMode && (
                   <div className="flex gap-3 pt-2">

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Internship, Certification, OfferLetter
+from api.models import Internship, Certification, OfferLetter,Project
 
 
 class InternshipSerializer(serializers.ModelSerializer):
@@ -65,3 +65,23 @@ class OfferLetterSerializer(serializers.ModelSerializer):
                 {"joining_letter_file": "Joining letter is required for a final offer."}
             )
         return data
+    
+class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = [
+            'id', 'student', 'project_title', 'technologies',
+            'group_members', 'description', 'project_link',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'student', 'created_at', 'updated_at']
+
+    def validate_group_members(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Group members must be greater than 0.")
+        return value
+
+    def validate_description(self, value):
+        if len(value.strip()) < 20:
+            raise serializers.ValidationError("Description must be at least 20 characters.")
+        return value

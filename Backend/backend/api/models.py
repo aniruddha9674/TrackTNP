@@ -420,6 +420,7 @@ class Project(models.Model):
     technologies = models.TextField()
     group_members = models.IntegerField()
     description = models.TextField()
+    project_link = models.URLField(max_length=500, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
