@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Plus,
   Eye,
@@ -18,8 +18,18 @@ import {
   Clock,
   Award,
   UserCheck,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
+import {
+  fetchCompanies,
+  createCompany,
+  updateCompany,
+  deleteCompany,
+  uploadCompanyFile,
+  companyFromApi,
+} from "../../../Utils/api/companyApi";   // ✅ matches actual filename + exports us
 
 const getLightTheme = () => ({
   background: "bg-gradient-to-br from-gray-50 to-white",
@@ -57,6 +67,9 @@ const getLightTheme = () => ({
   tableHeaderBg: "bg-gray-50",
   tableHoverBg: "hover:bg-gray-50",
   tableBorder: "border-gray-200",
+  errorText: "text-red-500",
+  errorBg: "bg-red-50",
+  errorBorder: "border-red-200",
 });
 
 const getDarkTheme = () => ({
@@ -95,12 +108,12 @@ const getDarkTheme = () => ({
   tableHeaderBg: "bg-gray-800",
   tableHoverBg: "hover:bg-gray-800",
   tableBorder: "border-gray-700",
+  errorText: "text-red-400",
+  errorBg: "bg-red-900/20",
+  errorBorder: "border-red-700",
 });
 
 // ─── Sub-components defined OUTSIDE CompanyManager ───────────────────────────
-// Defining them inside would create a new component type on every render,
-// causing React to unmount/remount the input on each keystroke → focus lost.
-
 const FormSection = ({ title, children, themeStyles }) => (
   <div className={`p-6 rounded-xl ${themeStyles.sectionBg} space-y-4`}>
     <h3 className={`text-lg font-semibold ${themeStyles.textPrimary} mb-4`}>
@@ -185,9 +198,90 @@ const SelectField = ({
 );
 // ─────────────────────────────────────────────────────────────────────────────
 
+const emptyFormData = () => ({
+  date: new Date().toISOString().split("T")[0],
+  month: String(new Date().getMonth() + 1),
+  year: String(new Date().getFullYear()),
+  companyName: "",
+  companyRelatedInfo: "",
+  regEndDate: "",
+  registrationTime: new Date().toLocaleTimeString("en-US", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+  }),
+  recruitmentMethod: "Everyone",
+  placedBelow: "",
+  eligibleBatchYears: [],
+  eligibleBranches: [],
+  eligibleColleges: [],
+  jobOpenings: "",
+  companyType: "",
+  driveType: "",
+  jobProfile: "",
+  sscCriteria: "",
+  hscCriteria: "",
+  cgpaCriteria: "",
+  backlogCriteria: "",
+  venue: "",
+  internshipStipend: "",
+  salaryOffered: "",
+  companyBond: "",
+  totalRegistered: "",
+  candidatesPresent: "",
+  pccoePresent: "",
+  pccoerPresent: "",
+  nmietPresent: "",
+  ncerPresent: "",
+  totalSelected: "",
+  totalSelectedPCCOE: "",
+  totalSelectedPCCOER: "",
+  totalSelectedNMIET: "",
+  totalSelectedNCER: "",
+  pccoerComputerSelected: "",
+  pccoerMechanicalSelected: "",
+  pccoerITSelected: "",
+  pccoerEnTCSelected: "",
+  pccoerCivilSelected: "",
+  pccoeComputerSelected: "",
+  pccoeAIMLSelected: "",
+  pccoeComputerRegionalSelected: "",
+  pccoeITSelected: "",
+  pccoeEnTCSelected: "",
+  pccoeMechanicalSelected: "",
+  pccoeCivilSelected: "",
+  nmietComputerSelected: "",
+  nmietITSelected: "",
+  nmietEnTCSelected: "",
+  nmietMechanicalSelected: "",
+  ncerComputerSelected: "",
+  ncerAIMLSelected: "",
+  ncerEnTCSelected: "",
+  ncerMechanicalSelected: "",
+  ncerAutomobileSelected: "",
+  totalInternshipSelected: "",
+  totalInternshipSelectedPCCOE: "",
+  totalInternshipSelectedPCCOER: "",
+  totalInternshipSelectedNMIET: "",
+  totalInternshipSelectedNCER: "",
+  internshipSelectedPRN: "",
+  placedStudentPRN: "",
+  approvedExpenditure: "",
+  actualExpenditure: "",
+  resumeRequired: "Required",
+  registrationStatus: "Open",
+  driveCompleted: "No",
+});
+
 const CompanyManager = () => {
   const { theme } = useTheme();
   const [companies, setCompanies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
@@ -198,80 +292,7 @@ const CompanyManager = () => {
   const [additionalFiles, setAdditionalFiles] = useState([
     { id: 1, file: null },
   ]);
-  const [formData, setFormData] = useState({
-    date: new Date().toISOString().split("T")[0],
-    month: String(new Date().getMonth() + 1),
-    year: String(new Date().getFullYear()),
-    companyName: "",
-    companyRelatedInfo: "",
-    regEndDate: "",
-    registrationTime: new Date().toLocaleTimeString("en-US", {
-      hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-    recruitmentMethod: "Everyone",
-    placedBelow: "",
-    eligibleBatchYears: [],
-    eligibleBranches: [],
-    eligibleColleges: [],
-    jobOpenings: "",
-    companyType: "",
-    driveType: "",
-    jobProfile: "",
-    sscCriteria: "",
-    hscCriteria: "",
-    cgpaCriteria: "",
-    backlogCriteria: "",
-    venue: "",
-    internshipStipend: "",
-    salaryOffered: "",
-    companyBond: "",
-    totalRegistered: "",
-    candidatesPresent: "",
-    pccoePresent: "",
-    pccoerPresent: "",
-    nmietPresent: "",
-    ncerPresent: "",
-    totalSelected: "",
-    totalSelectedPCCOE: "",
-    totalSelectedPCCOER: "",
-    totalSelectedNMIET: "",
-    totalSelectedNCER: "",
-    pccoerComputerSelected: "",
-    pccoerMechanicalSelected: "",
-    pccoerITSelected: "",
-    pccoerEnTCSelected: "",
-    pccoerCivilSelected: "",
-    pccoeComputerSelected: "",
-    pccoeAIMLSelected: "",
-    pccoeComputerRegionalSelected: "",
-    pccoeITSelected: "",
-    pccoeEnTCSelected: "",
-    pccoeMechanicalSelected: "",
-    pccoeCivilSelected: "",
-    nmietComputerSelected: "",
-    nmietITSelected: "",
-    nmietEnTCSelected: "",
-    nmietMechanicalSelected: "",
-    ncerComputerSelected: "",
-    ncerAIMLSelected: "",
-    ncerEnTCSelected: "",
-    ncerMechanicalSelected: "",
-    ncerAutomobileSelected: "",
-    totalInternshipSelected: "",
-    totalInternshipSelectedPCCOE: "",
-    totalInternshipSelectedPCCOER: "",
-    totalInternshipSelectedNMIET: "",
-    totalInternshipSelectedNCER: "",
-    internshipSelectedPRN: "",
-    placedStudentPRN: "",
-    approvedExpenditure: "",
-    actualExpenditure: "",
-    resumeRequired: "Required",
-    registrationStatus: "Open",
-    driveCompleted: "No",
-  });
+  const [formData, setFormData] = useState(emptyFormData());
 
   const batchYears = ["2025", "2026", "2027", "2028", "2029"];
   const branches = [
@@ -287,9 +308,25 @@ const CompanyManager = () => {
   const Colleges = ["PCCOE", "PCCOER", "NMIET", "NCER"];
 
   const themeStyles = theme === "dark" ? getDarkTheme() : getLightTheme();
-
-  // Shared props passed down to every InputField / SelectField
   const fieldProps = { formData, handleInputChange, viewMode, themeStyles };
+
+  // ─── Load companies from backend on mount ──────────────────────────────────
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      setLoadError("");
+      try {
+        const data = await fetchCompanies();
+        setCompanies(data.map(companyFromApi));
+      } catch (err) {
+        console.error("Failed to load companies", err);
+        setLoadError("Couldn't load company drives. Please refresh the page.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   const stats = useMemo(() => {
     const total = companies.length;
@@ -307,83 +344,11 @@ const CompanyManager = () => {
   }, [companies]);
 
   const resetForm = () => {
-    setFormData({
-      date: new Date().toISOString().split("T")[0],
-      month: String(new Date().getMonth() + 1),
-      year: String(new Date().getFullYear()),
-      companyName: "",
-      companyRelatedInfo: "",
-      regEndDate: "",
-      registrationTime: new Date().toLocaleTimeString("en-US", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      recruitmentMethod: "Everyone",
-      placedBelow: "",
-      eligibleBatchYears: [],
-      eligibleBranches: [],
-      eligibleColleges: [],
-      jobOpenings: "",
-      companyType: "",
-      driveType: "",
-      jobProfile: "",
-      sscCriteria: "",
-      hscCriteria: "",
-      cgpaCriteria: "",
-      backlogCriteria: "",
-      venue: "",
-      internshipStipend: "",
-      salaryOffered: "",
-      companyBond: "",
-      totalRegistered: "",
-      candidatesPresent: "",
-      pccoePresent: "",
-      pccoerPresent: "",
-      nmietPresent: "",
-      ncerPresent: "",
-      totalSelected: "",
-      totalSelectedPCCOE: "",
-      totalSelectedPCCOER: "",
-      totalSelectedNMIET: "",
-      totalSelectedNCER: "",
-      pccoerComputerSelected: "",
-      pccoerMechanicalSelected: "",
-      pccoerITSelected: "",
-      pccoerEnTCSelected: "",
-      pccoerCivilSelected: "",
-      pccoeComputerSelected: "",
-      pccoeAIMLSelected: "",
-      pccoeComputerRegionalSelected: "",
-      pccoeITSelected: "",
-      pccoeEnTCSelected: "",
-      pccoeMechanicalSelected: "",
-      pccoeCivilSelected: "",
-      nmietComputerSelected: "",
-      nmietITSelected: "",
-      nmietEnTCSelected: "",
-      nmietMechanicalSelected: "",
-      ncerComputerSelected: "",
-      ncerAIMLSelected: "",
-      ncerEnTCSelected: "",
-      ncerMechanicalSelected: "",
-      ncerAutomobileSelected: "",
-      totalInternshipSelected: "",
-      totalInternshipSelectedPCCOE: "",
-      totalInternshipSelectedPCCOER: "",
-      totalInternshipSelectedNMIET: "",
-      totalInternshipSelectedNCER: "",
-      internshipSelectedPRN: "",
-      placedStudentPRN: "",
-      approvedExpenditure: "",
-      actualExpenditure: "",
-      resumeRequired: "Required",
-      registrationStatus: "Open",
-      driveCompleted: "No",
-    });
+    setFormData(emptyFormData());
     setAdditionalFiles([{ id: 1, file: null }]);
     setEditingId(null);
     setViewMode(false);
+    setSaveError("");
   };
 
   function handleInputChange(e) {
@@ -403,44 +368,63 @@ const CompanyManager = () => {
     }
   }
 
-  const handleSubmit = (action = "save") => {
-    if (editingId !== null) {
-      setCompanies((prev) =>
-        prev.map((company) =>
-          company.id === editingId
-            ? { ...formData, id: editingId, files: additionalFiles }
-            : company
-        )
-      );
-    } else {
-      const newCompany = {
-        ...formData,
-        id: Date.now(),
-        files: additionalFiles,
-      };
-      setCompanies((prev) => [...prev, newCompany]);
-    }
+  // ─── Submit (create or update), then upload any new files ──────────────────
+  const handleSubmit = async (action = "save") => {
+    setSaving(true);
+    setSaveError("");
 
-    if (action === "save") {
-      setShowModal(false);
-      resetForm();
-    } else if (action === "saveAndAdd") {
-      resetForm();
+    try {
+      let savedCompany;
+      if (editingId !== null) {
+        const updated = await updateCompany(editingId, formData);
+        savedCompany = companyFromApi(updated);
+        setCompanies((prev) =>
+          prev.map((c) => (c.id === editingId ? savedCompany : c))
+        );
+      } else {
+        const created = await createCompany(formData);
+        savedCompany = companyFromApi(created);
+        setCompanies((prev) => [...prev, savedCompany]);
+      }
+
+      // upload any newly-attached files (skip empty slots / already-uploaded ones)
+      const filesToUpload = additionalFiles
+        .map((f) => f.file)
+        .filter((f) => f instanceof File);
+      for (const file of filesToUpload) {
+        await uploadCompanyFile(savedCompany.id, file);
+      }
+
+      if (action === "save") {
+        setShowModal(false);
+        resetForm();
+      } else if (action === "saveAndAdd") {
+        resetForm();
+      } else if (action === "saveAndContinue") {
+        // keep modal open, keep editing the (now-saved) company
+        setEditingId(savedCompany.id);
+        setAdditionalFiles([{ id: Date.now(), file: null }]);
+      }
+    } catch (err) {
+      console.error("Save failed", err);
+      setSaveError("Something went wrong while saving. Please check the form and try again.");
+    } finally {
+      setSaving(false);
     }
-    // "saveAndContinue" — keep modal open, keep editing state
   };
 
   const handleEdit = (company) => {
     setFormData({ ...company });
-    setAdditionalFiles(company.files || [{ id: 1, file: null }]);
+    setAdditionalFiles([{ id: Date.now(), file: null }]);
     setEditingId(company.id);
     setViewMode(false);
+    setSaveError("");
     setShowModal(true);
   };
 
   const handleView = (company) => {
     setFormData({ ...company });
-    setAdditionalFiles(company.files || []);
+    setAdditionalFiles([]);
     setViewMode(true);
     setShowModal(true);
   };
@@ -455,10 +439,18 @@ const CompanyManager = () => {
     setShowStatsModal(true);
   };
 
-  const confirmDelete = () => {
-    setCompanies((prev) => prev.filter((company) => company.id !== deleteId));
-    setShowDeleteModal(false);
-    setDeleteId(null);
+  const confirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await deleteCompany(deleteId);
+      setCompanies((prev) => prev.filter((company) => company.id !== deleteId));
+      setShowDeleteModal(false);
+      setDeleteId(null);
+    } catch (err) {
+      console.error("Delete failed", err);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const addFileInput = () => {
@@ -494,6 +486,13 @@ const CompanyManager = () => {
             </button>
           </div>
         </div>
+
+        {loadError && (
+          <div className={`flex items-start gap-3 px-4 py-3 rounded-lg border ${themeStyles.errorBg} ${themeStyles.errorBorder} mb-6`}>
+            <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${themeStyles.errorText}`} />
+            <p className={`text-sm ${themeStyles.errorText}`}>{loadError}</p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {[
@@ -562,7 +561,12 @@ const CompanyManager = () => {
           <h2 className={`text-xl font-semibold ${themeStyles.textPrimary} mb-4`}>
             Recent Drives
           </h2>
-          {companies.length === 0 ? (
+          {loading ? (
+            <div className={`rounded-2xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardBg} p-12 text-center flex flex-col items-center`}>
+              <Loader2 className={`h-8 w-8 animate-spin ${themeStyles.textTertiary} mb-3`} />
+              <p className={themeStyles.textSecondary}>Loading company drives...</p>
+            </div>
+          ) : companies.length === 0 ? (
             <div
               className={`rounded-2xl border ${themeStyles.cardBorder} ${themeStyles.cardShadow} ${themeStyles.cardBg} p-12 text-center`}
             >
@@ -776,15 +780,18 @@ const CompanyManager = () => {
                 <div className="flex gap-3">
                   <button
                     onClick={() => { setShowDeleteModal(false); setDeleteId(null); }}
-                    className={`flex-1 px-4 py-3 rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all`}
+                    disabled={deleting}
+                    className={`flex-1 px-4 py-3 rounded-lg border ${themeStyles.buttonBorder} ${themeStyles.buttonBg} ${themeStyles.buttonHover} ${themeStyles.textPrimary} font-medium transition-all disabled:opacity-60`}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={confirmDelete}
-                    className="flex-1 px-4 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium transition-all"
+                    disabled={deleting}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium transition-all disabled:opacity-60"
                   >
-                    Delete
+                    {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {deleting ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>
@@ -819,6 +826,14 @@ const CompanyManager = () => {
               </div>
 
               <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+
+                {!viewMode && saveError && (
+                  <div className={`flex items-start gap-3 px-4 py-3 rounded-lg border ${themeStyles.errorBg} ${themeStyles.errorBorder}`}>
+                    <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${themeStyles.errorText}`} />
+                    <p className={`text-sm ${themeStyles.errorText}`}>{saveError}</p>
+                  </div>
+                )}
+
                 <FormSection title="Basic Information" themeStyles={themeStyles}>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <InputField label="Date" name="date" type="date" required {...fieldProps} />
@@ -945,7 +960,7 @@ const CompanyManager = () => {
                     <InputField label="Internship Stipend" name="internshipStipend" placeholder="e.g., 15000/month" {...fieldProps} />
                   </div>
                   <InputField label="Company Bond" name="companyBond" placeholder="Bond details if any" {...fieldProps} />
-                </FormSection>  
+                </FormSection>
                 <FormSection title="Drive Status" themeStyles={themeStyles}>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <SelectField label="Resume Required" name="resumeRequired" options={[
@@ -996,6 +1011,9 @@ const CompanyManager = () => {
                         <Plus className="mr-2 h-4 w-4" />
                         Add Another File
                       </button>
+                      <p className={`text-xs ${themeStyles.textTertiary}`}>
+                        Files are uploaded to Cloudinary once the drive is saved.
+                      </p>
                     </div>
                   </FormSection>
                 )}
@@ -1004,20 +1022,26 @@ const CompanyManager = () => {
                   <div className="flex flex-col sm:flex-row gap-3 pt-4">
                     <button
                       onClick={() => handleSubmit("save")}
-                      className="flex-1 inline-flex items-center justify-center px-4 py-3 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium transition-all"
+                      disabled={saving}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                     >
+                      {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                       Save
                     </button>
                     <button
                       onClick={() => handleSubmit("saveAndAdd")}
-                      className="flex-1 inline-flex items-center justify-center px-4 py-3 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 font-medium transition-all"
+                      disabled={saving}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 font-medium transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                     >
+                      {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                       Save and Add Another
                     </button>
                     <button
                       onClick={() => handleSubmit("saveAndContinue")}
-                      className="flex-1 inline-flex items-center justify-center px-4 py-3 text-sm rounded-lg bg-purple-600 text-white hover:bg-purple-700 font-medium transition-all"
+                      disabled={saving}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 text-sm rounded-lg bg-purple-600 text-white hover:bg-purple-700 font-medium transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                     >
+                      {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                       Save and Continue Editing
                     </button>
                   </div>
