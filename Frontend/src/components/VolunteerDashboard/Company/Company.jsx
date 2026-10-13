@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Building2,
   Users,
@@ -16,6 +16,10 @@ import {
   Hash,
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
+import { fetchCompanyById, companyFromApi } from "../../../Utils/api/companyApi";
+import { fetchVolunteerById } from "../../../Utils/api/staffApi";
+
+const DEV_HARDCODED_VOLUNTEER_ID = 1;
 
 const Badge = ({
   children,
@@ -55,11 +59,15 @@ const Badge = ({
   );
 };
 
+
 const VolunteerDashboard = () => {
   const { theme } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDrive, setSelectedDrive] = useState(null);
   const [attendanceRecords, setAttendanceRecords] = useState({});
+  const [assignedDrives, setAssignedDrives] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Theme Functions
   const getLightTheme = () => ({
@@ -116,38 +124,32 @@ const VolunteerDashboard = () => {
 
   const themeStyles = theme === "dark" ? getDarkTheme() : getLightTheme();
 
-  // Mock data for assigned drives
-  const [assignedDrives] = useState([
-    {
-      id: 1,
-      companyName: "Google",
-      role: "Software Engineer",
-      driveDate: "2024-02-15",
-      location: "Main Auditorium",
-      status: "upcoming",
-      totalRegistered: 245,
-    },
-    {
-      id: 2,
-      companyName: "Microsoft",
-      role: "SDE-1",
-      driveDate: "2024-01-28",
-      location: "Building A, Room 301",
-      status: "ongoing",
-      totalRegistered: 312,
-    },
-    {
-      id: 3,
-      companyName: "Amazon",
-      role: "Software Development Engineer",
-      driveDate: "2024-02-20",
-      location: "Engineering Block",
-      status: "upcoming",
-      totalRegistered: 289,
-    },
-  ]);
+  // Fetch the volunteer's assigned drive (real data — replaces the old mock array)
+  useEffect(() => {
+    const loadAssignedDrive = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const volunteer = await fetchVolunteerById(DEV_HARDCODED_VOLUNTEER_ID);
+        if (volunteer.drive) {
+          const company = await fetchCompanyById(volunteer.drive);
+          setAssignedDrives([mapCompanyToDriveCard(companyFromApi(company))]);
+        } else {
+          setAssignedDrives([]); // volunteer has no drive assigned yet
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load assigned drive.");
+        setAssignedDrives([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Mock student data
+    loadAssignedDrive();
+  }, []);
+
+  // Mock student data — no backing table yet (see note below)
   const [students] = useState([
     {
       id: 1,

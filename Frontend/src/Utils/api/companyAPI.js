@@ -216,3 +216,7 @@ export const fetchCompanyFiles = (companyId) =>
   axios
     .get(`${API_BASE}/company-files/`, { params: { company: companyId } })
     .then((res) => res.data);
+
+
+export const fetchCompanyById = (id) =>
+  axios.get(`${API_BASE}/companies/${id}/`).then((res) => res.data);

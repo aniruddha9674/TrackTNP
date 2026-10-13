@@ -20,7 +20,7 @@ import {
   createOfferLetter,
   updateOfferLetter,
   deleteOfferLetter,
-} from "../../Utils/api/offerLetterApi";
+} from "../../Utils/api/OfferletterApi";
 
 // ─── backend uses lowercase codes, UI shows labels ───────────────────────────
 const COMPANY_TYPE_OPTIONS = [

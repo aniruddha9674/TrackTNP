@@ -6,6 +6,20 @@ import {
   X,
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
+import { fetchEvents } from "../../Utils/api/calenderApi";
+
+const DEV_HARDCODED_STUDENT_COLLEGE_ID = 4;
+
+const mapFromApi = (e) => ({
+  id: e.id,
+  date: new Date(e.start_date).toDateString(),
+  title: e.title,
+  description: e.description,
+  startTime: new Date(e.start_date).toTimeString().slice(0, 5),
+  endTime: new Date(e.end_date).toTimeString().slice(0, 5),
+  color: e.color,
+  target_colleges: e.target_colleges || [],
+});
 
 const StudentCalendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
@@ -15,6 +29,7 @@ const StudentCalendar = () => {
   const [selectedDateEvents, setSelectedDateEvents] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { theme } = useTheme();
 
   const months = [
@@ -23,17 +38,29 @@ const StudentCalendar = () => {
     "September", "October", "November", "December",
   ];
 
-  // Mobile: 1-letter label  /  Desktop: 3-letter label
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  // Load Events
+  // Load events from the real API, filtered to this student's college
   useEffect(() => {
     const loadEvents = async () => {
       try {
         setLoading(true);
-        const result = await window.storage.get("calendar-events", true);
-        if (result?.value) setEvents(JSON.parse(result.value));
-      } catch {
+        setError(null);
+        const data = await fetchEvents();
+        const mapped = data.map(mapFromApi);
+
+        // Only show events targeting this student's college.
+        // An event with an empty target_colleges list is treated as "everyone".
+        const filtered = mapped.filter(
+          (e) =>
+            e.target_colleges.length === 0 ||
+            e.target_colleges.includes(DEV_HARDCODED_STUDENT_COLLEGE_ID)
+        );
+
+        setEvents(filtered);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load events.");
         setEvents([]);
       } finally {
         setLoading(false);
@@ -41,9 +68,8 @@ const StudentCalendar = () => {
     };
 
     loadEvents();
-    const interval = setInterval(loadEvents, 5000);
-    return () => clearInterval(interval);
   }, []);
+
 
   const getDaysInMonth = (month, year) =>
     new Date(year, month + 1, 0).getDate();

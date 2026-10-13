@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Plus,
   Eye,
@@ -12,9 +12,17 @@ import {
   Heart,
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
+import {
+  fetchVolunteers,
+  createVolunteer,
+  updateVolunteer,
+  deleteVolunteer,
+} from "../../../Utils/api/staffApi";
 
 const VolunteerManager = () => {
   const [volunteers, setVolunteers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [viewMode, setViewMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -29,6 +37,49 @@ const VolunteerManager = () => {
   });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+
+  // Map backend shape -> frontend shape
+  const mapFromApi = (v) => ({
+    id: v.id,
+    volunteerName: v.volunteer_name || "",
+    email: v.user_email || "",
+    phone: v.user_phone_number || "",
+    driveName: v.drive_name || "",
+    driveSpan: v.drive_span_days ?? "",
+    createdDate: v.created_at ? v.created_at.split("T")[0] : "",
+  });
+
+  // Map frontend form shape -> backend payload shape
+  const mapToApi = (data) => {
+    const [first_name, ...rest] = data.volunteerName.trim().split(" ");
+    const last_name = rest.join(" ") || first_name; // fallback if single-word name
+    return {
+      first_name,
+      last_name,
+      email: data.email,
+      phone_number: data.phone,
+      drive_name: data.driveName,
+      drive_span_days: data.driveSpan ? Number(data.driveSpan) : null,
+    };
+  };
+
+  const loadVolunteers = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchVolunteers();
+      setVolunteers(data.map(mapFromApi));
+    } catch (err) {
+      setError("Failed to load volunteers.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadVolunteers();
+  }, []);
 
   const stats = useMemo(() => {
     const total = volunteers.length;
@@ -47,7 +98,7 @@ const VolunteerManager = () => {
     const avgSpan =
       volunteers.length > 0
         ? volunteers.reduce((sum, v) => sum + (parseInt(v.driveSpan) || 0), 0) /
-        volunteers.length
+          volunteers.length
         : 0;
 
     return { total, active, totalDrives, avgSpan };
@@ -58,12 +109,17 @@ const VolunteerManager = () => {
     setShowDeleteConfirm(true);
   };
 
-  const confirmDelete = () => {
-    setVolunteers((prev) =>
-      prev.filter((volunteer) => volunteer.id !== deleteId)
-    );
-    setShowDeleteConfirm(false);
-    setDeleteId(null);
+  const confirmDelete = async () => {
+    try {
+      await deleteVolunteer(deleteId);
+      setVolunteers((prev) => prev.filter((v) => v.id !== deleteId));
+    } catch (err) {
+      console.error(err);
+      setError("Failed to delete volunteer.");
+    } finally {
+      setShowDeleteConfirm(false);
+      setDeleteId(null);
+    }
   };
 
   const resetForm = () => {
@@ -84,25 +140,23 @@ const VolunteerManager = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
-    if (editingId !== null) {
-      setVolunteers((prev) =>
-        prev.map((volunteer) =>
-          volunteer.id === editingId
-            ? { ...formData, id: editingId }
-            : volunteer
-        )
-      );
-    } else {
-      const newVolunteer = {
-        ...formData,
-        id: Date.now(),
-      };
-      setVolunteers((prev) => [...prev, newVolunteer]);
+  const handleSubmit = async () => {
+    try {
+      if (editingId !== null) {
+        const updated = await updateVolunteer(editingId, mapToApi(formData));
+        setVolunteers((prev) =>
+          prev.map((v) => (v.id === editingId ? mapFromApi(updated) : v))
+        );
+      } else {
+        const created = await createVolunteer(mapToApi(formData));
+        setVolunteers((prev) => [...prev, mapFromApi(created)]);
+      }
+      setShowModal(false);
+      resetForm();
+    } catch (err) {
+      console.error(err.response?.data || err);
+      setError("Failed to save volunteer. Check the form and try again.");
     }
-
-    setShowModal(false);
-    resetForm();
   };
 
   const handleEdit = (volunteer) => {

@@ -8,6 +8,18 @@ import {
   X,
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
+import { fetchEvents } from "../../../Utils/api/calenderApi";
+
+
+const mapFromApi = (e) => ({
+  id: e.id,
+  date: new Date(e.start_date).toDateString(),
+  title: e.title,
+  description: e.description,
+  startTime: new Date(e.start_date).toTimeString().slice(0, 5),
+  endTime: new Date(e.end_date).toTimeString().slice(0, 5),
+  color: e.color,
+});
 
 const VolunteerCalendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
@@ -17,6 +29,7 @@ const VolunteerCalendar = () => {
   const [selectedDateEvents, setSelectedDateEvents] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { theme } = useTheme();
 
   const months = [
@@ -27,14 +40,17 @@ const VolunteerCalendar = () => {
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  // Load Events
+  // Load Events from the real API — fetch all, no filtering
   useEffect(() => {
     const loadEvents = async () => {
       try {
         setLoading(true);
-        const result = await window.storage.get("calendar-events", true);
-        if (result?.value) setEvents(JSON.parse(result.value));
-      } catch {
+        setError(null);
+        const data = await fetchEvents();
+        setEvents(data.map(mapFromApi));
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load events.");
         setEvents([]);
       } finally {
         setLoading(false);
@@ -42,9 +58,8 @@ const VolunteerCalendar = () => {
     };
 
     loadEvents();
-    const interval = setInterval(loadEvents, 5000);
-    return () => clearInterval(interval);
   }, []);
+
 
   const getDaysInMonth = (month, year) =>
     new Date(year, month + 1, 0).getDate();

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Plus,
   Eye,
@@ -16,41 +16,99 @@ import {
   Search,
 } from "lucide-react";
 import { useTheme } from "../../../Utils/context/ThemeContext";
+import {
+  fetchStaff, createStaff, updateStaff, deleteStaff,
+} from "../../../Utils/api/staffApi";
+
+// role/status mapping: frontend PascalCase <-> backend snake_case
+const roleToApi = { CollegeCoordinator: "college_coordinator", DepartmentCoordinator: "department_coordinator" };
+const roleFromApi = { college_coordinator: "CollegeCoordinator", department_coordinator: "DepartmentCoordinator" };
+const statusToApi = { Active: "active", Inactive: "inactive" };
+const statusFromApi = { active: "Active", inactive: "Inactive" };
+
+// Hardcoded colleges with IDs
+const collegeOptions = [
+  { id: 2, name: "Pimpri Chinchwad College of Engineering PCCOE" },
+  { id: 3, name: "Pimpri Chinchwad College of Engineering & Research PCCOER" },
+  { id: 4, name: "Nutan Maharashtra Institute of Engineering and Technology NMIET" },
+];
+
+// Hardcoded departments with IDs
+const departmentOptions = [
+  { id: 1, name: "Computer Engineering" },
+  { id: 2, name: "Mechanical Engineering" },
+  { id: 3, name: "Civil Engineering" },
+  { id: 4, name: "Electronics Engineering" },
+  { id: 5, name: "Information Technology" },
+  // Add more departments with their IDs from your database
+];
+
+// Helper to get college name from ID
+const getCollegeNameById = (id) => {
+  if (!id) return "";
+  const college = collegeOptions.find(c => c.id === parseInt(id));
+  return college ? college.name : "";
+};
+
+// Helper to get department name from ID
+const getDepartmentNameById = (id) => {
+  if (!id) return "";
+  const dept = departmentOptions.find(d => d.id === parseInt(id));
+  return dept ? dept.name : "";
+};
+
+const mapFromApi = (s) => ({
+  id: s.id,
+  name: s.staff_name || "",
+  email: s.user_email || "",
+  collegeId: s.college,          // raw FK id
+  collegeName: s.college_name || "", // human-readable
+  departmentId: s.department,    // raw FK id
+  departmentName: s.department_name || "", // human-readable (if your serializer returns this)
+  phoneNumber: s.user_phone_number || "",
+  status: statusFromApi[s.status] || s.status,
+  role: roleFromApi[s.role] || s.role,
+});
+
+const mapToApi = (data) => {
+  const [first_name, ...rest] = data.name.trim().split(" ");
+  const last_name = rest.join(" ") || first_name;
+  return {
+    first_name,
+    last_name,
+    email: data.email,
+    phone_number: data.phoneNumber,
+    college: data.collegeId,          // Send ID
+    department: data.departmentId,    // Send ID
+    role: roleToApi[data.role] || data.role,
+    status: statusToApi[data.status] || data.status,
+  };
+};
 
 const StaffDetailsManager = () => {
   const { theme } = useTheme();
-  const [staff, setStaff] = useState([
-    {
-      id: 1,
-      name: "PATEL",
-      email: "imrankpatel7861@gmail.com",
-      collegeName: "Pimpri Chinchwad College of Engineering PCCOE",
-      department: "",
-      phoneNumber: "1234567890",
-      status: "Active",
-      role: "CollegeCoordinator",
-    },
-    {
-      id: 2,
-      name: "PATEL",
-      email: "imrankpatel7861@gmail.com",
-      collegeName: "Pimpri Chinchwad College of Engineering PCCOE",
-      department: "",
-      phoneNumber: "1234567890",
-      status: "Active",
-      role: "CollegeCoordinator",
-    },
-    {
-      id: 3,
-      name: "PATEL",
-      email: "imrankpatel7861@gmail.com",
-      collegeName: "Pimpri Chinchwad College of Engineering PCCOE",
-      department: "",
-      phoneNumber: "1234567890",
-      status: "Active",
-      role: "CollegeCoordinator",
-    },
-  ]);
+  const [staff, setStaff] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const loadStaff = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchStaff();
+      setStaff(data.map(mapFromApi));
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load staff.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadStaff();
+  }, []);
+  
   const [showModal, setShowModal] = useState(false);
   const [showCollegeDetails, setShowCollegeDetails] = useState(false);
   const [selectedCollege, setSelectedCollege] = useState(null);
@@ -59,11 +117,13 @@ const StaffDetailsManager = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Use IDs for both college and department
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    collegeName: "",
-    department: "",
+    collegeId: "",
+    departmentId: "",  // Changed from department to departmentId
     phoneNumber: "",
     status: "Active",
     role: "CollegeCoordinator",
@@ -176,8 +236,8 @@ const StaffDetailsManager = () => {
     setFormData({
       name: "",
       email: "",
-      collegeName: "",
-      department: "",
+      collegeId: "",
+      departmentId: "",  // Changed
       phoneNumber: "",
       status: "Active",
       role: "CollegeCoordinator",
@@ -191,30 +251,60 @@ const StaffDetailsManager = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
-    if (editingId !== null) {
-      setStaff((prev) =>
-        prev.map((member) =>
-          member.id === editingId ? { ...formData, id: editingId } : member
-        )
-      );
-    } else {
-      const newStaff = {
-        ...formData,
-        id: Date.now(),
-      };
-      setStaff((prev) => [...prev, newStaff]);
+  const handleSubmit = async () => {
+    try {
+      // Validate that a college is selected
+      if (!formData.collegeId) {
+        setError("Please select a college");
+        return;
+      }
+
+      // Validate that a department is selected
+      if (!formData.departmentId) {
+        setError("Please select a department");
+        return;
+      }
+
+      if (editingId !== null) {
+        const updated = await updateStaff(editingId, mapToApi(formData));
+        setStaff((prev) =>
+          prev.map((m) => (m.id === editingId ? mapFromApi(updated) : m))
+        );
+      } else {
+        const created = await createStaff(mapToApi(formData));
+        setStaff((prev) => [...prev, mapFromApi(created)]);
+      }
+      setShowModal(false);
+      resetForm();
+      setError(null);
+    } catch (err) {
+      console.error(err.response?.data || err);
+      setError(err.response?.data?.college?.[0] || 
+              err.response?.data?.department?.[0] || 
+              "Failed to save staff member. Check the form and try again.");
     }
-    setShowModal(false);
-    resetForm();
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await deleteStaff(deleteId);
+      setStaff((prev) => prev.filter((m) => m.id !== deleteId));
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to delete staff member.");
+    } finally {
+      setShowDeleteConfirm(false);
+      setDeleteId(null);
+    }
   };
 
   const handleEdit = (member) => {
     setFormData({
       name: member.name,
       email: member.email,
-      collegeName: member.collegeName,
-      department: member.department || "",
+      collegeId: member.collegeId || "",
+      departmentId: member.departmentId || "",  // Use ID
       phoneNumber: member.phoneNumber,
       status: member.status,
       role: member.role,
@@ -222,14 +312,15 @@ const StaffDetailsManager = () => {
     setEditingId(member.id);
     setViewMode(false);
     setShowModal(true);
+    setError(null);
   };
 
   const handleView = (member) => {
     setFormData({
       name: member.name,
       email: member.email,
-      collegeName: member.collegeName,
-      department: member.department || "",
+      collegeId: member.collegeId || "",
+      departmentId: member.departmentId || "",  // Use ID
       phoneNumber: member.phoneNumber,
       status: member.status,
       role: member.role,
@@ -241,12 +332,6 @@ const StaffDetailsManager = () => {
   const handleDelete = (id) => {
     setDeleteId(id);
     setShowDeleteConfirm(true);
-  };
-
-  const confirmDelete = () => {
-    setStaff((prev) => prev.filter((member) => member.id !== deleteId));
-    setShowDeleteConfirm(false);
-    setDeleteId(null);
   };
 
   const handleSeeDetails = (collegeName) => {
@@ -264,6 +349,8 @@ const StaffDetailsManager = () => {
       ) || []
     : [];
 
+  // Modal render function with college dropdown
+  
   return (
     <div className={`min-h-screen ${themeStyles.background} p-6`}>
       <div className="max-w-full mx-auto">
@@ -703,58 +790,63 @@ const StaffDetailsManager = () => {
                   </select>
                 </div>
                 {/* College Name - Always show for both roles */}
-                <div className="space-y-2">
-                  <label
-                    className={`block text-sm font-medium ${themeStyles.textPrimary}`}
-                  >
-                    College Name <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="collegeName"
-                    value={formData.collegeName}
-                    onChange={handleInputChange}
-                    disabled={viewMode}
-                    required
-                    className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} transition-all`}
-                  >
-                    <option value="">Select a college</option>
-                    <option value="Pimpri Chinchwad College of Engineering PCCOE">
-                      Pimpri Chinchwad College of Engineering PCCOE
-                    </option>
-                    <option value="Pimpri Chinchwad College of Engineering & Research PCCOER">
-                      Pimpri Chinchwad College of Engineering & Research PCCOER
-                    </option>
-                    <option value="Nutan Maharashtra Institute of Engineering and Technology NMIET">
-                      Nutan Maharashtra Institute of Engineering and Technology
-                      NMIET
-                    </option>
-                  </select>
-                </div>
+               <div className="space-y-2">
+          <label
+            className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+          >
+            College Name <span className="text-red-500">*</span>
+          </label>
+          {viewMode ? (
+            <p className={`px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg ${themeStyles.inputText}`}>
+              {getCollegeNameById(formData.collegeId) || "No college selected"}
+            </p>
+          ) : (
+            <select
+              name="collegeId"
+              value={formData.collegeId}
+              onChange={handleInputChange}
+              required
+              className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} transition-all`}
+            >
+              <option value="">Select a college</option>
+              {collegeOptions.map((college) => (
+                <option key={college.id} value={college.id}>
+                  {college.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
                 {/* Department - Show only for Department Coordinators */}
-                {formData.role === "DepartmentCoordinator" && (
-                  <div className="space-y-2">
-                    <label
-                      className={`block text-sm font-medium ${themeStyles.textPrimary}`}
-                    >
-                      Department <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="department"
-                      value={formData.department}
-                      onChange={handleInputChange}
-                      disabled={viewMode}
-                      required
-                      className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} transition-all`}
-                    >
-                      <option value="">Select a department</option>
-                      <option value="Computer">Computer</option>
-                      <option value="IT">IT</option>
-                      <option value="ENTC">ENTC</option>
-                      <option value="Mechanical">Mechanical</option>
-                      <option value="Civil">Civil</option>
-                    </select>
-                  </div>
-                )}
+                 {formData.role === "DepartmentCoordinator" && (
+          <div className="space-y-2">
+            <label
+              className={`block text-sm font-medium ${themeStyles.textPrimary}`}
+            >
+              Department <span className="text-red-500">*</span>
+            </label>
+            {viewMode ? (
+              <p className={`px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg ${themeStyles.inputText}`}>
+                {getDepartmentNameById(formData.departmentId) || "No department selected"}
+              </p>
+            ) : (
+              <select
+                name="departmentId"  // Changed from 'department' to 'departmentId'
+                value={formData.departmentId}
+                onChange={handleInputChange}
+                required
+                className={`w-full px-4 py-3 ${themeStyles.inputBg} border ${themeStyles.inputBorder} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${themeStyles.inputDisabled} ${themeStyles.inputText} transition-all`}
+              >
+                <option value="">Select a department</option>
+                {departmentOptions.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+        )}
                 {/* Phone Number */}
                 <div className="space-y-2">
                   <label

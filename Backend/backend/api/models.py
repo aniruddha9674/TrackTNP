@@ -167,6 +167,9 @@ class PastQualification(models.Model):
     
     def __str__(self):
         return f"{self.student.prn_number} - {self.qualification_type}"
+    
+
+
 
 # Semester Results
 class SemesterResult(models.Model):
@@ -519,7 +522,8 @@ class CalendarEvent(models.Model):
     
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    event_type = models.CharField(max_length=20, choices=EVENT_TYPE_CHOICES)
+    event_type = models.CharField(max_length=20, choices=EVENT_TYPE_CHOICES, default='other')
+    color = models.CharField(max_length=20, blank=True, default='#465FFF')
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     location = models.CharField(max_length=200, blank=True)
@@ -538,3 +542,18 @@ class CalendarEvent(models.Model):
     def __str__(self):
         return f"{self.title} - {self.start_date.date()}"
 # Create your models here.
+# Volunteer Management
+class Volunteer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='volunteer_profile')
+    drive = models.ForeignKey(Company, on_delete=models.SET_NULL, related_name='volunteers', null=True, blank=True)
+    drive_name = models.CharField(max_length=200, blank=True)
+    drive_span_days = models.IntegerField(null=True, blank=True, help_text='Duration of the drive in days')
+    is_profile_complete = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'volunteers'
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.drive_name or 'No drive assigned'}"

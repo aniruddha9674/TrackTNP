@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -10,11 +10,13 @@ import {
   AlignLeft,
 } from "lucide-react";
 import { useTheme } from "../../Utils/context/ThemeContext";
-
+import { fetchEvents, createEvent, deleteEvent } from "../../Utils/api/calenderApi"; 
 const Calendar = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [events, setEvents] = useState([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [eventTitle, setEventTitle] = useState("");
@@ -22,8 +24,16 @@ const Calendar = () => {
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("10:00");
   const [eventColor, setEventColor] = useState("#465FFF");
+  const [selectedColleges, setSelectedColleges] = useState([]);
   const { theme } = useTheme();
   const isDark = theme === "dark";
+
+const collegeOptions = [
+  { id: 2, name: "Pimpri Chinchwad College of Engineering PCCOE" },
+  { id: 3, name: "Pimpri Chinchwad College of Engineering & Research PCCOER" },
+  { id: 4, name: "Nutan Maharashtra Institute of Engineering and Technology NMIET" },
+];
+
 
   const months = [
     "January",
@@ -53,6 +63,40 @@ const Calendar = () => {
     { color: "#F97066", name: "Error Light" },
   ];
 
+  const combineDateAndTime = (date, time) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  const combined = new Date(date);
+  combined.setHours(hours, minutes, 0, 0);
+  return combined.toISOString();
+};
+
+  const mapFromApi = (e) => ({
+  id: e.id,
+  date: new Date(e.start_date).toDateString(), // matches your existing getEventsForDate() comparison
+  title: e.title,
+  description: e.description,
+  startTime: new Date(e.start_date).toTimeString().slice(0, 5), // "HH:MM"
+  endTime: new Date(e.end_date).toTimeString().slice(0, 5),
+  color: e.color,
+});
+
+  useEffect(() => {
+  const loadEvents = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchEvents();
+      setEvents(data.map(mapFromApi));
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load events.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  loadEvents();
+}, []);
+
   const getDaysInMonth = (month, year) => {
     return new Date(year, month + 1, 0).getDate();
   };
@@ -76,7 +120,14 @@ const Calendar = () => {
 
     return days;
   };
-
+  
+  const toggleCollege = (college) => {
+  setSelectedColleges((prev) =>
+    prev.includes(college)
+      ? prev.filter((c) => c !== college)
+      : [...prev, college]
+  );
+};
   const handlePrevMonth = () => {
     if (currentMonth === 0) {
       setCurrentMonth(11);
@@ -107,25 +158,39 @@ const Calendar = () => {
     }
   };
 
-  const handleAddEvent = () => {
-    if (eventTitle && selectedDate) {
-      const newEvent = {
-        id: Date.now(),
-        date: selectedDate.toDateString(),
-        title: eventTitle,
-        description: eventDescription,
-        startTime,
-        endTime,
-        color: eventColor,
-      };
-      setEvents([...events, newEvent]);
-      setShowModal(false);
-    }
+  const handleAddEvent = async () => {
+  if (!eventTitle || !selectedDate) return;
+
+  const payload = {
+    title: eventTitle,
+    description: eventDescription,
+    event_type: "other", // no dropdown in the form yet, backend defaults to this anyway
+    color: eventColor,
+    start_date: combineDateAndTime(selectedDate, startTime),
+    end_date: combineDateAndTime(selectedDate, endTime),
+    target_colleges: selectedColleges,
   };
 
-  const handleDeleteEvent = (id) => {
-    setEvents(events.filter((event) => event.id !== id));
-  };
+  try {
+    const created = await createEvent(payload);
+    setEvents((prev) => [...prev, mapFromApi(created)]);
+    setShowModal(false);
+    setSelectedColleges([]);
+  } catch (err) {
+    console.error(err.response?.data || err);
+    setError("Failed to create event. Check the form and try again.");
+  }
+};
+
+  const handleDeleteEvent = async (id) => {
+  try {
+    await deleteEvent(id);
+    setEvents((prev) => prev.filter((event) => event.id !== id));
+  } catch (err) {
+    console.error(err);
+    setError("Failed to delete event.");
+  }
+};
 
   const getEventsForDate = (day) => {
     if (!day) return [];
@@ -565,6 +630,46 @@ const Calendar = () => {
                     }}
                   />
                 </div>
+
+                <div>
+  <label
+    className="block text-xs sm:text-sm font-semibold mb-2 sm:mb-3"
+    style={{ color: isDark ? "#F9FAFB" : "#101828" }}
+  >
+    Target Colleges
+  </label>
+  <div className="flex flex-col gap-2">
+  {collegeOptions.map((college) => (
+    <label
+      key={college.id}
+      className="flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all text-sm"
+      style={{
+        backgroundColor: selectedColleges.includes(college.id)
+          ? isDark
+            ? "#344054"
+            : "#EEF2FF"
+          : isDark
+          ? "#1D2939"
+          : "#ffffff",
+        borderColor: selectedColleges.includes(college.id)
+          ? "#465FFF"
+          : isDark
+          ? "#344054"
+          : "#E4E7EC",
+        color: isDark ? "#F9FAFB" : "#101828",
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={selectedColleges.includes(college.id)}
+        onChange={() => toggleCollege(college.id)}
+        className="w-4 h-4 accent-[#465FFF]"
+      />
+      {college.name}
+    </label>
+  ))}
+</div>
+</div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>

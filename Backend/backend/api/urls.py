@@ -6,6 +6,9 @@ from api.views import (
     CertificationViewSet,
     OfferLetterViewSet,
     CompanyViewSet,
+    VolunteerViewSet,
+    StaffViewSet,
+    CalendarEventViewSet
 )
 
 router = DefaultRouter()
@@ -33,6 +36,18 @@ router.register(
     CompanyViewSet,
     basename='company'
 )
+router.register(
+    r'volunteers',
+    VolunteerViewSet,
+    basename='volunteer'
+)
+
+router.register(
+    r'staff',
+    StaffViewSet,
+    basename='staff'
+)
+router.register(r'events', CalendarEventViewSet, basename='calendarevent')
 
 urlpatterns = [
     path('', include(router.urls)),
